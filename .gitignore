@@ -1,0 +1,32 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Editor & IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.env
+.venv
+env/
+venv/
+
+# C / C++ compiled objects & binaries
+*.o
+*.obj
+*.exe
+gateway_app
+build/
+bin/
+
+# OS specific
+.DS_Store
+Thumbs.db
