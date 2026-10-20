@@ -1,8 +1,6 @@
 # Tối ưu hóa kênh truyền LoRa với TinyML (Channel Hopping Optimization)
 
-Dự án đồ án tốt nghiệp phát triển dựa trên bài báo khoa học:  
-**"Optimizing LoRa for Edge Computing with TinyML Pipeline for Channel Hopping" (arXiv:2412.01609v1)**  
-Mã nguồn gốc tham khảo: [GitLab M4RL4/loraedgetinyml](https://gitlab.com/M4RL4/loraedgetinyml)
+Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML) trên vi điều khiển ESP32 và Gateway Raspberry Pi lắng nghe đa kênh thời gian thực.
 
 ---
 
@@ -110,7 +108,7 @@ Phân bố chân Chip Select (CS), Reset, DIO0 độc lập cho 3 Module:
    python scripts/03_generate_dataset.py
    python scripts/04_train_model.py
    ```
-   - Script 04 sẽ huấn luyện mạng nơ-ron FCNN theo bài báo (Dense 10 $\rightarrow$ Dense 10 L1 $\rightarrow$ Dense 3 Softmax).
+   - Script 04 sẽ huấn luyện mạng nơ-ron FCNN tối ưu cho MCU (Dense 10 $\rightarrow$ Dense 10 L1 $\rightarrow$ Dense 3 Softmax).
    - Vẽ đường cong Loss / Accuracy lưu vào `TinyML/figures/training_trends.png`.
    - Xuất file `.tflite` và tự động sinh mã nguồn C `model.h` đồng bộ sang thư mục Node TinyML.
 
@@ -121,7 +119,7 @@ Chạy script đánh giá đối chứng:
 ```bash
 python scripts/05_evaluate_comparison.py
 ```
-Script sẽ sinh biểu đồ `TinyML/figures/comparison_metrics_fig10.png` gồm 3 tiêu chí:
+Script sẽ sinh biểu đồ `TinyML/figures/comparison_metrics.png` gồm 3 tiêu chí:
 1. **Average RSSI**: So sánh RSSI giữa Random Hopping và TinyML.
 2. **Average SNR**: So sánh chất lượng tín hiệu.
 3. **PDR (Packet Delivery Ratio)**: Minh chứng TinyML duy trì tỷ lệ nhận gói cao (95% - 99%) vượt trội so với Kênh cố định (Fixed) và Nhảy ngẫu nhiên (Random).

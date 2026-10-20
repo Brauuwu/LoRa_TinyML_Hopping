@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <mutex>
 
 // Các thanh ghi quan trọng của Semtech SX1278
 #define REG_FIFO                    0x00
@@ -51,6 +52,8 @@ public:
     bool isPacketAvailable();
     int readPacket(uint8_t* buffer, int maxLen, int& rssi, float& snr);
 
+    static bool configureSpiNoCs();
+
     double getFrequency() const { return m_frequency; }
     int getCsPin() const { return m_csPin; }
 
@@ -58,6 +61,8 @@ private:
     uint8_t readRegister(uint8_t address);
     void writeRegister(uint8_t address, uint8_t value);
     void burstRead(uint8_t address, uint8_t* buffer, uint8_t len);
+
+    static std::recursive_mutex s_spiMutex;
 
     int m_csPin;
     int m_rstPin;

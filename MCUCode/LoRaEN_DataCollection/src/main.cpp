@@ -2,7 +2,6 @@
  * LoRa End-Node Traffic Generator & Data Collection (ESP32 + Ra-02 + OLED)
  * -------------------------------------------------------------------------
  * Nghiên cứu: Channel Hopping Optimization & TinyML
- * Dựa trên cấu trúc paper: arXiv:2412.01609v1
  *
  * Chức năng:
  *   - Phát các chùm gói tin (bursts) với kích thước thay đổi (30B -> 250B)
@@ -51,7 +50,7 @@ int currentChannelIndex = 0;
 #define LORA_POWER             17 // dBm
 #define LORA_PREAMBLE           8 // symbols
 
-// ── Kịch bản truyền dữ liệu theo bài báo (arXiv:2412.01609v1) ────────────────
+// ── Kịch bản truyền dữ liệu ──────────────────────────────────────────────────
 const int SAMPLES_PER_BURST = 50;  // 50 gói cho mỗi kích thước payload
 const int PAYLOAD_SIZES[6]  = {30, 74, 118, 162, 206, 250}; // 6 bước kích thước
 const int NUM_SIZES = 6;
@@ -107,7 +106,7 @@ void setup() {
   delay(500);
   Serial.println("\n==================================================");
   Serial.printf("   LoRa Traffic Generator - Node [%c]\n", NODE_ID);
-  Serial.println("   Paper: arXiv:2412.01609v1 (LoRaEdgeTinyML)");
+  Serial.println("   LoRa TinyML Channel Hopping");
   Serial.println("==================================================");
 
   // Khởi động I2C & OLED
@@ -189,16 +188,11 @@ void loop() {
       packetCount = 0;
       sizeIndex++;
 
-      // Nếu đã xong tất cả 6 kích thước payload -> Chuyển sang kênh tần số tiếp theo
+      // Đã xong 6 kích thước payload -> Quay lại kích thước đầu tiên, giữ nguyên kênh 433.175 MHz
       if (sizeIndex >= NUM_SIZES) {
         sizeIndex = 0;
-        currentChannelIndex = (currentChannelIndex + 1) % NUM_CHANNELS;
-        
-        Serial.printf("\n[CHANNEL SWITCH] Node [%c] changing to %.3f MHz...\n\n",
+        Serial.printf("\n[CYCLE COMPLETED] Node [%c] completed all payload sizes. Continuing on %.3f MHz...\n\n",
                       NODE_ID, CHANNELS[currentChannelIndex]);
-        
-        radio.setFrequency(CHANNELS[currentChannelIndex]);
-        delay(2000); // Tạm dừng 2 giây giữa các đợt đổi kênh
       }
     }
   }

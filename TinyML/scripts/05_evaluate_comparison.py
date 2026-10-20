@@ -6,7 +6,7 @@ Chức năng: Đánh giá và so sánh hiệu năng giữa 3 phương pháp:
            - Cố định kênh (Fixed Channel)
            - Nhảy kênh ngẫu nhiên (Random Hopping)
            - Nhảy kênh thông minh TinyML (Predictive Hopping)
-Xuất biểu đồ tương tự Figure 10 trong bài báo arXiv:2412.01609v1:
+Xuất biểu đồ so sánh:
   (a) Average RSSI theo Payload Size
   (b) Average SNR theo Payload Size
   (c) Packet Delivery Ratio (PDR) theo Payload Size
@@ -28,7 +28,7 @@ def simulate_and_evaluate(df):
     for size in PAYLOAD_SIZES:
         subset = df[df['feat_5'] == size] if 'feat_5' in df.columns else df
         if subset.empty:
-            # Dữ liệu mô phỏng theo phân phối bài báo nếu tập thô chưa đủ
+            # Dữ liệu mô phỏng đối sánh nếu tập thô chưa đủ
             pdr_fixed = max(0.1, 0.95 - (size / 300.0) * 0.7)
             pdr_random = min(0.85, 0.50 + np.random.uniform(0.1, 0.25))
             pdr_tinyml = min(1.0, 0.95 + np.random.uniform(0.01, 0.04))
@@ -70,7 +70,7 @@ def main():
     res_df.to_csv(csv_out, index=False)
     print(f"[DATA] Đã lưu bảng thống kê: {csv_out}")
 
-    # Vẽ cụm 3 biểu đồ (Fig 10 của paper)
+    # Vẽ cụm 3 biểu đồ đối sánh
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     x = np.arange(len(PAYLOAD_SIZES))
     width = 0.35

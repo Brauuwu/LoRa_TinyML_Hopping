@@ -15,20 +15,20 @@
 
 // Module 1 (Kênh 1: 433.175 MHz)
 #define MODULE1_CS_PIN      10        // BCM GPIO 8  (CE0)
-#define MODULE1_RST_PIN      3        // BCM GPIO 22
-#define MODULE1_DIO0_PIN     6        // BCM GPIO 25
+#define MODULE1_RST_PIN      2        // BCM GPIO 27
+#define MODULE1_DIO0_PIN     3        // BCM GPIO 22
 #define MODULE1_FREQ        433.175
 
 // Module 2 (Kênh 2: 433.375 MHz)
 #define MODULE2_CS_PIN      11        // BCM GPIO 7  (CE1)
-#define MODULE2_RST_PIN      4        // BCM GPIO 23
-#define MODULE2_DIO0_PIN     5        // BCM GPIO 24
+#define MODULE2_RST_PIN      0        // BCM GPIO 17
+#define MODULE2_DIO0_PIN     1        // BCM GPIO 18
 #define MODULE2_FREQ        433.375
 
 // Module 3 (Kênh 3: 433.575 MHz)
-#define MODULE3_CS_PIN       2        // BCM GPIO 27 (Custom CS)
-#define MODULE3_RST_PIN      1        // BCM GPIO 18
-#define MODULE3_DIO0_PIN     0        // BCM GPIO 17
+#define MODULE3_CS_PIN       6        // BCM GPIO 25 (Software CS)
+#define MODULE3_RST_PIN      5        // BCM GPIO 24
+#define MODULE3_DIO0_PIN     4        // BCM GPIO 23
 #define MODULE3_FREQ        433.575
 
 // ── Thông số RF LoRa tiêu chuẩn ─────────────────────────────────────────────

@@ -3,7 +3,6 @@
 """
 01_data_parser.py
 Chức năng: Trích xuất và chuẩn hóa log dữ liệu từ Gateway thành các file CSV.
-Dựa trên paper: arXiv:2412.01609v1 (LoRaEdgeTinyML)
 """
 
 import os

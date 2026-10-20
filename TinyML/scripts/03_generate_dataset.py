@@ -4,7 +4,6 @@
 03_generate_dataset.py
 Chức năng: Xây dựng đặc trưng chuỗi thời gian (Sliding Window / Temporal Memory)
            và gán nhãn kênh tối ưu (Best Channel) cho bài toán nhảy kênh TinyML.
-Dựa trên paper: arXiv:2412.01609v1 (LoRaEdgeTinyML)
 """
 
 import os

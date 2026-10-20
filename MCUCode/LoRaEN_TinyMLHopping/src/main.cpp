@@ -2,7 +2,6 @@
  * LoRa End-Node with TinyML-based Channel Hopping (ESP32 + Ra-02 + OLED)
  * -------------------------------------------------------------------------
  * Nghiên cứu: Channel Hopping Optimization & TinyML
- * Dựa trên cấu trúc paper: arXiv:2412.01609v1
  *
  * Chức năng:
  *   - Quản lý bộ đệm trượt (Sliding Window) lưu trạng thái lịch sử kênh

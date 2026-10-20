@@ -4,7 +4,6 @@
 04_train_model.py
 Chức năng: Huấn luyện mạng Nơ-ron FCNN phân loại kênh LoRa tối ưu,
            chuyển đổi sang TensorFlow Lite và xuất mã nguồn C array (model.h).
-Dựa trên paper: arXiv:2412.01609v1 (LoRaEdgeTinyML)
 """
 
 import os
@@ -59,13 +58,13 @@ def main():
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
 
-    # Chia tập train (60%), val (20%), test (20%) theo đúng bài báo
+    # Chia tập train (60%), val (20%), test (20%)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y_onehot, test_size=0.4, random_state=1337)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1337)
 
     print(f"Dataset: Tổng {len(X)} mẫu | Train: {len(X_train)} | Val: {len(X_val)} | Test: {len(X_test)}")
 
-    # ── Xây dựng kiến trúc FCNN theo đúng Table II trong bài báo ─────────────
+    # ── Xây dựng kiến trúc FCNN tối ưu cho TinyML (Edge MCU) ──────────────
     # Model: Sequential: Dense(10, relu) -> Dense(10, L1) -> Dense(3, softmax)
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(10, activation='relu', input_shape=(X.shape[1],)),

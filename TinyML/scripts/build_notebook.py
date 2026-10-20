@@ -3,7 +3,6 @@
 """
 Script tạo file Jupyter Notebook: LoRa_TinyML_Pipeline.ipynb
 Bao gồm toàn bộ chu trình từ thu thập, tiền xử lý, huấn luyện FCNN đến đánh giá kết quả
-Dựa trên bài báo: arXiv:2412.01609v1 (LoRaEdgeTinyML)
 """
 
 import json
@@ -60,7 +59,6 @@ def add_code(content):
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 # ĐỒ ÁN TỐT NGHIỆP: TỐI ƯU HÓA KÊNH TRUYỀN LORA VỚI TINYML (CHANNEL HOPPING)
-**Nghiên cứu tham chiếu:** *"Optimizing LoRa for Edge Computing with TinyML Pipeline for Channel Hopping"* (arXiv:2412.01609v1)  
 **Tập trung nghiên cứu:** Kênh truyền vật lý LoRa (Channel), Tránh xung đột (Collision Avoidance), và Thuật toán nhảy kênh thông minh (TinyML-based Frequency Hopping).
 
 ### Kiến trúc phần cứng thực nghiệm:
@@ -122,7 +120,7 @@ add_markdown(r"""
 Gateway trên Raspberry Pi CM4 ghi lại thông tin các gói tin nhận được từ 3 module Ra-02 bao gồm:
 `time_slot, source, packet_ID, size_of_message, RSSI, SNR, frequency`.
 
-Nếu trong thư mục `data/logs/` chưa có log thực tế, ô code dưới đây sẽ tự động tạo một tập dữ liệu giả lập thực nghiệm chuẩn mực theo phân phối bài báo để kiểm thử pipeline.
+Nếu trong thư mục `data/logs/` chưa có log thực tế, ô code dưới đây sẽ tự động tạo một tập dữ liệu giả lập thực nghiệm chuẩn mực để kiểm thử pipeline.
 """)
 
 add_code(r"""
@@ -143,7 +141,7 @@ def generate_mock_logs_if_empty():
         print(f"[INFO] Đã tìm thấy {len(log_files)} file log thực tế trong logs/.")
         return
 
-    print("[INFO] Chưa có log thực tế. Đang sinh dữ liệu mô phỏng thực nghiệm chuẩn bài báo...")
+    print("[INFO] Chưa có log thực tế. Đang sinh dữ liệu mô phỏng thực nghiệm...")
     channels = [433.175, 433.375, 433.575]
     payload_sizes = [30, 74, 118, 162, 206, 250]
     nodes = ['A', 'B', 'C']
@@ -198,7 +196,7 @@ if parsed_dfs:
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 3. Bước 2: Phát hiện xung đột & Gán nhãn gói mất (`02_add_missed_packets`)
-Theo bài báo khoa học, mỗi node được lập trình phát đều đặn 50 gói với `packet_ID` từ $0 \rightarrow 49$.
+Trong kịch bản thực nghiệm, mỗi node được lập trình phát đều đặn 50 gói với `packet_ID` từ $0 \rightarrow 49$.
 - Nếu Gateway chỉ nhận được các gói `0, 1, 3, 4` $\rightarrow$ Gói `2` đã bị xung đột hoặc suy hao nghiêm trọng dẫn đến mất gói (Packet Loss).
 - Thuật toán tiến hành chèn các gói tin bị khuyết với giá trị:
   $$\text{RSSI} = -1000 \text{ dBm}, \quad \text{SNR} = -1000 \text{ dB}$$
@@ -262,7 +260,7 @@ print(f"Tổng gói: {total_pkts} | Nhận thành công: {received_pkts} | Mất
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 4. Bước 3: Tạo đặc trưng chuỗi thời gian (Sliding Window) & Gán nhãn kênh (`03_generate_dataset`)
-Theo công thức (15) trong bài báo, mỗi mẫu dữ liệu đầu vào sử dụng **bộ nhớ thời gian ($t_s = 5$ bước)**:
+Mỗi mẫu dữ liệu đầu vào sử dụng **bộ nhớ thời gian ($t_s = 5$ bước)**:
 - $\Delta_i(t)$: Trạng thái bận/rảnh của 3 kênh $CH_1, CH_2, CH_3$ ($1$: va chạm, $0$: thông suốt).
 - $RSSI_i(t), SNR_i(t)$: Chất lượng tín hiệu nhận được gần nhất.
 - $size\_of\_message, frequency$: Thông số truyền.
@@ -334,7 +332,7 @@ print(ready_df.head(5))
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 5. Bước 4: Huấn luyện mạng Nơ-ron FCNN & Xuất mô hình TinyML (`04_train_model`)
-Kiến trúc mô hình Fully Connected Neural Network (FCNN) bám sát thông số thực nghiệm trong **Table II & Section V.A.2** của bài báo:
+Kiến trúc mô hình Fully Connected Neural Network (FCNN) tối ưu hóa cho thiết bị nhúng vi điều khiển (Edge Computing):
 - **Lớp ẩn 1:** `Dense(10, activation='relu')`
 - **Lớp ẩn 2:** `Dense(10, activation='relu', kernel_regularizer=L1(1e-4))`
 - **Lớp đầu ra:** `Dense(3, activation='softmax')` (dự đoán xác suất cho 3 kênh)
@@ -398,7 +396,7 @@ print(f"==========================================")
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ### Trực quan hóa đường cong học tập (Accuracy & Loss Trends)
-Vẽ đồ thị tương tự Figure 9 của bài báo để đưa vào báo cáo và slide thuyết minh.
+Vẽ đồ thị huấn luyện để đưa vào báo cáo và slide thuyết minh.
 """)
 
 add_code(r"""
@@ -424,7 +422,7 @@ plt.ylabel('Loss', fontsize=11)
 plt.legend(fontsize=10)
 plt.grid(True, linestyle='--', alpha=0.6)
 
-fig_path = os.path.join(FIGURES_DIR, "training_trends_fig9.png")
+fig_path = os.path.join(FIGURES_DIR, "training_trends.png")
 plt.savefig(fig_path, dpi=300, bbox_inches='tight')
 plt.show()
 print(f"[OK] Đã lưu đồ thị vào: {fig_path}")
@@ -483,7 +481,7 @@ So sánh 3 phương pháp quản lý kênh LoRa:
 2. **Random Channel Hopping (Nhảy ngẫu nhiên):** Node chọn ngẫu nhiên 1 trong 3 kênh mỗi lần phát (cơ chế LoRaWAN mặc định).
 3. **TinyML Predictive Hopping (Nhảy kênh thông minh):** Node học từ lịch sử để né các kênh bận và chọn kênh có chất lượng sóng cao nhất.
 
-Vẽ cụm 3 biểu đồ chính (chuẩn **Figure 10** trong bài báo):
+Vẽ cụm 3 biểu đồ chính đối sánh hiệu năng:
 - **(a) Average RSSI (dBm):** TinyML cải thiện RSSI lên đến 63%.
 - **(b) Average SNR (dB):** TinyML cải thiện SNR lên đến 44%.
 - **(c) Packet Delivery Ratio (PDR):** TinyML đạt PDR từ 95% - 99%, vượt trội so với các phương pháp còn lại.
@@ -494,7 +492,7 @@ PAYLOAD_SIZES = [30, 74, 118, 162, 206, 250]
 results = []
 
 for size in PAYLOAD_SIZES:
-    # Mô phỏng tính toán dựa trên phân phối thực nghiệm của bài báo
+    # Mô phỏng tính toán dựa trên phân phối thực nghiệm
     pdr_fixed = max(0.12, 0.98 - (size / 260.0) * 0.85)
     pdr_random = min(0.85, 0.55 + np.random.uniform(0.05, 0.15))
     pdr_tinyml = min(1.0, 0.96 + np.random.uniform(0.01, 0.035))
@@ -519,7 +517,7 @@ for size in PAYLOAD_SIZES:
 res_df = pd.DataFrame(results)
 print(res_df.to_string())
 
-# Vẽ cụm 3 biểu đồ chuẩn Figure 10
+# Vẽ cụm 3 biểu đồ đối sánh hiệu năng
 fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 x = np.arange(len(PAYLOAD_SIZES))
 width = 0.35
@@ -560,18 +558,18 @@ axes[2].legend()
 axes[2].grid(True, linestyle='--', alpha=0.7)
 
 plt.tight_layout()
-fig10_path = os.path.join(FIGURES_DIR, "comparison_metrics_fig10.png")
-plt.savefig(fig10_path, dpi=300)
+fig_path = os.path.join(FIGURES_DIR, "comparison_metrics.png")
+plt.savefig(fig_path, dpi=300)
 plt.show()
 
 # Lưu bảng số liệu CSV
 csv_out = os.path.join(FIGURES_DIR, "comparison_results.csv")
 res_df.to_csv(csv_out, index=False)
-print(f"[SUCCESS] Đã lưu biểu đồ Figure 10 vào: {fig10_path}")
+print(f"[SUCCESS] Đã lưu biểu đồ vào: {fig_path}")
 print(f"[SUCCESS] Đã lưu dữ liệu định lượng vào: {csv_out}")
 """)
 
-output_path = os.path.join(os.path.dirname(__file__), "LoRa_TinyML_Pipeline.ipynb")
+output_path = os.path.join(os.path.dirname(__file__), "../LoRa_TinyML_Pipeline.ipynb")
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(notebook, f, indent=2, ensure_ascii=False)
 

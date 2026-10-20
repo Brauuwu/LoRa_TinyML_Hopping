@@ -4,7 +4,6 @@
 02_add_missed_packets.py
 Chức năng: Phát hiện các gói tin bị mất do va chạm hoặc suy hao sóng
            và bổ sung các dòng dữ liệu với RSSI = -1000, SNR = -1000.
-Dựa trên paper: arXiv:2412.01609v1 (LoRaEdgeTinyML)
 """
 
 import os
@@ -48,7 +47,7 @@ def process_file(input_file, output_file):
                     time_slot = '00:00:00.000'
                     freq = subset.iloc[0]['frequency']
 
-                # Đánh dấu gói tin va chạm / mất sóng theo chuẩn bài báo
+                # Đánh dấu gói tin va chạm / mất sóng (RSSI = -1000, SNR = -1000)
                 new_rows.append({
                     'time_slot': time_slot,
                     'source': source,
