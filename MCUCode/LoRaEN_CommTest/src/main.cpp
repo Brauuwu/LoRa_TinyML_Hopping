@@ -27,11 +27,11 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // CẤU HÌNH TEST
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'A'
+#define NODE_ID             'B'
 
 // Tần số test - đồng bộ với 1 trong 3 kênh RPi
-#define TEST_FREQ           433.175  // MHz (Kênh 1)
-// #define TEST_FREQ        433.375  // MHz (Kênh 2)
+// #define TEST_FREQ           433.175  // MHz (Kênh 1)
+#define TEST_FREQ        433.375  // MHz (Kênh 2)
 // #define TEST_FREQ        433.575  // MHz (Kênh 3)
 
 #define TX_INTERVAL_MS      2000     // Gửi mỗi 2 giây
