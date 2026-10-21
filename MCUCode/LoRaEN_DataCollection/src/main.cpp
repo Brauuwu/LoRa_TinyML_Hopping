@@ -21,7 +21,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // CẤU HÌNH NODE: Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp 3 node!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'A'
+#define NODE_ID             'C'
 
 // ── Định nghĩa chân kết nối phần cứng ESP32 ─────────────────────────────────
 #define LORA_MOSI            27
@@ -40,7 +40,17 @@
 // ── 3 Kênh tần số thực nghiệm (dải 433 MHz) ─────────────────────────────────
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
 const int NUM_CHANNELS = 3;
+
+// Phân bố kênh khởi đầu theo Node ID để 3 node phủ sóng cả 3 kênh
+#if NODE_ID == 'A'
+int currentChannelIndex = 0; // Kênh 1: 433.175 MHz
+#elif NODE_ID == 'B'
+int currentChannelIndex = 1; // Kênh 2: 433.375 MHz
+#elif NODE_ID == 'C'
+int currentChannelIndex = 2; // Kênh 3: 433.575 MHz
+#else
 int currentChannelIndex = 0;
+#endif
 
 // Các thông số vô tuyến LoRa (đồng bộ với Gateway)
 #define LORA_BW             125.0 // kHz
@@ -58,7 +68,9 @@ const int NUM_SIZES = 6;
 int sizeIndex = 0;
 uint32_t packetCount = 0;
 unsigned long lastTxTime = 0;
-const unsigned long TX_INTERVAL = 3000; // Khoảng thời gian phát giữa 2 gói: 3 giây
+#define TX_BASE_INTERVAL_MS 2500   // Chu kỳ phát cơ sở: 2.5 giây
+#define TX_JITTER_MS        500    // Dao động ngẫu nhiên: 0..500 ms (tổng 2.5s - 3.0s)
+unsigned long currentInterval = TX_BASE_INTERVAL_MS;
 
 // ── Đối tượng phần cứng ─────────────────────────────────────────────────────
 SPIClass loRaSPI(VSPI);
@@ -147,14 +159,17 @@ void setup() {
 void loop() {
   unsigned long now = millis();
 
-  if (now - lastTxTime >= TX_INTERVAL || lastTxTime == 0) {
+  if (now - lastTxTime >= currentInterval || lastTxTime == 0) {
     lastTxTime = now;
+    // Tạo khoảng ngẫu nhiên (jitter) cho lần phát kế tiếp
+    currentInterval = TX_BASE_INTERVAL_MS + random(0, TX_JITTER_MS);
+
     int currentPayloadSize = PAYLOAD_SIZES[sizeIndex];
 
     // Tạo payload với độ dài mong muốn
     // Cấu trúc gói tin:
     // [Byte 0]: Node ID ('A', 'B', 'C')
-    // [Byte 1..2]: Packet ID (16-bit uint)
+    // [Byte 1..2]: Packet ID (16-bit uint, big-endian)
     // [Byte 3]: Payload Size
     // [Byte 4..N-2]: Padding bytes ('X')
     // [Byte N-1]: Ký tự kết thúc '\0'
@@ -188,11 +203,22 @@ void loop() {
       packetCount = 0;
       sizeIndex++;
 
-      // Đã xong 6 kích thước payload -> Quay lại kích thước đầu tiên, giữ nguyên kênh 433.175 MHz
+      // Nếu đã hoàn thành tất cả 6 kích thước payload -> Chuyển sang kênh tần số tiếp theo
       if (sizeIndex >= NUM_SIZES) {
         sizeIndex = 0;
-        Serial.printf("\n[CYCLE COMPLETED] Node [%c] completed all payload sizes. Continuing on %.3f MHz...\n\n",
-                      NODE_ID, CHANNELS[currentChannelIndex]);
+        currentChannelIndex = (currentChannelIndex + 1) % NUM_CHANNELS;
+
+        Serial.println("==================================================");
+        Serial.printf("[CHANNEL HOP] Node [%c] completed full payload cycle!\n", NODE_ID);
+        Serial.printf("[CHANNEL HOP] Switching to CH%d (%.3f MHz)...\n",
+                      currentChannelIndex + 1, CHANNELS[currentChannelIndex]);
+        Serial.println("==================================================");
+
+        int chState = radio.setFrequency(CHANNELS[currentChannelIndex]);
+        if (chState != RADIOLIB_ERR_NONE) {
+          Serial.printf("[ERROR] Failed to switch frequency! Error: %d\n", chState);
+        }
+        delay(2000); // Tạm dừng 2 giây giữa các đợt đổi kênh
       }
     }
   }

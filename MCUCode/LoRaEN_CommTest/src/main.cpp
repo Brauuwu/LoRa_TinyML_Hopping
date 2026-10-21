@@ -27,15 +27,15 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // CẤU HÌNH TEST
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'B'
+#define NODE_ID             'C'
 
 // Tần số test - đồng bộ với 1 trong 3 kênh RPi
 // #define TEST_FREQ           433.175  // MHz (Kênh 1)
-#define TEST_FREQ        433.375  // MHz (Kênh 2)
-// #define TEST_FREQ        433.575  // MHz (Kênh 3)
+// #define TEST_FREQ        433.375  // MHz (Kênh 2)
+#define TEST_FREQ        433.575  // MHz (Kênh 3)
 
 #define TX_INTERVAL_MS      2000     // Gửi mỗi 2 giây
-#define TEST_PAYLOAD_SIZE   30       // Kích thước gói (bytes)
+#define TEST_PAYLOAD_SIZE   100       // Kích thước gói (bytes)
 
 // ── Chân phần cứng ESP32 ────────────────────────────────────────────────
 #define LORA_MOSI            27

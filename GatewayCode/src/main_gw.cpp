@@ -45,6 +45,7 @@ struct LoRaPacket {
     int rssi;
     float snr;
     int channelId; // 1, 2, hoặc 3
+    bool crcError;
 };
 
 // ── Hàng đợi Thread-Safe (Thread-Safe Queue tương tự FreeRTOS Queue) ────────
@@ -139,23 +140,37 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
             int len = radio->readPacket(rxBuffer, sizeof(rxBuffer), rssi, snr);
 
             if (len >= 4) {
+                char node = (char)rxBuffer[0];
+                // Chỉ nhận các gói hợp lệ từ 3 Node thử nghiệm ('A', 'B', 'C')
+                if (node < 'A' || node > 'C') {
+                    continue;
+                }
+
                 LoRaPacket pkt;
                 getTimeStamp(pkt.timestamp, sizeof(pkt.timestamp));
                 pkt.channelId = channelId;
                 pkt.frequency = radio->getFrequency();
-                pkt.sourceNode = (char)rxBuffer[0];
+                pkt.sourceNode = node;
                 pkt.packetId = ((uint16_t)rxBuffer[1] << 8) | rxBuffer[2];
                 pkt.payloadSize = rxBuffer[3];
                 pkt.rssi = rssi;
                 pkt.snr = snr;
+                pkt.crcError = false;
 
                 // Đẩy vào hàng đợi để Task_Logger xử lý (Non-blocking I/O)
                 queue->push(pkt);
             } else if (len == -1) {
-                printf("[WARN] Task_RX_%d (%.3f MHz): Gói tin bị lỗi CRC!\n", channelId, radio->getFrequency());
-            } else if (len > 0) {
-                printf("[WARN] Task_RX_%d (%.3f MHz): Nhận gói ngắn (%d bytes < 4 bytes)\n",
-                       channelId, radio->getFrequency(), len);
+                LoRaPacket pkt;
+                getTimeStamp(pkt.timestamp, sizeof(pkt.timestamp));
+                pkt.channelId = channelId;
+                pkt.frequency = radio->getFrequency();
+                pkt.sourceNode = '?';
+                pkt.packetId = 0;
+                pkt.payloadSize = 0;
+                pkt.rssi = rssi;
+                pkt.snr = snr;
+                pkt.crcError = true;
+                queue->push(pkt);
             }
         }
 
@@ -183,18 +198,30 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& logFileName) {
 
     printf("[RTOS] Task_Logger đã kích hoạt. Đang ghi dữ liệu vào: %s\n\n", logFileName.c_str());
     printf(" Timestamp    | Ch (MHz) | Node | Pkt ID | Size | RSSI (dBm) | SNR (dB)\n");
-    printf("-----------------------------------------------------------------------------\n");
+    printf("--------------+----------+------+--------+------+------------+---------\n");
 
     uint32_t totalPackets = 0;
+    uint32_t totalCrcErrors = 0;
     uint32_t channelCounts[3] = {0, 0, 0};
+    uint32_t nodeCounts[3] = {0, 0, 0}; // Node A, B, C
 
     while (g_running.load() || !queue->empty()) {
         LoRaPacket pkt;
         // Chờ gói tin từ hàng đợi với timeout 100ms
         if (queue->pop(pkt, 100)) {
+            if (pkt.crcError) {
+                totalCrcErrors++;
+                printf(" %-12s | %8.3f |   ?  | ------ | ---- | ---------- | CRC ERROR!\n",
+                       pkt.timestamp, pkt.frequency);
+                continue;
+            }
+
             totalPackets++;
             if (pkt.channelId >= 1 && pkt.channelId <= 3) {
                 channelCounts[pkt.channelId - 1]++;
+            }
+            if (pkt.sourceNode >= 'A' && pkt.sourceNode <= 'C') {
+                nodeCounts[pkt.sourceNode - 'A']++;
             }
 
             // 1. Hiển thị thông số ra Terminal Console
@@ -207,14 +234,29 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& logFileName) {
                     pkt.timestamp, pkt.sourceNode, pkt.packetId,
                     pkt.payloadSize, pkt.rssi, pkt.snr, pkt.frequency);
             fflush(logFile);
+
+            // Thống kê nhanh mỗi 25 gói
+            if (totalPackets % 25 == 0) {
+                printf("--------------+----------+------+--------+------+------------+---------\n");
+                printf(" [STATS] Ghi nhận:%u | CH1:%u CH2:%u CH3:%u | A:%u B:%u C:%u | CRC:%u\n",
+                       totalPackets, channelCounts[0], channelCounts[1], channelCounts[2],
+                       nodeCounts[0], nodeCounts[1], nodeCounts[2], totalCrcErrors);
+                printf("--------------+----------+------+--------+------+------------+---------\n");
+            }
         }
     }
 
     fclose(logFile);
-    printf("-----------------------------------------------------------------------------\n");
-    printf("[RTOS] Task_Logger đã đóng file CSV an toàn: %s\n", logFileName.c_str());
-    printf("[THỐNG KÊ] Tổng số gói thu được: %u (CH1: %u | CH2: %u | CH3: %u)\n",
-           totalPackets, channelCounts[0], channelCounts[1], channelCounts[2]);
+    printf("=============================================================================\n");
+    printf("[RTOS] Đã đóng file CSV an toàn: %s\n", logFileName.c_str());
+    printf("[THỐNG KÊ KẾT THÚC]\n");
+    printf("  - Tổng gói hợp lệ ghi nhận : %u\n", totalPackets);
+    printf("  - Tổng gói lỗi CRC         : %u\n", totalCrcErrors);
+    printf("  - Phân bổ theo Kênh        : CH1: %u | CH2: %u | CH3: %u\n",
+           channelCounts[0], channelCounts[1], channelCounts[2]);
+    printf("  - Phân bổ theo Node        : Node A: %u | Node B: %u | Node C: %u\n",
+           nodeCounts[0], nodeCounts[1], nodeCounts[2]);
+    printf("=============================================================================\n");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
