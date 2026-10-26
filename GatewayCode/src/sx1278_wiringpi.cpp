@@ -188,3 +188,64 @@ int SX1278_WiringPi::readPacket(uint8_t* buffer, int maxLen, int& rssi, float& s
     setMode(MODE_RXCONTINUOUS);
     return nbBytes;
 }
+
+void SX1278_WiringPi::burstWrite(uint8_t address, const uint8_t* buffer, uint8_t len) {
+    std::lock_guard<std::recursive_mutex> lock(s_spiMutex);
+    uint8_t tx[256];
+    tx[0] = address | 0x80;
+    memcpy(tx + 1, buffer, len);
+    digitalWrite(m_csPin, LOW);
+    wiringPiSPIDataRW(SPI_CHANNEL, tx, len + 1);
+    digitalWrite(m_csPin, HIGH);
+}
+
+bool SX1278_WiringPi::sendPacket(const uint8_t* buffer, size_t len, uint32_t timeoutMs) {
+    if (len > 255) len = 255;
+    std::lock_guard<std::recursive_mutex> lock(s_spiMutex);
+
+    // 1. Chuyển sang chế độ Standby
+    setMode(MODE_STDBY);
+
+    // 2. Đặt con trỏ FIFO về TX Base
+    uint8_t txBase = readRegister(REG_FIFO_TX_BASE_ADDR);
+    writeRegister(REG_FIFO_ADDR_PTR, txBase);
+
+    // 3. Nạp dữ liệu vào FIFO
+    burstWrite(REG_FIFO, buffer, (uint8_t)len);
+
+    // 4. Thiết lập độ dài Payload
+    writeRegister(REG_PAYLOAD_LENGTH, (uint8_t)len);
+
+    // 5. Cấu hình DIO0: ngắt TxDone (bits 7:6 = 01 -> 0x40)
+    writeRegister(REG_DIO_MAPPING_1, 0x40);
+
+    // 6. Xóa cờ ngắt cũ
+    writeRegister(REG_IRQ_FLAGS, 0xFF);
+
+    // 7. Bật chế độ phát sóng TX (MODE_LONG_RANGE_MODE | 0x03)
+    writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | 0x03);
+
+    // 8. Chờ cờ TxDone (bit 3 của REG_IRQ_FLAGS = 0x08)
+    uint32_t waited = 0;
+    bool success = false;
+    while (waited < timeoutMs) {
+        uint8_t irq = readRegister(REG_IRQ_FLAGS);
+        if (irq & 0x08) { // TxDone hoàn tất
+            success = true;
+            break;
+        }
+        usleep(2000); // 2ms
+        waited += 2;
+    }
+
+    // 9. Xóa cờ ngắt
+    writeRegister(REG_IRQ_FLAGS, 0xFF);
+
+    // 10. Đặt lại DIO0 về RxDone (0x00)
+    writeRegister(REG_DIO_MAPPING_1, 0x00);
+
+    // 11. Chuyển lại về chế độ nhận liên tục
+    setMode(MODE_RXCONTINUOUS);
+
+    return success;
+}

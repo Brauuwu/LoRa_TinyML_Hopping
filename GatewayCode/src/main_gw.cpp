@@ -344,6 +344,68 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& csvFilePath, c
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// HÀM PHÁT LỆNH KÍCH HOẠT (DOWNLINK TRIGGER COMMAND TỚI CÁC END-NODE)
+// ═══════════════════════════════════════════════════════════════════════════
+void broadcastStartCommand(SX1278_WiringPi* r1, SX1278_WiringPi* r2, SX1278_WiringPi* r3, const std::string& cmd) {
+    printf("\n[DOWNLINK] >>> ĐANG GỬI LỆNH KÍCH HOẠT: \"%s\" TỚI CÁC END-NODE... <<<\n", cmd.c_str());
+    // Phát lặp lại 3 đợt trên cả 3 kênh để đảm bảo 100% các Node bắt được sóng
+    for (int rep = 0; rep < 3; rep++) {
+        r1->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
+        r2->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
+        r3->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
+        usleep(30000); // 30ms giữa các lần phát
+    }
+    printf("[DOWNLINK] >>> ĐÃ GỬI XONG LỆNH \"%s\"! Các End-Node sẽ bắt đầu phát dữ liệu. <<<\n\n", cmd.c_str());
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TASK ĐIỀU KHIỂN BÀN PHÍM (CONSOLE COMMAND CONTROLLER)
+// ═══════════════════════════════════════════════════════════════════════════
+void task_console_controller(SX1278_WiringPi* r1, SX1278_WiringPi* r2, SX1278_WiringPi* r3) {
+    // Chờ 1 giây để các luồng RX và Logger in hoàn tất tiêu đề khởi động
+    usleep(1000000);
+
+    printf("=============================================================================\n");
+    printf(" [HỆ THỐNG ĐIỀU KHIỂN GATEWAY -> END-NODE]\n");
+    printf("   • Nhấn [ENTER] hoặc gõ 'start' : Kích hoạt TẤT CẢ các Node (START:ALL)\n");
+    printf("   • Gõ 'start A' / 'start B'     : Kích hoạt riêng Node A hoặc Node B\n");
+    printf("   • Gõ 'q' hoặc 'exit'           : Dừng và tắt Gateway an toàn\n");
+    printf("=============================================================================\n\n");
+
+    std::string line;
+    while (g_running.load()) {
+        if (!std::getline(std::cin, line)) {
+            break;
+        }
+
+        while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) {
+            line.pop_back();
+        }
+
+        if (line == "q" || line == "exit") {
+            printf("[INFO] Người dùng yêu cầu dừng Gateway...\n");
+            g_running.store(false);
+            break;
+        }
+
+        std::string cmd = "CMD:START:ALL";
+        if (line.empty() || line == "start" || line == "START") {
+            cmd = "CMD:START:ALL";
+        } else if (line == "start A" || line == "start a" || line == "A") {
+            cmd = "CMD:START:A";
+        } else if (line == "start B" || line == "start b" || line == "B") {
+            cmd = "CMD:START:B";
+        } else if (line == "start C" || line == "start c" || line == "C") {
+            cmd = "CMD:START:C";
+        } else {
+            cmd = line;
+        }
+
+        broadcastStartCommand(r1, r2, r3, cmd);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN THREAD (Hàm khởi tạo hệ thống & Điều phối các Task RTOS)
 // ═══════════════════════════════════════════════════════════════════════════
 int main(int argc, char* argv[]) {
@@ -415,15 +477,28 @@ int main(int argc, char* argv[]) {
     // 5. Khởi tạo hàng đợi và kích hoạt các Task thời gian thực
     SafeQueue<LoRaPacket> packetQueue;
 
-    printf("[RTOS] Đang kích hoạt 4 Task thời gian thực...\n");
+    printf("[RTOS] Đang kích hoạt các Task thời gian thực...\n");
     std::thread tLogger(task_logger, &packetQueue, csvPath, txtPath);
     std::thread tRx1(task_lora_rx, 1, &radio1, &packetQueue);
     std::thread tRx2(task_lora_rx, 2, &radio2, &packetQueue);
     std::thread tRx3(task_lora_rx, 3, &radio3, &packetQueue);
 
+    // Kích hoạt luồng nhận lệnh điều khiển bàn phím (chạy ngầm độc lập)
+    std::thread tCmd(task_console_controller, &radio1, &radio2, &radio3);
+    tCmd.detach();
+
+    // Tự động gửi lệnh START sau 2.5 giây khi hệ thống khởi động hoàn tất
+    std::thread tAutoStart([&radio1, &radio2, &radio3]() {
+        usleep(2500000); // 2.5 giây
+        if (g_running.load()) {
+            broadcastStartCommand(&radio1, &radio2, &radio3, "CMD:START:ALL");
+        }
+    });
+    tAutoStart.detach();
+
     printf("[RTOS] Toàn bộ hệ thống Gateway đã sẵn sàng hoạt động!\n\n");
 
-    // 6. Chờ cho tới khi các luồng kết thúc (khi người dùng bấm Ctrl+C)
+    // 6. Chờ cho tới khi các luồng kết thúc (khi người dùng bấm Ctrl+C hoặc gõ 'exit')
     tRx1.join();
     tRx2.join();
     tRx3.join();

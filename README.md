@@ -105,6 +105,7 @@ LoRa_TinyML_Hopping/
    - Đặt `#define NODE_ID 'A'`, nạp cho Node 1 (Cổng COM tương ứng).
    - Đổi thành `#define NODE_ID 'B'`, nạp cho Node 2.
    - Đổi thành `#define NODE_ID 'C'`, nạp cho Node 3.
+   - *Khi vừa bật, các Node sẽ ở chế độ **CHỜ LỆNH** (màn hình OLED báo `NODE [x] - CHO LENH`), chưa phát sóng ngay.*
 2. **Chạy Gateway trên Raspberry Pi CM4**:
    ```bash
    cd GatewayCode
@@ -117,7 +118,12 @@ LoRa_TinyML_Hopping/
    Gateway sẽ lắng nghe đồng thời 3 kênh và tự động sinh đồng thời 2 file:
    - `csv/<TÊN_KỊCH_BẢN>.csv`: File dữ liệu bảng cho Python Pandas.
    - `logs/<TÊN_KỊCH_BẢN>.txt`: File log thô theo chuẩn bài báo `LoRaEdgeTinyML`.
-3. Cho các Node phát tuần tự 6 mức kích thước (30B -> 250B) x 100 gói. Node sẽ tự động dừng phát hoàn toàn sau khi gửi đủ gói cuối.
+3. **Kích hoạt phát dữ liệu (Trigger Mechanism)**:
+   - **Tự động / Điều khiển từ Gateway**: Gateway sẽ tự động phát lệnh `CMD:START:ALL` sau 2.5s khi khởi động, hoặc bạn chỉ cần nhấn **`[ENTER]`** (hoặc gõ `start`) trên màn hình Gateway để phát lệnh kích hoạt tới tất cả các Node.
+   - **Thủ công**: Bạn cũng có thể bấm nút **`BOOT`** (GPIO 0) trên bo ESP32 để kích hoạt phát ngay mà không cần đợi Gateway.
+4. **Tiến trình phát & Tự động kết thúc**:
+   - Các Node nhận lệnh sẽ chuyển sang trạng thái `RUNNING` và phát tuần tự 6 mức kích thước (30B -> 250B) x 100 gói (= 600 gói).
+   - Khi phát xong gói thứ 100 của kích thước lớn nhất 250B, module LoRa sẽ chuyển sang chế độ `SLEEP`, OLED báo `>> DA DUNG PHAT <<` và dừng hẳn việc phát sóng vĩnh viễn.
 
 ---
 

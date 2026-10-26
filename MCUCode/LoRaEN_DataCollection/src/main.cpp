@@ -25,7 +25,7 @@
 // 1. CẤU HÌNH ĐỊNH DANH NODE (NODE ID)
 // Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp code cho từng bo mạch!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'A'   // 'A', 'B', hoặc 'C'
+#define NODE_ID             'C'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. CẤU HÌNH TẦN SỐ CỐ ĐỊNH CHO ĐỢT ĐO (FIXED CHANNEL SELECTION)
@@ -34,7 +34,7 @@
 //    3: Kênh 3 - 433.575 MHz
 // Chọn kênh tương ứng cho kịch bản đo đạc (ví dụ: A_433.175, A_B_433.175, ...)
 // ═══════════════════════════════════════════════════════════════════════════
-#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3
+#define SELECTED_CHANNEL_NUM  3   // Đặt 1, 2, hoặc 3
 
 // Bảng tra cứu tần số theo số kênh
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
@@ -73,13 +73,24 @@ const int NUM_SIZES         = 6;
 #define LORA_POWER             17 // dBm (50 mW)
 #define LORA_PREAMBLE           8 // symbols
 
-// ── Biến điều khiển trạng thái phát ─────────────────────────────────────────
+// ── Chân nút bấm BOOT tích hợp trên ESP32 (để kích hoạt thủ công khi cần) ───
+#define BOOT_PIN              0
+
+// ── Định nghĩa các trạng thái hoạt động của End-Node ────────────────────────
+enum NodeState {
+  STATE_WAIT_CMD,     // Chờ lệnh START từ Gateway (hoặc bấm nút BOOT)
+  STATE_TRANSMITTING, // Đang phát dữ liệu theo kịch bản (600 gói)
+  STATE_FINISHED      // Đã hoàn thành 600 gói, dừng hẳn
+};
+
+NodeState nodeState = STATE_WAIT_CMD;
+
+// ── Biến điều khiển tiến trình phát ─────────────────────────────────────────
 int sizeIndex = 0;              // Chỉ số kích thước payload hiện tại (0..5)
 uint32_t packetCount = 0;       // Đếm số gói đã phát của kích thước hiện tại (0..99)
 uint32_t totalPacketsSent = 0;  // Tổng số gói đã phát trên toàn bộ tiến trình (tối đa 600)
 unsigned long lastTxTime = 0;
 unsigned long currentInterval = TX_BASE_INTERVAL_MS;
-bool isFinished = false;        // Cờ báo hiệu đã hoàn thành toàn bộ kịch bản
 
 // ── Đối tượng phần cứng ─────────────────────────────────────────────────────
 SPIClass loRaSPI(VSPI);
@@ -87,21 +98,67 @@ SX1278 radio = new Module(LORA_NSS, LORA_DIO0, LORA_RST, RADIOLIB_NC, loRaSPI);
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
 bool oledOk = false;
 
+// ── Hàm hiển thị màn hình OLED khi ĐANG CHỜ LỆNH TỪ GATEWAY ─────────────────
+void oledShowWaitingCommand(int dotCount) {
+  if (!oledOk) return;
+
+  display.clearDisplay();
+  display.fillRect(0, 0, 128, 11, SSD1306_WHITE);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(2, 2);
+  display.printf("NODE [%c] - CHO LENH", NODE_ID);
+  display.setCursor(95, 2);
+  display.printf("CH%d", SELECTED_CHANNEL_NUM);
+
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 15);
+  display.printf("Freq: %.3f MHz", FIXED_FREQUENCY);
+  display.setCursor(0, 27);
+  display.print("Trang thai: Cho GW");
+  for (int i = 0; i < (dotCount % 4); i++) display.print(".");
+
+  display.setCursor(0, 40);
+  display.print(">> CHO LENH START <<");
+  display.setCursor(0, 52);
+  display.print("Hoac bam nut BOOT");
+  display.display();
+}
+
+// ── Hàm hiển thị màn hình OLED khi NHẬN ĐƯỢC LỆNH KÍCH HOẠT ────────────────
+void oledShowTriggered(const char* cmdText) {
+  if (!oledOk) return;
+
+  display.clearDisplay();
+  display.fillRect(0, 0, 128, 12, SSD1306_WHITE);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(4, 2);
+  display.printf("NODE [%c] - KICH HOAT!", NODE_ID);
+
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 18);
+  display.printf("Lenh: %s", cmdText);
+  display.setCursor(0, 32);
+  display.print("Khoi dong 600 goi...");
+  display.setCursor(0, 46);
+  display.printf("Kenh: %.3f MHz", FIXED_FREQUENCY);
+  display.display();
+}
+
 // ── Hàm cập nhật màn hình OLED trong quá trình phát ─────────────────────────
 void oledUpdateProgress(int seq, int pSize, int status, unsigned long airTime) {
   if (!oledOk) return;
 
   display.clearDisplay();
-  // Thanh tiêu đề phía trên
   display.fillRect(0, 0, 128, 11, SSD1306_WHITE);
   display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
   display.setTextSize(1);
   display.setCursor(2, 2);
-  display.printf("NODE [%c] - ", NODE_ID);
+  display.printf("NODE [%c] - RUNNING", NODE_ID);
   display.setCursor(95, 2);
   display.printf("CH%d", SELECTED_CHANNEL_NUM);
 
-  // Nội dung thông số truyền
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 15);
   display.printf("Freq: %.3f MHz", FIXED_FREQUENCY);
@@ -124,7 +181,6 @@ void oledShowFinished() {
   if (!oledOk) return;
 
   display.clearDisplay();
-  // Header hoàn thành
   display.fillRect(0, 0, 128, 12, SSD1306_WHITE);
   display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
   display.setTextSize(1);
@@ -147,6 +203,7 @@ void oledShowFinished() {
 void setup() {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
+  pinMode(BOOT_PIN, INPUT_PULLUP); // Nút BOOT kích hoạt thủ công
 
   Serial.begin(115200);
   delay(500);
@@ -154,24 +211,19 @@ void setup() {
   Serial.println();
   Serial.println("==================================================");
   Serial.println("   LORA END-NODE - DATA COLLECTION TRAFFIC GENERATOR");
-  Serial.printf("   Node ID      : [%c]\n", NODE_ID);
-  Serial.printf("   Tần số cố định: %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
-  Serial.printf("   Số gói/mức   : %d gói tin\n", SAMPLES_PER_BURST);
-  Serial.printf("   Tổng số gói  : %d mức x %d = %d gói tin\n", NUM_SIZES, SAMPLES_PER_BURST, NUM_SIZES * SAMPLES_PER_BURST);
-  Serial.println("   Khi gửi đủ gói cuối (250B x 100), Node sẽ DỪNG PHÁT.");
+  Serial.printf("   Node ID       : [%c]\n", NODE_ID);
+  Serial.printf("   Tần số cố định : %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
+  Serial.printf("   Số gói/mức    : %d gói tin\n", SAMPLES_PER_BURST);
+  Serial.printf("   Tổng số gói   : %d mức x %d = %d gói tin\n", NUM_SIZES, SAMPLES_PER_BURST, NUM_SIZES * SAMPLES_PER_BURST);
+  Serial.println("   CHẾ ĐỘ        : ĐANG CHỜ LỆNH START TỪ GATEWAY...");
+  Serial.println("                   (Hoặc nhấn nút BOOT trên bo để phát ngay)");
   Serial.println("==================================================");
 
   // Khởi động I2C & OLED
   Wire.begin(OLED_SDA, OLED_SCL);
   if (display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     oledOk = true;
-    display.clearDisplay();
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 5);
-    display.printf("Node [%c] Khoi Dong...\n", NODE_ID);
-    display.printf("Freq: %.3f MHz\n", FIXED_FREQUENCY);
-    display.printf("Muc tieu: 600 Goi\n");
-    display.display();
+    oledShowWaitingCommand(0);
   }
 
   // Khởi tạo SPI & LoRa Radio SX1278 trên tần số cố định
@@ -182,6 +234,8 @@ void setup() {
                           LORA_SYNC_WORD, LORA_POWER, LORA_PREAMBLE);
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println("[INIT] SX1278 Khởi tạo THÀNH CÔNG!");
+    // Đưa module LoRa vào chế độ nhận để sẵn sàng bắt lệnh START từ Gateway
+    radio.startReceive();
   } else {
     Serial.printf("[ERROR] SX1278 Khởi tạo THẤT BẠI! Mã lỗi: %d\n", state);
     if (oledOk) {
@@ -195,28 +249,107 @@ void setup() {
 
   // Khởi tạo Seed ngẫu nhiên từ nhiễu điện từ ADC
   randomSeed(analogRead(34) + (uint8_t)NODE_ID + micros());
-  delay(1500);
+  delay(500);
 
   Serial.println();
-  Serial.println("BAT DAU KICH BAN PHAT GOI TIN...");
-  Serial.println("--------------------------------------------------");
+  Serial.println("[READY] Node đã sẵn sàng ở chế độ CHỜ LỆNH...");
 }
 
 // ── Loop ────────────────────────────────────────────────────────────────────
 void loop() {
-  // NẾU ĐÃ HOÀN THÀNH TOÀN BỘ 600 GÓI TIN -> DỪNG PHÁT HOÀN TOÀN
-  if (isFinished) {
-    // Nhấp nháy nhẹ LED mỗi 3 giây để báo hiệu hệ thống đang ở trạng thái nghỉ
-    digitalWrite(LED_PIN, HIGH);
-    delay(50);
+  // TRƯỜNG HỢP 1: ĐÃ HOÀN THÀNH TOÀN BỘ 600 GÓI TIN -> DỪNG PHÁT VĨNH VIỄN
+  if (nodeState == STATE_FINISHED) {
     digitalWrite(LED_PIN, LOW);
-    delay(2950);
+    delay(1000);
     return;
   }
 
-  unsigned long now = millis();
+  // TRƯỜNG HỢP 2: ĐANG CHỜ LỆNH TỪ GATEWAY HOẶC NÚT BOOT
+  if (nodeState == STATE_WAIT_CMD) {
+    bool triggered = false;
+    String cmdReceived = "";
 
-  // Kiểm tra chu kỳ phát (Interval) có kèm ngẫu nhiên hóa (Jitter)
+    // A. Kiểm tra nếu có gói tin LoRa từ Gateway gửi đến
+    String rxData;
+    int rxState = radio.readData(rxData);
+    if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
+      Serial.printf("[RX LORA] Nhận gói tin từ Gateway: \"%s\"\n", rxData.c_str());
+      String rxUpper = rxData;
+      rxUpper.toUpperCase();
+
+      // Kiểm tra lệnh có chứa từ khóa START
+      if (rxUpper.indexOf("START") >= 0) {
+        // Kiểm tra xem lệnh broadcast ("ALL", "START", "CMD:START") hay đích danh ("A", "B", "C")
+        if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
+          triggered = true;
+          cmdReceived = "START:ALL";
+        } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
+          triggered = true;
+          cmdReceived = String("START:") + NODE_ID;
+        }
+      }
+    }
+
+    // B. Kiểm tra nút nhấn BOOT (GPIO 0) để phát thủ công nếu không có Gateway
+    if (!triggered && digitalRead(BOOT_PIN) == LOW) {
+      delay(50); // Chống dội
+      if (digitalRead(BOOT_PIN) == LOW) {
+        Serial.println("[MANUAL] >>> Nút BOOT được nhấn! Kích hoạt phát thủ công. <<<");
+        triggered = true;
+        cmdReceived = "NUT BOOT";
+        while (digitalRead(BOOT_PIN) == LOW) delay(10); // Chờ nhả nút
+      }
+    }
+
+    // Nếu nhận được lệnh kích hoạt:
+    if (triggered) {
+      Serial.println();
+      Serial.println("==================================================");
+      Serial.printf(" >>> [KÍCH HOẠT THÀNH CÔNG] Node [%c] BẮT ĐẦU PHÁT DỮ LIỆU! <<<\n", NODE_ID);
+      Serial.printf(" Nguồn kích hoạt : %s\n", cmdReceived.c_str());
+      Serial.printf(" Tần số làm việc : %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
+      Serial.println("==================================================");
+
+      oledShowTriggered(cmdReceived.c_str());
+
+      // Nháy LED 3 lần báo hiệu nhận lệnh
+      for (int i = 0; i < 3; i++) {
+        digitalWrite(LED_PIN, HIGH); delay(80);
+        digitalWrite(LED_PIN, LOW);  delay(80);
+      }
+      delay(800);
+
+      // Chuyển sang trạng thái phát dữ liệu
+      nodeState = STATE_TRANSMITTING;
+      lastTxTime = 0; // Để phát ngay gói đầu tiên
+      packetCount = 0;
+      sizeIndex = 0;
+      totalPacketsSent = 0;
+      return;
+    }
+
+    // Hiệu ứng chờ lệnh trên màn hình OLED và nhấp nháy LED nhẹ
+    static unsigned long lastWaitTime = 0;
+    static int dotCount = 0;
+    if (millis() - lastWaitTime >= 600) {
+      lastWaitTime = millis();
+      dotCount++;
+      oledShowWaitingCommand(dotCount);
+
+      // Nhấp nháy nhẹ LED mỗi 1.2s báo hiệu node đang sống và chờ lệnh
+      if (dotCount % 2 == 0) {
+        digitalWrite(LED_PIN, HIGH);
+        delay(30);
+        digitalWrite(LED_PIN, LOW);
+      }
+    }
+
+    delay(20);
+    return;
+  }
+
+  // TRƯỜNG HỢP 3: STATE_TRANSMITTING - ĐANG PHÁT 6 MỨC KÍCH THƯỚC (GIỮ NGUYÊN)
+  unsigned long now = millis();
   if (now - lastTxTime >= currentInterval || lastTxTime == 0) {
     lastTxTime = now;
     currentInterval = TX_BASE_INTERVAL_MS + random(0, TX_JITTER_MS);
@@ -225,19 +358,13 @@ void loop() {
 
     // Xây dựng gói tin ASCII theo đúng định dạng bài báo LoRaEdgeTinyML:
     // Định dạng: "<NODE_ID><packetCount>*<chuỗi chữ số ngẫu nhiên '0'..'9'>"
-    // Ví dụ kích thước 30 bytes: "A0*204036563877114581128047642" (đúng 30 ký tự)
-    // - Byte đầu: Tên Node ('A', 'B', 'C')
-    // - Các byte số: Số thứ tự gói tin (0 đến 99 dạng chuỗi ASCII)
-    // - Ký tự '*': Phân cách (separator)
-    // - Các byte còn lại: Chữ số ngẫu nhiên '0'..'9' (ASCII 48..57) cho đến đủ kích thước
     char txBuffer[256];
     int headerLen = snprintf(txBuffer, sizeof(txBuffer), "%c%u*", NODE_ID, packetCount);
     for (int i = headerLen; i < currentPayloadSize; i++) {
-      txBuffer[i] = (char)random(48, 58); // Ký tự số ngẫu nhiên '0' -> '9'
+      txBuffer[i] = (char)random(48, 58);
     }
-    txBuffer[currentPayloadSize] = '\0'; // Kết thúc chuỗi để in ra Serial an toàn
+    txBuffer[currentPayloadSize] = '\0';
 
-    // Bật LED chỉ báo đang truyền sóng
     digitalWrite(LED_PIN, HIGH);
     unsigned long t0 = millis();
 
@@ -248,27 +375,23 @@ void loop() {
 
     totalPacketsSent++;
 
-    // In log chi tiết ra Serial Monitor
     Serial.printf("NODE:%c | FREQ:%.3fMHz | SIZE:%3dB (%d/%d) | PKT:#%02u/%d | TOTAL:%3u/600 | ToA:%lums | Result:%d | DATA:\"%s\"\n",
                   NODE_ID, FIXED_FREQUENCY, currentPayloadSize, sizeIndex + 1, NUM_SIZES,
                   packetCount, SAMPLES_PER_BURST, totalPacketsSent, airTime, state, txBuffer);
 
-    // Cập nhật màn hình OLED
     oledUpdateProgress(packetCount, currentPayloadSize, state, airTime);
 
     packetCount++;
 
-    // Khi đã gửi đủ 100 gói cho kích thước hiện tại
     if (packetCount >= SAMPLES_PER_BURST) {
       packetCount = 0;
       sizeIndex++;
 
       // KIỂM TRA ĐÃ GỬI XONG MỨC KÍCH THƯỚC CUỐI CÙNG CHƯA (250 BYTES)
       if (sizeIndex >= NUM_SIZES) {
-        isFinished = true;
+        nodeState = STATE_FINISHED;
 
-        // Đưa module LoRa vào chế độ Sleep để ngừng phát sóng hoàn toàn
-        radio.sleep();
+        radio.sleep(); // Tắt sóng LoRa hoàn toàn
 
         Serial.println();
         Serial.println("==================================================");
@@ -288,7 +411,7 @@ void loop() {
       Serial.printf("[TIẾN TRÌNH] Chuyển sang kích thước tiếp theo: %d bytes (100 gói)...\n",
                     PAYLOAD_SIZES[sizeIndex]);
       Serial.println("--------------------------------------------------");
-      delay(2000); // Tạm dừng 2 giây giữa 2 đợt kích thước
+      delay(2000);
     }
   }
 }

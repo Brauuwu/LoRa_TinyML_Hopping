@@ -51,6 +51,7 @@ public:
     void setMode(uint8_t mode);
     bool isPacketAvailable();
     int readPacket(uint8_t* buffer, int maxLen, int& rssi, float& snr);
+    bool sendPacket(const uint8_t* buffer, size_t len, uint32_t timeoutMs = 1000);
 
     static bool configureSpiNoCs();
 
@@ -61,6 +62,7 @@ private:
     uint8_t readRegister(uint8_t address);
     void writeRegister(uint8_t address, uint8_t value);
     void burstRead(uint8_t address, uint8_t* buffer, uint8_t len);
+    void burstWrite(uint8_t address, const uint8_t* buffer, uint8_t len);
 
     static std::recursive_mutex s_spiMutex;
 
