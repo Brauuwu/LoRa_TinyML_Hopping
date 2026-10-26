@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoRaWAN AI-Edge Gateway - Bảng Điều Khiển Thu Thập Dữ Liệu</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Kiểu Router Gateway Quản Trị Mạng -->
+  <header class="router-header">
+    <div class="brand-section">
+      <div class="router-icon-box">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">LoRaWAN AI-Edge Gateway</h1>
+        <p class="brand-subtitle">Raspberry Pi CM4 &bull; 3-Kênh Ra-02 (SX1278) &bull; Hệ Thống Thu Thập TinyML</p>
+      </div>
+    </div>
+
+    <div class="header-status-group">
+      <div class="status-pill status-online">
+        <span class="pulsing-dot"></span>
+        <span id="gw-status-text">GATEWAY ONLINE</span>
+      </div>
+      <div class="status-badge">
+        <span class="badge-label">Uptime:</span>
+        <span class="badge-value" id="gw-uptime">00:00:00</span>
+      </div>
+      <div class="status-badge">
+        <span class="badge-label">Giao thức:</span>
+        <span class="badge-value">Port 80 (Nginx)</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Thanh Tác Vụ Nhanh (Master Command Toolbar) -->
+    <section class="master-toolbar card">
+      <div class="toolbar-left">
+        <div class="section-tag">ĐIỀU KHIỂN HỆ THỐNG</div>
+        <h2 class="section-title">Lệnh Kích Hoạt & Đồng Bộ Downlink</h2>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btn-start-selected" class="btn btn-primary" onclick="triggerSelectedNodes('START')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Phát Các Node Đã Chọn
+        </button>
+
+        <button id="btn-start-all" class="btn btn-success" onclick="triggerNode('ALL', 'START')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Phát TẤT CẢ (ALL)
+        </button>
+
+        <button id="btn-stop-all" class="btn btn-danger" onclick="triggerNode('ALL', 'STOP')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+          Dừng / Chờ Tất Cả (RESET)
+        </button>
+
+        <button id="btn-ping-all" class="btn btn-secondary" onclick="pingNodes('ALL')">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Ping Kiểm Tra Online
+        </button>
+      </div>
+    </section>
+
+    <!-- Quản Lý Phiên Đo Đạc & Tiến Trình Thu Thập -->
+    <section class="session-grid">
+      <!-- Card Đổi Tên Phiên Đo -->
+      <div class="card session-card">
+        <div class="card-header">
+          <div class="header-icon cyan">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div>
+            <h3 class="card-title">Phiên Thu Thập Hiện Tại</h3>
+            <p class="card-caption">Tên file CSV/TXT sẽ tự động đồng bộ theo tên phiên này</p>
+          </div>
+        </div>
+
+        <div class="session-form">
+          <div class="input-group">
+            <label for="session-name-input">Tên Kịch Bản / Phiên Đo:</label>
+            <div class="input-wrapper">
+              <input type="text" id="session-name-input" placeholder="Ví dụ: A_433.175 hoặc A_B_433.375" />
+              <button class="btn btn-accent" onclick="applySessionName()">
+                Áp Dụng & Tạo File Mới
+              </button>
+            </div>
+          </div>
+
+          <div class="session-paths">
+            <div class="path-item">
+              <span class="path-label">File CSV:</span>
+              <code class="path-val" id="path-csv">csv/A_433.175.csv</code>
+            </div>
+            <div class="path-item">
+              <span class="path-label">File TXT Log:</span>
+              <code class="path-val" id="path-txt">logs/A_433.175.txt</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Thống Kê Gói Tin -->
+      <div class="card telemetry-card">
+        <div class="card-header">
+          <div class="header-icon emerald">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          </div>
+          <div>
+            <h3 class="card-title">Tiến Độ Thu Thập Bộ Dữ Liệu</h3>
+            <p class="card-caption">Chỉ ghi nhận gói dữ liệu (Payload) &bull; Đã lọc bỏ bản tin điều khiển</p>
+          </div>
+        </div>
+
+        <div class="stats-counters">
+          <div class="stat-box primary-glow">
+            <div class="stat-number" id="stat-total-packets">0</div>
+            <div class="stat-desc">Gói Dữ Liệu Đã Thu (CSV/TXT)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number amber" id="stat-control-packets">0</div>
+            <div class="stat-desc">Bản Tin Điều Khiển (Đã Lọc Bỏ)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number crimson" id="stat-crc-errors">0</div>
+            <div class="stat-desc">Lỗi Khung CRC</div>
+          </div>
+        </div>
+
+        <!-- Thanh phân bổ theo 3 Kênh -->
+        <div class="channel-distribution">
+          <div class="ch-stat">
+            <span class="ch-name">CH1 (433.175 MHz)</span>
+            <span class="ch-val" id="ch1-pkts">0 gói</span>
+          </div>
+          <div class="ch-stat">
+            <span class="ch-name">CH2 (433.375 MHz)</span>
+            <span class="ch-val" id="ch2-pkts">0 gói</span>
+          </div>
+          <div class="ch-stat">
+            <span class="ch-name">CH3 (433.575 MHz)</span>
+            <span class="ch-val" id="ch3-pkts">0 gói</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danh Sách Quản Trị Các End-Node -->
+    <section class="nodes-section">
+      <div class="section-header-row">
+        <div>
+          <div class="section-tag">TOPOLOGY MẠNG LORA</div>
+          <h2 class="section-title">Trạng Thái & Cấu Hình Tần Số OTA Cho Các Node</h2>
+        </div>
+        <div class="select-all-box">
+          <label class="custom-checkbox-container">
+            <input type="checkbox" id="chk-select-all-nodes" onchange="toggleSelectAllNodes(this.checked)">
+            <span class="checkmark"></span>
+            <span class="chk-label">Chọn Tất Cả Các Node</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="node-cards-grid" id="node-cards-container">
+        <!-- Node A Card -->
+        <div class="card node-card" id="card-node-A">
+          <div class="node-card-top">
+            <label class="custom-checkbox-container">
+              <input type="checkbox" class="node-select-chk" value="A">
+              <span class="checkmark"></span>
+            </label>
+            <div class="node-avatar avatar-A">A</div>
+            <div class="node-title-box">
+              <h3 class="node-name">End-Node A</h3>
+              <div class="node-status-badge offline" id="badge-status-A">
+                <span class="node-dot"></span>
+                <span class="status-text">OFFLINE</span>
+              </div>
+            </div>
+            <div class="node-state-pill" id="state-pill-A">CHỜ LỆNH</div>
+          </div>
+
+          <div class="node-metrics-grid">
+            <div class="metric-item">
+              <span class="m-label">Tần Số Hiện Tại</span>
+              <span class="m-val" id="freq-A">433.175 MHz</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Chất Lượng Sóng</span>
+              <div class="signal-container">
+                <div class="signal-bars" id="sig-bars-A">
+                  <span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span>
+                </div>
+                <span class="m-val" id="rssi-A">-- dBm</span>
+              </div>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Tỷ Số SNR</span>
+              <span class="m-val" id="snr-A">-- dB</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Gói Đã Gửi</span>
+              <span class="m-val highlight" id="pkts-A">0 / 600</span>
+            </div>
+          </div>
+
+          <!-- Khu Vực Cấu Hình Tần Số OTA -->
+          <div class="ota-config-box">
+            <div class="ota-header">
+              <span class="ota-title">Cấu hình tần số OTA:</span>
+              <span class="ota-badge stable" id="ota-badge-A">ỔN ĐỊNH ✓</span>
+            </div>
+            <div class="ota-controls">
+              <select id="select-freq-A" class="form-select">
+                <option value="433.175" selected>CH1: 433.175 MHz</option>
+                <option value="433.375">CH2: 433.375 MHz</option>
+                <option value="433.575">CH3: 433.575 MHz</option>
+              </select>
+              <button class="btn btn-sm btn-outline-cyan" onclick="applyOtaConfig('A')">
+                Áp Dụng OTA
+              </button>
+            </div>
+          </div>
+
+          <!-- Nút Điều Khiển Riêng Từng Node -->
+          <div class="node-actions-row">
+            <button class="btn btn-sm btn-outline-emerald" onclick="triggerNode('A', 'START')">▶ Phát Riêng A</button>
+            <button class="btn btn-sm btn-outline-crimson" onclick="triggerNode('A', 'STOP')">⏹ Dừng A</button>
+            <button class="btn btn-sm btn-outline-gray" onclick="pingNodes('A')">Ping</button>
+          </div>
+        </div>
+
+        <!-- Node B Card -->
+        <div class="card node-card" id="card-node-B">
+          <div class="node-card-top">
+            <label class="custom-checkbox-container">
+              <input type="checkbox" class="node-select-chk" value="B">
+              <span class="checkmark"></span>
+            </label>
+            <div class="node-avatar avatar-B">B</div>
+            <div class="node-title-box">
+              <h3 class="node-name">End-Node B</h3>
+              <div class="node-status-badge offline" id="badge-status-B">
+                <span class="node-dot"></span>
+                <span class="status-text">OFFLINE</span>
+              </div>
+            </div>
+            <div class="node-state-pill" id="state-pill-B">CHỜ LỆNH</div>
+          </div>
+
+          <div class="node-metrics-grid">
+            <div class="metric-item">
+              <span class="m-label">Tần Số Hiện Tại</span>
+              <span class="m-val" id="freq-B">433.375 MHz</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Chất Lượng Sóng</span>
+              <div class="signal-container">
+                <div class="signal-bars" id="sig-bars-B">
+                  <span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span>
+                </div>
+                <span class="m-val" id="rssi-B">-- dBm</span>
+              </div>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Tỷ Số SNR</span>
+              <span class="m-val" id="snr-B">-- dB</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Gói Đã Gửi</span>
+              <span class="m-val highlight" id="pkts-B">0 / 600</span>
+            </div>
+          </div>
+
+          <div class="ota-config-box">
+            <div class="ota-header">
+              <span class="ota-title">Cấu hình tần số OTA:</span>
+              <span class="ota-badge stable" id="ota-badge-B">ỔN ĐỊNH ✓</span>
+            </div>
+            <div class="ota-controls">
+              <select id="select-freq-B" class="form-select">
+                <option value="433.175">CH1: 433.175 MHz</option>
+                <option value="433.375" selected>CH2: 433.375 MHz</option>
+                <option value="433.575">CH3: 433.575 MHz</option>
+              </select>
+              <button class="btn btn-sm btn-outline-cyan" onclick="applyOtaConfig('B')">
+                Áp Dụng OTA
+              </button>
+            </div>
+          </div>
+
+          <div class="node-actions-row">
+            <button class="btn btn-sm btn-outline-emerald" onclick="triggerNode('B', 'START')">▶ Phát Riêng B</button>
+            <button class="btn btn-sm btn-outline-crimson" onclick="triggerNode('B', 'STOP')">⏹ Dừng B</button>
+            <button class="btn btn-sm btn-outline-gray" onclick="pingNodes('B')">Ping</button>
+          </div>
+        </div>
+
+        <!-- Node C Card -->
+        <div class="card node-card" id="card-node-C">
+          <div class="node-card-top">
+            <label class="custom-checkbox-container">
+              <input type="checkbox" class="node-select-chk" value="C">
+              <span class="checkmark"></span>
+            </label>
+            <div class="node-avatar avatar-C">C</div>
+            <div class="node-title-box">
+              <h3 class="node-name">End-Node C</h3>
+              <div class="node-status-badge offline" id="badge-status-C">
+                <span class="node-dot"></span>
+                <span class="status-text">OFFLINE</span>
+              </div>
+            </div>
+            <div class="node-state-pill" id="state-pill-C">CHỜ LỆNH</div>
+          </div>
+
+          <div class="node-metrics-grid">
+            <div class="metric-item">
+              <span class="m-label">Tần Số Hiện Tại</span>
+              <span class="m-val" id="freq-C">433.575 MHz</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Chất Lượng Sóng</span>
+              <div class="signal-container">
+                <div class="signal-bars" id="sig-bars-C">
+                  <span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span>
+                </div>
+                <span class="m-val" id="rssi-C">-- dBm</span>
+              </div>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Tỷ Số SNR</span>
+              <span class="m-val" id="snr-C">-- dB</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">Gói Đã Gửi</span>
+              <span class="m-val highlight" id="pkts-C">0 / 600</span>
+            </div>
+          </div>
+
+          <div class="ota-config-box">
+            <div class="ota-header">
+              <span class="ota-title">Cấu hình tần số OTA:</span>
+              <span class="ota-badge stable" id="ota-badge-C">ỔN ĐỊNH ✓</span>
+            </div>
+            <div class="ota-controls">
+              <select id="select-freq-C" class="form-select">
+                <option value="433.175">CH1: 433.175 MHz</option>
+                <option value="433.375">CH2: 433.375 MHz</option>
+                <option value="433.575" selected>CH3: 433.575 MHz</option>
+              </select>
+              <button class="btn btn-sm btn-outline-cyan" onclick="applyOtaConfig('C')">
+                Áp Dụng OTA
+              </button>
+            </div>
+          </div>
+
+          <div class="node-actions-row">
+            <button class="btn btn-sm btn-outline-emerald" onclick="triggerNode('C', 'START')">▶ Phát Riêng C</button>
+            <button class="btn btn-sm btn-outline-crimson" onclick="triggerNode('C', 'STOP')">⏹ Dừng C</button>
+            <button class="btn btn-sm btn-outline-gray" onclick="pingNodes('C')">Ping</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nhật Ký Sự Kiện Trực Tiếp Kiểu Router Console -->
+    <section class="card console-card">
+      <div class="card-header console-header">
+        <div>
+          <div class="section-tag">NHẬT KÝ THỜI GIAN THỰC</div>
+          <h3 class="card-title">Live RF Packet & Event Console</h3>
+        </div>
+        <div class="console-controls">
+          <label class="custom-checkbox-container">
+            <input type="checkbox" id="chk-autoscroll" checked>
+            <span class="checkmark"></span>
+            <span class="chk-label">Tự Động Cuộn</span>
+          </label>
+          <button class="btn btn-sm btn-outline-gray" onclick="clearConsole()">Xóa Nhật Ký</button>
+        </div>
+      </div>
+
+      <div class="terminal-body" id="terminal-body">
+        <div class="log-line sys">[SYSTEM] Đang khởi động bảng điều khiển LoRaWAN Gateway...</div>
+        <div class="log-line sys">[SYSTEM] Đã kết nối Webserver Nginx & C++ RTOS Daemon thành công.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="router-footer">
+    <p>Đồ Án Tốt Nghiệp: Lựa chọn kênh truyền tối ưu cho hệ thống LoRaWAN dựa trên TinyML &bull; Đại học Bách Khoa</p>
+    <p>Gateway CM4 Hardware: 3x SX1278 (Ra-02) &bull; SPI Bus No-CS Kernel Mode &bull; Realtime SCHED_FIFO Priority</p>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

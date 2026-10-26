@@ -8,7 +8,7 @@ LDFLAGS = -lwiringPi -lpthread
 
 # ── Gateway chính (3 kênh) ──
 TARGET_GW = lora_gw_3ch
-SRCS_GW = src/main_gw.cpp src/sx1278_wiringpi.cpp
+SRCS_GW = src/main_gw.cpp src/sx1278_wiringpi.cpp src/http_server.cpp
 OBJS_GW = $(SRCS_GW:.cpp=.o)
 
 # ── Chương trình test truyền thông ──

@@ -105,25 +105,37 @@ LoRa_TinyML_Hopping/
    - Đặt `#define NODE_ID 'A'`, nạp cho Node 1 (Cổng COM tương ứng).
    - Đổi thành `#define NODE_ID 'B'`, nạp cho Node 2.
    - Đổi thành `#define NODE_ID 'C'`, nạp cho Node 3.
-   - *Khi vừa bật, các Node sẽ ở chế độ **CHỜ LỆNH** (màn hình OLED báo `NODE [x] - CHO LENH`), chưa phát sóng ngay.*
-2. **Chạy Gateway trên Raspberry Pi CM4**:
+   - *Khi vừa bật, các Node sẽ ở chế độ **CHỜ LỆNH** (màn hình OLED báo `NODE [x] - CHO LENH`), sẵn sàng nhận lệnh từ Web Gateway hoặc nút bấm.*
+
+2. **Cài đặt Nginx & Web Dashboard trên Raspberry Pi CM4 (Chỉ làm lần đầu)**:
    ```bash
-   cd GatewayCode
-   make
-   # Chạy thu thập theo kịch bản đo cụ thể:
-   sudo ./lora_gw_3ch A_433.175
-   # Hoặc cho kịch bản 2 Node:
-   sudo ./lora_gw_3ch A_B_433.175
+   cd ~/LoRa_TinyML_Hopping/GatewayCode
+   sudo chmod +x setup_webserver.sh
+   sudo ./setup_webserver.sh
    ```
-   Gateway sẽ lắng nghe đồng thời 3 kênh và tự động sinh đồng thời 2 file:
-   - `csv/<TÊN_KỊCH_BẢN>.csv`: File dữ liệu bảng cho Python Pandas.
-   - `logs/<TÊN_KỊCH_BẢN>.txt`: File log thô theo chuẩn bài báo `LoRaEdgeTinyML`.
-3. **Kích hoạt phát dữ liệu (Trigger Mechanism)**:
-   - **Tự động / Điều khiển từ Gateway**: Gateway sẽ tự động phát lệnh `CMD:START:ALL` sau 2.5s khi khởi động, hoặc bạn chỉ cần nhấn **`[ENTER]`** (hoặc gõ `start`) trên màn hình Gateway để phát lệnh kích hoạt tới tất cả các Node.
-   - **Thủ công**: Bạn cũng có thể bấm nút **`BOOT`** (GPIO 0) trên bo ESP32 để kích hoạt phát ngay mà không cần đợi Gateway.
-4. **Tiến trình phát & Tự động kết thúc**:
-   - Các Node nhận lệnh sẽ chuyển sang trạng thái `RUNNING` và phát tuần tự 6 mức kích thước (30B -> 250B) x 100 gói (= 600 gói).
-   - Khi phát xong gói thứ 100 của kích thước lớn nhất 250B, module LoRa sẽ chuyển sang chế độ `SLEEP`, OLED báo `>> DA DUNG PHAT <<` và dừng hẳn việc phát sóng vĩnh viễn.
+   *Script sẽ tự động cài Nginx, cấu hình Virtual Host cổng 80, và copy giao diện Web Admin vào `/var/www/loragw`.*
+
+3. **Chạy Gateway Daemon trên Raspberry Pi CM4**:
+   ```bash
+   cd ~/LoRa_TinyML_Hopping/GatewayCode
+   make clean && make
+   sudo ./lora_gw_3ch
+   ```
+
+4. **Truy cập Giao diện Web Quản trị (Port 80 qua Wi-Fi)**:
+   - Mở trình duyệt trên máy tính/điện thoại kết nối cùng mạng Wi-Fi với CM4:
+     `http://<ĐỊA_CHỈ_IP_WIFI_CỦA_CM4>/` *(Không cần đăng nhập, không cần gõ cổng)*.
+   - **Tính năng trên Web Dashboard**:
+     - **Quản lý phiên đo**: Đổi tên kịch bản ngay trên Web (ví dụ: `A_433.175`, `A_B_433.375`). Hệ thống tự động tạo file `csv/<TÊN>.csv` và `logs/<TÊN>.txt` mới tương ứng.
+     - **Kích hoạt linh hoạt**: Tích chọn phát riêng lẻ từng Node (A, B hoặc C), phát đồng thời 2 Node (A+B, B+C, A+C), hoặc phát TẤT CẢ (ALL).
+     - **Dừng / Reset**: Gửi lệnh `CMD:STOP` từ xa để dừng và reset các Node về trạng thái chờ lệnh bất kỳ lúc nào.
+     - **Cấu hình tần số OTA**: Điều chỉnh tần số từ xa cho từng Node, hiển thị trạng thái xác nhận `ỔN ĐỊNH ✓` trước khi phát.
+     - **Giám sát Online / Offline**: Hiển thị trạng thái Online/Offline, chất lượng sóng 4 vạch RSSI và SNR thời gian thực.
+     - **Bộ lọc Control Traffic**: Toàn bộ bản tin Ping/Pong, ACK, OTA Config đều được hiển thị trên Web Console nhưng **tuyệt đối không bị ghi vào file CSV/TXT dataset**.
+
+5. **Tiến trình phát & Hoàn thành**:
+   - Khi nhận lệnh `START`, các Node phát tuần tự 6 mức kích thước (30B -> 250B) x 100 gói (= 600 gói).
+   - Khi hoàn tất gói thứ 100 của mức 250B, Node báo `HOÀN THÀNH` trên màn hình OLED và tiếp tục duy trì lắng nghe để sẵn sàng cho phiên đo tiếp theo từ Web Gateway.
 
 ---
 

@@ -4,13 +4,13 @@
  * Đề tài: Lựa chọn kênh truyền tối ưu cho hệ thống LoRaWAN dựa trên TinyML
  * Phần cứng: ESP32 DevKit V1 + Module LoRa Ra-02 (SX1278 433MHz) + OLED SSD1306
  *
- * KỊCH BẢN THU THẬP DỮ LIỆU CHUẨN BÀI BÁO (LoRaEdgeTinyML):
- *   1. Tần số cố định: Cấu hình kênh phát cố định (CH1, CH2 hoặc CH3).
- *   2. Định danh cố định: Gán nhãn Node 'A', 'B', hoặc 'C'.
- *   3. Phát tuần tự 6 mức kích thước payload: 30, 74, 118, 162, 206, 250 bytes.
- *   4. Mỗi mức kích thước phát chính xác 100 gói (Packet ID từ 0 đến 99).
- *   5. Payload chứa chuỗi chữ số ngẫu nhiên '0'..'9' sau dấu '*' lấp đầy độ dài.
- *   6. KHI HOÀN THÀNH GÓI THỨ 100 CỦA KÍCH THƯỚC 250B -> NGỪNG PHÁT HOÀN TOÀN!
+ * TÍNH NĂNG TƯƠNG TÁC WEBSERVER GATEWAY:
+ *   1. Nhận lệnh kích hoạt Downlink: Phát lẻ từng Node, 2 Node cùng lúc, hoặc Tất cả.
+ *   2. Cấu hình tần số từ xa qua sóng vô tuyến (OTA Frequency Config).
+ *   3. Phản hồi Ping kiểm tra trạng thái Online / Offline tức thời về Gateway.
+ *   4. Nhận lệnh Dừng / Reset (CMD:STOP) ngay cả khi đang trong tiến trình phát.
+ *   5. Các bản tin điều khiển (Ping, Config, Command) có tiền tố "CTRL:" để
+ *      Gateway phân loại và LOẠI BỎ khỏi tập dữ liệu thu thập (CSV/TXT).
  * -------------------------------------------------------------------------
  */
 
@@ -28,20 +28,21 @@
 #define NODE_ID             'A'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 2. CẤU HÌNH TẦN SỐ CỐ ĐỊNH CHO ĐỢT ĐO (FIXED CHANNEL SELECTION)
+// 2. CẤU HÌNH TẦN SỐ KHỞI ĐỘNG MẶC ĐỊNH (DEFAULT STARTUP FREQUENCY)
 //    1: Kênh 1 - 433.175 MHz
 //    2: Kênh 2 - 433.375 MHz
 //    3: Kênh 3 - 433.575 MHz
-// Chọn kênh tương ứng cho kịch bản đo đạc (ví dụ: A_433.175, A_B_433.175, ...)
+// Có thể thay đổi động từ xa qua giao diện Web Gateway (OTA Frequency Tuning)
 // ═══════════════════════════════════════════════════════════════════════════
-#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3
+#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3 mặc định khi mới cấp điện
 
 // Bảng tra cứu tần số theo số kênh
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
-const float FIXED_FREQUENCY = CHANNELS[SELECTED_CHANNEL_NUM - 1];
+float currentFrequency = CHANNELS[SELECTED_CHANNEL_NUM - 1];
+int currentChannelNum = SELECTED_CHANNEL_NUM;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 3. THIẾT LẬP KỊCH BẢN PHÁT GÓI TIN (TRAFFIC SCENARIO)
+// 3. THIẾT LẬP KỊCH BẢN PHÁT GÓI TIN DỮ LIỆU (TRAFFIC SCENARIO)
 // ═══════════════════════════════════════════════════════════════════════════
 #define SAMPLES_PER_BURST   100   // Mỗi kích thước phát đúng 100 gói (0..99)
 const int PAYLOAD_SIZES[6]  = {30, 74, 118, 162, 206, 250}; // 6 mức kích thước
@@ -119,11 +120,11 @@ void oledShowWaitingCommand(int dotCount) {
   display.setCursor(2, 2);
   display.printf("NODE [%c] - CHO LENH", NODE_ID);
   display.setCursor(95, 2);
-  display.printf("CH%d", SELECTED_CHANNEL_NUM);
+  display.printf("CH%d", currentChannelNum);
 
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 15);
-  display.printf("Freq: %.3f MHz", FIXED_FREQUENCY);
+  display.printf("Freq: %.3f MHz", currentFrequency);
   display.setCursor(0, 27);
   display.print("Trang thai: Cho GW");
   for (int i = 0; i < (dotCount % 4); i++) display.print(".");
@@ -152,7 +153,28 @@ void oledShowTriggered(const char* cmdText) {
   display.setCursor(0, 32);
   display.print("Khoi dong 600 goi...");
   display.setCursor(0, 46);
-  display.printf("Kenh: %.3f MHz", FIXED_FREQUENCY);
+  display.printf("Kenh: %.3f MHz", currentFrequency);
+  display.display();
+}
+
+// ── Hàm hiển thị màn hình OLED khi CẬP NHẬT TẦN SỐ OTA ──────────────────────
+void oledShowConfigUpdated(float newFreq, int chNum) {
+  if (!oledOk) return;
+
+  display.clearDisplay();
+  display.fillRect(0, 0, 128, 12, SSD1306_WHITE);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(4, 2);
+  display.printf("NODE [%c] - OTA CONFIG", NODE_ID);
+
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 18);
+  display.print("Tan so moi thanh cong:");
+  display.setCursor(0, 32);
+  display.printf("%.3f MHz (CH%d)", newFreq, chNum);
+  display.setCursor(0, 48);
+  display.print("STABLE CONFIRMED OK");
   display.display();
 }
 
@@ -167,11 +189,11 @@ void oledUpdateProgress(int seq, int pSize, int status, unsigned long airTime) {
   display.setCursor(2, 2);
   display.printf("NODE [%c] - RUNNING", NODE_ID);
   display.setCursor(95, 2);
-  display.printf("CH%d", SELECTED_CHANNEL_NUM);
+  display.printf("CH%d", currentChannelNum);
 
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 15);
-  display.printf("Freq: %.3f MHz", FIXED_FREQUENCY);
+  display.printf("Freq: %.3f MHz", currentFrequency);
   display.setCursor(0, 27);
   display.printf("Pkt : #%02d / %d", seq, SAMPLES_PER_BURST);
   display.setCursor(0, 39);
@@ -199,7 +221,7 @@ void oledShowFinished() {
 
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 16);
-  display.printf("Freq : %.3f MHz (CH%d)", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
+  display.printf("Freq : %.3f MHz (CH%d)", currentFrequency, currentChannelNum);
   display.setCursor(0, 28);
   display.printf("Tong : %u/600 Pkts", totalPacketsSent);
   display.setCursor(0, 40);
@@ -207,6 +229,20 @@ void oledShowFinished() {
   display.setCursor(0, 52);
   display.print(">> DA DUNG PHAT <<");
   display.display();
+}
+
+// ── Hàm gửi phản hồi bản tin điều khiển tới Gateway ─────────────────────────
+// Ghi chú: Mọi bản tin điều khiển có tiền tố "CTRL:" để Gateway phân loại
+// và TUYỆT ĐỐI LOẠI BỎ khỏi tập dữ liệu thu thập (CSV & TXT).
+void sendControlResponse(const String& ctrlMsg) {
+  digitalWrite(LED_PIN, HIGH);
+  radio.standby();
+  delay(10);
+  radio.transmit((uint8_t*)ctrlMsg.c_str(), ctrlMsg.length());
+  digitalWrite(LED_PIN, LOW);
+  delay(10);
+  radio.startReceive();
+  Serial.printf("[CTRL TX] Đã gửi phản hồi: \"%s\"\n", ctrlMsg.c_str());
 }
 
 // ── Setup ───────────────────────────────────────────────────────────────────
@@ -222,11 +258,10 @@ void setup() {
   Serial.println("==================================================");
   Serial.println("   LORA END-NODE - DATA COLLECTION TRAFFIC GENERATOR");
   Serial.printf("   Node ID       : [%c]\n", NODE_ID);
-  Serial.printf("   Tần số cố định : %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
+  Serial.printf("   Tần số mặc định: %.3f MHz (Kênh %d)\n", currentFrequency, currentChannelNum);
   Serial.printf("   Số gói/mức    : %d gói tin\n", SAMPLES_PER_BURST);
   Serial.printf("   Tổng số gói   : %d mức x %d = %d gói tin\n", NUM_SIZES, SAMPLES_PER_BURST, NUM_SIZES * SAMPLES_PER_BURST);
-  Serial.println("   CHẾ ĐỘ        : ĐANG CHỜ LỆNH START TỪ GATEWAY...");
-  Serial.println("                   (Hoặc nhấn nút BOOT trên bo để phát ngay)");
+  Serial.println("   CHẾ ĐỘ        : ĐANG CHỜ LỆNH TỪ WEBSERVER GATEWAY...");
   Serial.println("==================================================");
 
   // Khởi động I2C & OLED
@@ -236,15 +271,15 @@ void setup() {
     oledShowWaitingCommand(0);
   }
 
-  // Khởi tạo SPI & LoRa Radio SX1278 trên tần số cố định
+  // Khởi tạo SPI & LoRa Radio SX1278 trên tần số ban đầu
   loRaSPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_NSS);
-  Serial.printf("[INIT] Đang khởi động SX1278 trên tần số %.3f MHz...\n", FIXED_FREQUENCY);
+  Serial.printf("[INIT] Đang khởi động SX1278 trên tần số %.3f MHz...\n", currentFrequency);
 
-  int state = radio.begin(FIXED_FREQUENCY, LORA_BW, LORA_SF, LORA_CR,
+  int state = radio.begin(currentFrequency, LORA_BW, LORA_SF, LORA_CR,
                           LORA_SYNC_WORD, LORA_POWER, LORA_PREAMBLE);
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println("[INIT] SX1278 Khởi tạo THÀNH CÔNG!");
-    // Đăng ký ngắt DIO0 và đưa module vào chế độ nhận để sẵn sàng bắt lệnh START từ Gateway
+    // Đăng ký ngắt DIO0 và bắt đầu lắng nghe Downlink
     radio.setPacketReceivedAction(onDio0Interrupt);
     int rxState = radio.startReceive();
     if (rxState == RADIOLIB_ERR_NONE) {
@@ -271,16 +306,163 @@ void setup() {
   Serial.println("[READY] Node đã sẵn sàng ở chế độ CHỜ LỆNH...");
 }
 
+// ── Hàm xử lý toàn diện các gói tin Downlink từ Gateway ─────────────────────
+// Trả về true nếu lệnh yêu cầu chuyển sang phát dữ liệu (START)
+bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
+  String rxUpper = rxData;
+  rxUpper.toUpperCase();
+  rxUpper.trim();
+
+  float rssi = radio.getRSSI();
+  float snr = radio.getSNR();
+  Serial.println();
+  Serial.printf("[RX DOWNLINK] \"%s\" (RSSI: %.1f dBm, SNR: %.1f dB)\n", rxData.c_str(), rssi, snr);
+
+  // 1. XỬ LÝ LỆNH PING (KIỂM TRA TRẠNG THÁI ONLINE / OFFLINE)
+  // Cú pháp: "CMD:PING:ALL" hoặc "CMD:PING:A", "CMD:PING:B"
+  if (rxUpper.startsWith("CMD:PING") || rxUpper.equals("PING")) {
+    bool targetMe = false;
+    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.indexOf(String(NODE_ID)) >= 0 || rxUpper.equals("PING")) {
+      targetMe = true;
+    }
+    if (targetMe) {
+      String stateStr = (nodeState == STATE_WAIT_CMD) ? "WAIT" :
+                        (nodeState == STATE_TRANSMITTING) ? "TX" : "DONE";
+      // Phản hồi: CTRL:PONG:<NODE_ID>:<CHANNEL>:<FREQ>:<STATE>
+      char pongMsg[64];
+      snprintf(pongMsg, sizeof(pongMsg), "CTRL:PONG:%c:%d:%.3f:%s",
+               NODE_ID, currentChannelNum, currentFrequency, stateStr.c_str());
+      delay(random(20, 100)); // Tránh xung đột nếu nhiều node cùng trả lời
+      sendControlResponse(pongMsg);
+      return false;
+    }
+  }
+
+  // 2. XỬ LÝ LỆNH CẤU HÌNH TẦN SỐ OTA (OTA FREQUENCY CONFIGURATION)
+  // Cú pháp: "CMD:CFG:<NODE>:<FREQ>" (Ví dụ: "CMD:CFG:A:433.175" hoặc "CMD:CFG:ALL:433.375")
+  if (rxUpper.startsWith("CMD:CFG:") || rxUpper.startsWith("CFG:")) {
+    int firstColon = rxData.indexOf(':', 4); // Bỏ qua "CMD:"
+    if (firstColon > 0) {
+      int secondColon = rxData.indexOf(':', firstColon + 1);
+      if (secondColon > 0) {
+        String targetNode = rxData.substring(firstColon + 1, secondColon);
+        targetNode.toUpperCase();
+        String freqStr = rxData.substring(secondColon + 1);
+        float newFreq = freqStr.toFloat();
+
+        if ((targetNode.indexOf("ALL") >= 0 || targetNode.indexOf(String(NODE_ID)) >= 0) && newFreq > 400.0 && newFreq < 450.0) {
+          Serial.printf("[OTA] Nhận yêu cầu đổi tần số sang %.3f MHz...\n", newFreq);
+
+          // Cập nhật phần cứng SX1278
+          radio.standby();
+          int res = radio.setFrequency(newFreq);
+          if (res == RADIOLIB_ERR_NONE) {
+            currentFrequency = newFreq;
+            if (fabs(newFreq - 433.175) < 0.05) currentChannelNum = 1;
+            else if (fabs(newFreq - 433.375) < 0.05) currentChannelNum = 2;
+            else if (fabs(newFreq - 433.575) < 0.05) currentChannelNum = 3;
+
+            oledShowConfigUpdated(currentFrequency, currentChannelNum);
+
+            // Gửi xác nhận cấu hình ổn định về Gateway
+            // Định dạng: CTRL:ACK:CFG:<NODE>:<FREQ>
+            char ackMsg[64];
+            snprintf(ackMsg, sizeof(ackMsg), "CTRL:ACK:CFG:%c:%.3f", NODE_ID, currentFrequency);
+            delay(50);
+            sendControlResponse(ackMsg);
+
+            delay(1500);
+            if (nodeState == STATE_WAIT_CMD) oledShowWaitingCommand(0);
+          } else {
+            Serial.printf("[OTA FAIL] Không thể thiết lập tần số! Mã lỗi: %d\n", res);
+          }
+          return false;
+        }
+      }
+    }
+  }
+
+  // 3. XỬ LÝ LỆNH DỪNG / RESET (CMD:STOP / CMD:RESET)
+  // Cú pháp: "CMD:STOP:ALL" hoặc "CMD:STOP:A", "CMD:STOP:A,B"
+  if (rxUpper.indexOf("STOP") >= 0 || rxUpper.indexOf("RESET") >= 0) {
+    bool targetMe = false;
+    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.indexOf(String(NODE_ID)) >= 0 || rxUpper.equals("STOP")) {
+      targetMe = true;
+    }
+    if (targetMe) {
+      Serial.println("[DOWNLINK] >>> NHẬN LỆNH DỪNG/RESET TỪ GATEWAY! <<<");
+      char ackStop[64];
+      snprintf(ackStop, sizeof(ackStop), "CTRL:ACK:STOP:%c", NODE_ID);
+      sendControlResponse(ackStop);
+
+      nodeState = STATE_WAIT_CMD;
+      packetCount = 0;
+      sizeIndex = 0;
+      totalPacketsSent = 0;
+      lastTxTime = 0;
+      oledShowWaitingCommand(0);
+      return false;
+    }
+  }
+
+  // 4. XỬ LÝ LỆNH PHÁT (CMD:START)
+  // Cú pháp hỗ trợ:
+  //   - "CMD:START:ALL"        -> Tất cả các Node phát
+  //   - "CMD:START:A"          -> Chỉ Node A phát
+  //   - "CMD:START:A,B"        -> Đồng thời Node A và Node B phát
+  //   - "CMD:START:B,C"        -> Đồng thời Node B và Node C phát
+  if (rxUpper.indexOf("START") >= 0) {
+    bool targetMe = false;
+    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
+      targetMe = true;
+      cmdReceived = "START:ALL";
+    } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
+      targetMe = true;
+      cmdReceived = String("START:") + NODE_ID;
+    }
+
+    if (targetMe) {
+      // Gửi xác nhận bắt đầu về Gateway
+      char ackStart[64];
+      snprintf(ackStart, sizeof(ackStart), "CTRL:ACK:START:%c", NODE_ID);
+      sendControlResponse(ackStart);
+      return true; // Kích hoạt phát dữ liệu
+    }
+  }
+
+  return false;
+}
+
 // ── Loop ────────────────────────────────────────────────────────────────────
 void loop() {
-  // TRƯỜNG HỢP 1: ĐÃ HOÀN THÀNH TOÀN BỘ 600 GÓI TIN -> DỪNG PHÁT VĨNH VIỄN
+  // TRƯỜNG HỢP 1: ĐÃ HOÀN THÀNH TOÀN BỘ 600 GÓI TIN
   if (nodeState == STATE_FINISHED) {
     digitalWrite(LED_PIN, LOW);
-    delay(1000);
+
+    // Vẫn lắng nghe Downlink để người dùng có thể bấm [RESET / PHÁT LẠI] từ Web Gateway
+    if (g_rxFlag || digitalRead(LORA_DIO0) == HIGH) {
+      g_rxFlag = false;
+      String rxData;
+      int rxState = radio.readData(rxData);
+      if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
+        String cmdReceived = "";
+        if (handleDownlinkPacket(rxData, cmdReceived)) {
+          nodeState = STATE_TRANSMITTING;
+          lastTxTime = 0;
+          packetCount = 0;
+          sizeIndex = 0;
+          totalPacketsSent = 0;
+          oledShowTriggered(cmdReceived.c_str());
+          return;
+        }
+      }
+      radio.startReceive();
+    }
+    delay(200);
     return;
   }
 
-  // TRƯỜNG HỢP 2: ĐANG CHỜ LỆNH TỪ GATEWAY HOẶC NÚT BOOT
+  // TRƯỜNG HỢP 2: ĐANG CHỜ LỆNH TỪ WEBSERVER GATEWAY HOẶC NÚT BOOT
   if (nodeState == STATE_WAIT_CMD) {
     bool triggered = false;
     String cmdReceived = "";
@@ -293,37 +475,20 @@ void loop() {
       int rxState = radio.readData(rxData);
 
       if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
-        float rssi = radio.getRSSI();
-        float snr = radio.getSNR();
-        Serial.println();
-        Serial.printf("[RX LORA] >>> Nhận gói từ Gateway: \"%s\" (RSSI: %.1f dBm, SNR: %.1f dB) <<<\n",
-                      rxData.c_str(), rssi, snr);
-
-        String rxUpper = rxData;
-        rxUpper.toUpperCase();
-
-        // Kiểm tra lệnh có chứa từ khóa START
-        if (rxUpper.indexOf("START") >= 0) {
-          // Kiểm tra xem lệnh broadcast ("ALL", "START", "CMD:START") hay đích danh ("A", "B", "C")
-          if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
-            triggered = true;
-            cmdReceived = "START:ALL";
-          } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
-            triggered = true;
-            cmdReceived = String("START:") + NODE_ID;
-          }
+        if (handleDownlinkPacket(rxData, cmdReceived)) {
+          triggered = true;
         }
       } else {
         Serial.printf("[RX LORA] Lỗi đọc gói tin (Code: %d)\n", rxState);
       }
 
-      // QUAN TRỌNG: Nếu chưa được kích hoạt, PHẢI đưa SX1278 trở lại chế độ nhận!
+      // Nếu chưa kích hoạt, tiếp tục đưa SX1278 vào chế độ nhận
       if (!triggered) {
         radio.startReceive();
       }
     }
 
-    // B. Kiểm tra nút nhấn BOOT (GPIO 0) để phát thủ công nếu không có Gateway
+    // B. Kiểm tra nút nhấn BOOT (GPIO 0) để phát thủ công khi không có Gateway
     if (!triggered && digitalRead(BOOT_PIN) == LOW) {
       delay(50); // Chống dội
       if (digitalRead(BOOT_PIN) == LOW) {
@@ -334,17 +499,15 @@ void loop() {
       }
     }
 
-    // Nếu nhận được lệnh kích hoạt:
+    // C. Nếu nhận được lệnh kích hoạt: Bắt đầu phát dữ liệu
     if (triggered) {
-      // Hủy hàm ngắt để chuyển sang chế độ phát độc quyền
-      radio.clearPacketReceivedAction();
       radio.standby();
 
       Serial.println();
       Serial.println("==================================================");
       Serial.printf(" >>> [KÍCH HOẠT THÀNH CÔNG] Node [%c] BẮT ĐẦU PHÁT DỮ LIỆU! <<<\n", NODE_ID);
       Serial.printf(" Nguồn kích hoạt : %s\n", cmdReceived.c_str());
-      Serial.printf(" Tần số làm việc : %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
+      Serial.printf(" Tần số làm việc : %.3f MHz (Kênh %d)\n", currentFrequency, currentChannelNum);
       Serial.println("==================================================");
 
       oledShowTriggered(cmdReceived.c_str());
@@ -354,7 +517,7 @@ void loop() {
         digitalWrite(LED_PIN, HIGH); delay(80);
         digitalWrite(LED_PIN, LOW);  delay(80);
       }
-      delay(800);
+      delay(500);
 
       // Chuyển sang trạng thái phát dữ liệu
       nodeState = STATE_TRANSMITTING;
@@ -380,7 +543,6 @@ void loop() {
       dotCount++;
       oledShowWaitingCommand(dotCount);
 
-      // Nhấp nháy nhẹ LED mỗi 1.2s báo hiệu node đang sống và chờ lệnh
       if (dotCount % 2 == 0) {
         digitalWrite(LED_PIN, HIGH);
         delay(30);
@@ -392,7 +554,23 @@ void loop() {
     return;
   }
 
-  // TRƯỜNG HỢP 3: STATE_TRANSMITTING - ĐANG PHÁT 6 MỨC KÍCH THƯỚC (GIỮ NGUYÊN)
+  // TRƯỜNG HỢP 3: STATE_TRANSMITTING - ĐANG PHÁT DỮ LIỆU THU THẬP
+  // Trong thời gian nghỉ giữa các gói, vẫn lắng nghe lệnh STOP/RESET từ Gateway!
+  if (g_rxFlag || digitalRead(LORA_DIO0) == HIGH) {
+    g_rxFlag = false;
+    String rxData;
+    int rxState = radio.readData(rxData);
+    if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
+      String unusedCmd = "";
+      handleDownlinkPacket(rxData, unusedCmd);
+      if (nodeState != STATE_TRANSMITTING) {
+        // Đã bị dừng bởi lệnh STOP từ Gateway
+        return;
+      }
+    }
+    radio.startReceive();
+  }
+
   unsigned long now = millis();
   if (now - lastTxTime >= currentInterval || lastTxTime == 0) {
     lastTxTime = now;
@@ -401,7 +579,7 @@ void loop() {
     int currentPayloadSize = PAYLOAD_SIZES[sizeIndex];
 
     // Xây dựng gói tin ASCII theo đúng định dạng bài báo LoRaEdgeTinyML:
-    // Định dạng: "<NODE_ID><packetCount>*<chuỗi chữ số ngẫu nhiên '0'..'9'>"
+    // "<NODE_ID><packetCount>*<chuỗi chữ số ngẫu nhiên '0'..'9'>"
     char txBuffer[256];
     int headerLen = snprintf(txBuffer, sizeof(txBuffer), "%c%u*", NODE_ID, packetCount);
     for (int i = headerLen; i < currentPayloadSize; i++) {
@@ -410,6 +588,7 @@ void loop() {
     txBuffer[currentPayloadSize] = '\0';
 
     digitalWrite(LED_PIN, HIGH);
+    radio.standby();
     unsigned long t0 = millis();
 
     int state = radio.transmit((uint8_t*)txBuffer, currentPayloadSize);
@@ -417,10 +596,13 @@ void loop() {
     unsigned long airTime = millis() - t0;
     digitalWrite(LED_PIN, LOW);
 
+    // Ngay sau khi truyền xong, chuyển lại sang chế độ nhận để bắt lệnh STOP nếu có
+    radio.startReceive();
+
     totalPacketsSent++;
 
     Serial.printf("NODE:%c | FREQ:%.3fMHz | SIZE:%3dB (%d/%d) | PKT:#%02u/%d | TOTAL:%3u/600 | ToA:%lums | Result:%d | DATA:\"%s\"\n",
-                  NODE_ID, FIXED_FREQUENCY, currentPayloadSize, sizeIndex + 1, NUM_SIZES,
+                  NODE_ID, currentFrequency, currentPayloadSize, sizeIndex + 1, NUM_SIZES,
                   packetCount, SAMPLES_PER_BURST, totalPacketsSent, airTime, state, txBuffer);
 
     oledUpdateProgress(packetCount, currentPayloadSize, state, airTime);
@@ -435,15 +617,13 @@ void loop() {
       if (sizeIndex >= NUM_SIZES) {
         nodeState = STATE_FINISHED;
 
-        radio.sleep(); // Tắt sóng LoRa hoàn toàn
-
         Serial.println();
         Serial.println("==================================================");
         Serial.printf(" >>> [HOÀN THÀNH KỊCH BẢN] Node [%c] ĐÃ PHÁT ĐỦ %u GÓI TIN! <<<\n", NODE_ID, totalPacketsSent);
-        Serial.printf(" Tần số cố định : %.3f MHz (Kênh %d)\n", FIXED_FREQUENCY, SELECTED_CHANNEL_NUM);
-        Serial.printf(" Chi tiết       : 6 mức kích thước (30B -> 250B) x %d gói\n", SAMPLES_PER_BURST);
-        Serial.println(" LoRa Radio đã chuyển sang chế độ SLEEP.");
-        Serial.println(" >>> NODE ĐÃ NGỪNG PHÁT HOÀN TOÀN! <<<");
+        Serial.printf(" Tần số làm việc : %.3f MHz (Kênh %d)\n", currentFrequency, currentChannelNum);
+        Serial.printf(" Chi tiết        : 6 mức kích thước (30B -> 250B) x %d gói\n", SAMPLES_PER_BURST);
+        Serial.println(" >>> NODE ĐÃ HOÀN THÀNH VÀ DỪNG PHÁT DỮ LIỆU! <<<");
+        Serial.println(" (Tiếp tục lắng nghe lệnh RESET/START mới từ Web Gateway)");
         Serial.println("==================================================");
 
         oledShowFinished();
