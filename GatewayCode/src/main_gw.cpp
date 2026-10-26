@@ -75,6 +75,7 @@ struct NodeStateInfo {
     time_t lastSeen;          // Thời điểm nhận gói tin cuối cùng
     uint32_t packetsReceived; // Số gói dữ liệu đã nhận từ Node này trong phiên
     bool cfgConfirmed;        // Đã xác nhận cấu hình tần số OTA ổn định
+    double pendingFreq;       // Tần số đang chờ xác nhận cấu hình OTA
 };
 
 // ── Cấu trúc sự kiện hiển thị trên Web Console ──────────────────────────────
@@ -143,13 +144,13 @@ static std::atomic<bool> g_sessionChanged(false);
 // Bảng thông tin trạng thái 3 Node A, B, C
 static std::mutex g_nodesMutex;
 static NodeStateInfo g_nodes[3] = {
-    {'A', false, "WAIT", MODULE1_FREQ, 1, -120, 0.0f, 0, 0, true},
-    {'B', false, "WAIT", MODULE2_FREQ, 2, -120, 0.0f, 0, 0, true},
-    {'C', false, "WAIT", MODULE3_FREQ, 3, -120, 0.0f, 0, 0, true}
+    {'A', false, "WAIT", MODULE1_FREQ, 1, -120, 0.0f, 0, 0, true, MODULE1_FREQ},
+    {'B', false, "WAIT", MODULE2_FREQ, 2, -120, 0.0f, 0, 0, true, MODULE2_FREQ},
+    {'C', false, "WAIT", MODULE3_FREQ, 3, -120, 0.0f, 0, 0, true, MODULE3_FREQ}
 };
 
-// Thống kê gói theo 3 kênh phần cứng
-static std::atomic<uint32_t> g_channelPackets[3] = {0, 0, 0};
+// Thống kê gói theo 3 kênh phần cứng (khởi tạo riêng lẻ để tương thích GCC 14)
+static std::atomic<uint32_t> g_channelPackets[3];
 
 // Nhật ký sự kiện phục vụ Web Dashboard (lưu tối đa 50 sự kiện gần nhất)
 static std::mutex g_eventsMutex;
@@ -744,6 +745,10 @@ int main(int argc, char* argv[]) {
     printf("   Hệ điều hành: Webserver Nginx (Port 80) + POSIX RTOS\n");
     printf("   Kênh: %.3f MHz | %.3f MHz | %.3f MHz\n", MODULE1_FREQ, MODULE2_FREQ, MODULE3_FREQ);
     printf("=========================================================\n\n");
+
+    for (int i = 0; i < 3; i++) {
+        g_channelPackets[i].store(0);
+    }
 
     // 1. Khởi tạo WiringPi & bus SPI0
     if (wiringPiSetup() < 0) {
