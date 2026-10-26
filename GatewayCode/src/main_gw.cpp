@@ -93,8 +93,9 @@ public:
     }
 };
 
-// ── Biến điều khiển dừng chương trình an toàn ──────────────────────────────
+// ── Biến điều khiển dừng chương trình và đếm gói an toàn ────────────────────
 static std::atomic<bool> g_running(true);
+static std::atomic<uint32_t> g_totalPackets(0);
 
 void sigintHandler(int sig) {
     printf("\n\n[RTOS] Nhận tín hiệu ngắt (Signal %d). Đang thu dọn các Task và đóng file an toàn...\n", sig);
@@ -281,6 +282,7 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& csvFilePath, c
             }
 
             totalPackets++;
+            g_totalPackets.fetch_add(1);
             if (pkt.channelId >= 1 && pkt.channelId <= 3) {
                 channelCounts[pkt.channelId - 1]++;
             }
@@ -348,14 +350,19 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& csvFilePath, c
 // ═══════════════════════════════════════════════════════════════════════════
 void broadcastStartCommand(SX1278_WiringPi* r1, SX1278_WiringPi* r2, SX1278_WiringPi* r3, const std::string& cmd) {
     printf("\n[DOWNLINK] >>> ĐANG GỬI LỆNH KÍCH HOẠT: \"%s\" TỚI CÁC END-NODE... <<<\n", cmd.c_str());
+    bool ok1 = false, ok2 = false, ok3 = false;
     // Phát lặp lại 3 đợt trên cả 3 kênh để đảm bảo 100% các Node bắt được sóng
     for (int rep = 0; rep < 3; rep++) {
-        r1->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
-        r2->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
-        r3->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 200);
+        ok1 = r1->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 300);
+        ok2 = r2->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 300);
+        ok3 = r3->sendPacket((const uint8_t*)cmd.c_str(), cmd.length(), 300);
         usleep(30000); // 30ms giữa các lần phát
     }
-    printf("[DOWNLINK] >>> ĐÃ GỬI XONG LỆNH \"%s\"! Các End-Node sẽ bắt đầu phát dữ liệu. <<<\n\n", cmd.c_str());
+    printf("[DOWNLINK] Trạng thái phát: CH1 (%.3f MHz): %s | CH2 (%.3f MHz): %s | CH3 (%.3f MHz): %s\n",
+           r1->getFrequency(), ok1 ? "OK" : "TIMEOUT",
+           r2->getFrequency(), ok2 ? "OK" : "TIMEOUT",
+           r3->getFrequency(), ok3 ? "OK" : "TIMEOUT");
+    printf("[DOWNLINK] >>> ĐÃ GỬI XONG LỆNH \"%s\"! <<<\n\n", cmd.c_str());
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -487,11 +494,23 @@ int main(int argc, char* argv[]) {
     std::thread tCmd(task_console_controller, &radio1, &radio2, &radio3);
     tCmd.detach();
 
-    // Tự động gửi lệnh START sau 2.5 giây khi hệ thống khởi động hoàn tất
+    // Tự động phát lệnh START định kỳ mỗi 3 giây cho đến khi nhận được gói uplink đầu tiên
     std::thread tAutoStart([&radio1, &radio2, &radio3]() {
-        usleep(2500000); // 2.5 giây
-        if (g_running.load()) {
+        usleep(2000000); // Đợi 2s để các Task RX và Logger ổn định
+        printf("[AUTO-BEACON] Luồng phát lệnh Downlink khởi động...\n");
+        printf("[AUTO-BEACON] Sẽ phát lệnh START định kỳ mỗi 3s tới khi có gói Uplink đầu tiên.\n");
+
+        while (g_running.load() && g_totalPackets.load() == 0) {
             broadcastStartCommand(&radio1, &radio2, &radio3, "CMD:START:ALL");
+
+            // Chờ 3 giây trước lần phát tiếp theo (hoặc thoát sớm nếu có gói đến hoặc người dùng bấm thoát)
+            for (int i = 0; i < 30 && g_running.load() && g_totalPackets.load() == 0; i++) {
+                usleep(100000); // 100ms * 30 = 3000ms
+            }
+        }
+
+        if (g_totalPackets.load() > 0) {
+            printf("[AUTO-BEACON] Đã phát hiện gói Uplink từ End-Node! Tự động dừng phát beacon Downlink.\n");
         }
     });
     tAutoStart.detach();

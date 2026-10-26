@@ -117,6 +117,11 @@ bool SX1278_WiringPi::begin() {
     // Cấu hình tần số
     setFrequency(m_frequency);
 
+    // Cấu hình công suất phát PA_BOOST (+17 dBm) cho module Ra-02 (SX1278)
+    // Bit 7: PaSelect = 1 (kết nối antenna qua chân PA_BOOST pin 22), MaxPower = 7, OutputPower = 15 -> +17 dBm
+    writeRegister(REG_PA_CONFIG, 0x8F);
+    writeRegister(REG_PA_DAC, 0x84);
+
     // Cấu hình LoRa: BW=125kHz, CR=4/5 (0x72), SF=7 (0x74), Preamble=8, SyncWord=0x12
     writeRegister(REG_MODEM_CONFIG_1, 0x72); // BW 125kHz, CR 4/5, Explicit header
     writeRegister(REG_MODEM_CONFIG_2, 0x74); // SF7, CRC enable
@@ -206,24 +211,28 @@ bool SX1278_WiringPi::sendPacket(const uint8_t* buffer, size_t len, uint32_t tim
     // 1. Chuyển sang chế độ Standby
     setMode(MODE_STDBY);
 
-    // 2. Đặt con trỏ FIFO về TX Base
+    // 2. Đảm bảo cấu hình công suất phát PA_BOOST (+17 dBm)
+    writeRegister(REG_PA_CONFIG, 0x8F);
+    writeRegister(REG_PA_DAC, 0x84);
+
+    // 3. Đặt con trỏ FIFO về TX Base
     uint8_t txBase = readRegister(REG_FIFO_TX_BASE_ADDR);
     writeRegister(REG_FIFO_ADDR_PTR, txBase);
 
-    // 3. Nạp dữ liệu vào FIFO
+    // 4. Nạp dữ liệu vào FIFO
     burstWrite(REG_FIFO, buffer, (uint8_t)len);
 
-    // 4. Thiết lập độ dài Payload
+    // 5. Thiết lập độ dài Payload
     writeRegister(REG_PAYLOAD_LENGTH, (uint8_t)len);
 
-    // 5. Cấu hình DIO0: ngắt TxDone (bits 7:6 = 01 -> 0x40)
+    // 6. Cấu hình DIO0: ngắt TxDone (bits 7:6 = 01 -> 0x40)
     writeRegister(REG_DIO_MAPPING_1, 0x40);
 
-    // 6. Xóa cờ ngắt cũ
+    // 7. Xóa cờ ngắt cũ
     writeRegister(REG_IRQ_FLAGS, 0xFF);
 
-    // 7. Bật chế độ phát sóng TX (MODE_LONG_RANGE_MODE | 0x03)
-    writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | 0x03);
+    // 8. Bật chế độ phát sóng TX
+    setMode(MODE_TX);
 
     // 8. Chờ cờ TxDone (bit 3 của REG_IRQ_FLAGS = 0x08)
     uint32_t waited = 0;

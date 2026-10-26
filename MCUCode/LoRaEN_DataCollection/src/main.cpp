@@ -25,7 +25,7 @@
 // 1. CẤU HÌNH ĐỊNH DANH NODE (NODE ID)
 // Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp code cho từng bo mạch!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'C'   // 'A', 'B', hoặc 'C'
+#define NODE_ID             'A'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. CẤU HÌNH TẦN SỐ CỐ ĐỊNH CHO ĐỢT ĐO (FIXED CHANNEL SELECTION)
@@ -34,7 +34,7 @@
 //    3: Kênh 3 - 433.575 MHz
 // Chọn kênh tương ứng cho kịch bản đo đạc (ví dụ: A_433.175, A_B_433.175, ...)
 // ═══════════════════════════════════════════════════════════════════════════
-#define SELECTED_CHANNEL_NUM  3   // Đặt 1, 2, hoặc 3
+#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3
 
 // Bảng tra cứu tần số theo số kênh
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
@@ -97,6 +97,16 @@ SPIClass loRaSPI(VSPI);
 SX1278 radio = new Module(LORA_NSS, LORA_DIO0, LORA_RST, RADIOLIB_NC, loRaSPI);
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
 bool oledOk = false;
+
+// ── Cờ ngắt nhận gói tin LoRa từ DIO0 ───────────────────────────────────────
+volatile bool g_rxFlag = false;
+
+#if defined(ESP8266) || defined(ESP32)
+  ICACHE_RAM_ATTR
+#endif
+void onDio0Interrupt() {
+  g_rxFlag = true;
+}
 
 // ── Hàm hiển thị màn hình OLED khi ĐANG CHỜ LỆNH TỪ GATEWAY ─────────────────
 void oledShowWaitingCommand(int dotCount) {
@@ -234,8 +244,14 @@ void setup() {
                           LORA_SYNC_WORD, LORA_POWER, LORA_PREAMBLE);
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println("[INIT] SX1278 Khởi tạo THÀNH CÔNG!");
-    // Đưa module LoRa vào chế độ nhận để sẵn sàng bắt lệnh START từ Gateway
-    radio.startReceive();
+    // Đăng ký ngắt DIO0 và đưa module vào chế độ nhận để sẵn sàng bắt lệnh START từ Gateway
+    radio.setPacketReceivedAction(onDio0Interrupt);
+    int rxState = radio.startReceive();
+    if (rxState == RADIOLIB_ERR_NONE) {
+      Serial.println("[INIT] Đang lắng nghe Downlink trên kênh...");
+    } else {
+      Serial.printf("[WARN] startReceive trả về mã: %d\n", rxState);
+    }
   } else {
     Serial.printf("[ERROR] SX1278 Khởi tạo THẤT BẠI! Mã lỗi: %d\n", state);
     if (oledOk) {
@@ -269,24 +285,41 @@ void loop() {
     bool triggered = false;
     String cmdReceived = "";
 
-    // A. Kiểm tra nếu có gói tin LoRa từ Gateway gửi đến
-    String rxData;
-    int rxState = radio.readData(rxData);
-    if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
-      Serial.printf("[RX LORA] Nhận gói tin từ Gateway: \"%s\"\n", rxData.c_str());
-      String rxUpper = rxData;
-      rxUpper.toUpperCase();
+    // A. Kiểm tra nếu có cờ ngắt DIO0 hoặc chân DIO0 lên mức HIGH (có gói tin đến)
+    if (g_rxFlag || digitalRead(LORA_DIO0) == HIGH) {
+      g_rxFlag = false;
 
-      // Kiểm tra lệnh có chứa từ khóa START
-      if (rxUpper.indexOf("START") >= 0) {
-        // Kiểm tra xem lệnh broadcast ("ALL", "START", "CMD:START") hay đích danh ("A", "B", "C")
-        if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
-          triggered = true;
-          cmdReceived = "START:ALL";
-        } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
-          triggered = true;
-          cmdReceived = String("START:") + NODE_ID;
+      String rxData;
+      int rxState = radio.readData(rxData);
+
+      if (rxState == RADIOLIB_ERR_NONE && rxData.length() > 0) {
+        float rssi = radio.getRSSI();
+        float snr = radio.getSNR();
+        Serial.println();
+        Serial.printf("[RX LORA] >>> Nhận gói từ Gateway: \"%s\" (RSSI: %.1f dBm, SNR: %.1f dB) <<<\n",
+                      rxData.c_str(), rssi, snr);
+
+        String rxUpper = rxData;
+        rxUpper.toUpperCase();
+
+        // Kiểm tra lệnh có chứa từ khóa START
+        if (rxUpper.indexOf("START") >= 0) {
+          // Kiểm tra xem lệnh broadcast ("ALL", "START", "CMD:START") hay đích danh ("A", "B", "C")
+          if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
+            triggered = true;
+            cmdReceived = "START:ALL";
+          } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
+            triggered = true;
+            cmdReceived = String("START:") + NODE_ID;
+          }
         }
+      } else {
+        Serial.printf("[RX LORA] Lỗi đọc gói tin (Code: %d)\n", rxState);
+      }
+
+      // QUAN TRỌNG: Nếu chưa được kích hoạt, PHẢI đưa SX1278 trở lại chế độ nhận!
+      if (!triggered) {
+        radio.startReceive();
       }
     }
 
@@ -303,6 +336,10 @@ void loop() {
 
     // Nếu nhận được lệnh kích hoạt:
     if (triggered) {
+      // Hủy hàm ngắt để chuyển sang chế độ phát độc quyền
+      radio.clearPacketReceivedAction();
+      radio.standby();
+
       Serial.println();
       Serial.println("==================================================");
       Serial.printf(" >>> [KÍCH HOẠT THÀNH CÔNG] Node [%c] BẮT ĐẦU PHÁT DỮ LIỆU! <<<\n", NODE_ID);
@@ -326,6 +363,13 @@ void loop() {
       sizeIndex = 0;
       totalPacketsSent = 0;
       return;
+    }
+
+    // Watchdog định kỳ 2.0 giây: Re-arm chế độ nhận để đảm bảo SX1278 không bao giờ bị treo ở Standby
+    static unsigned long lastRxWatchdog = 0;
+    if (millis() - lastRxWatchdog >= 2000) {
+      lastRxWatchdog = millis();
+      radio.startReceive();
     }
 
     // Hiệu ứng chờ lệnh trên màn hình OLED và nhấp nháy LED nhẹ

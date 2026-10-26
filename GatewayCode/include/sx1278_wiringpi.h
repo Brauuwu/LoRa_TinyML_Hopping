@@ -29,11 +29,13 @@
 #define REG_SYNC_WORD               0x39
 #define REG_DIO_MAPPING_1           0x40
 #define REG_VERSION                 0x42
+#define REG_PA_DAC                  0x4D
 
 // Chế độ hoạt động OP_MODE
 #define MODE_LONG_RANGE_MODE        0x80
 #define MODE_SLEEP                  0x00
 #define MODE_STDBY                  0x01
+#define MODE_TX                     0x03
 #define MODE_RXCONTINUOUS           0x05
 
 // Cờ ngắt
