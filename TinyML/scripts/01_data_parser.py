@@ -61,11 +61,11 @@ def parse_log_file(input_path, output_path):
             df_csv['size_of_message'] = pd.to_numeric(df_csv['size_of_message'], errors='coerce').astype(int)
             df_csv['RSSI'] = pd.to_numeric(df_csv['RSSI'], errors='coerce').astype(int)
             df_csv['SNR'] = pd.to_numeric(df_csv['SNR'], errors='coerce').astype(float)
-            df_csv['frequency'] = pd.to_numeric(df_csv['frequency'], errors='coerce').astype(float)
+            df_csv['frequency'] = pd.to_numeric(df_csv['frequency'], errors='coerce').astype(float).round(3)
             if 'time_slot' not in df_csv.columns:
                 df_csv['time_slot'] = '00:00:00.000'
             df_csv = df_csv[REQUIRED_COLUMNS]
-            df_csv.to_csv(output_path, index=False)
+            df_csv.to_csv(output_path, index=False, float_format='%.3f')
             print(f"[OK] File CSV chuẩn: trích xuất {len(df_csv)} dòng -> {os.path.basename(output_path)}")
             return
     except Exception:
@@ -92,12 +92,13 @@ def parse_log_file(input_path, output_path):
                 d["size_of_message"] = int(d["size_of_message"])
                 d["RSSI"] = int(d["RSSI"])
                 d["SNR"] = float(d["SNR"])
-                d["frequency"] = float(d["frequency"])
+                d["frequency"] = round(float(d["frequency"]), 3)
                 data.append(d)
 
     if data:
         df = pd.DataFrame(data)[REQUIRED_COLUMNS]
-        df.to_csv(output_path, index=False)
+        df['frequency'] = df['frequency'].round(3)
+        df.to_csv(output_path, index=False, float_format='%.3f')
         print(f"[OK] Trích xuất {len(df)} dòng từ log {os.path.basename(input_path)} -> {os.path.basename(output_path)}")
     else:
         print(f"[WARN] Không tìm thấy dữ liệu hợp lệ trong {os.path.basename(input_path)}")

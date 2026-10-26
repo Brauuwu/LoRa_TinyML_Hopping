@@ -310,7 +310,7 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& csvFilePath, c
             // "HH:MM:SS.mmm -> <Payload> size_of_message <Size> RSSI <RSSI> SNR <SNR> Frequency <Freq>"
             if (txtFile) {
                 int snrInt = (int)std::round(pkt.snr);
-                fprintf(txtFile, "%s -> %s size_of_message %u RSSI %d SNR %d Frequency %.2f\n",
+                fprintf(txtFile, "%s -> %s size_of_message %u RSSI %d SNR %d Frequency %.3f\n",
                         pkt.timestamp, payloadStr.c_str(), pkt.payloadSize, pkt.rssi, snrInt, pkt.frequency);
                 fflush(txtFile);
             }

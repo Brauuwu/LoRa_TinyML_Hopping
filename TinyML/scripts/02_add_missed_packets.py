@@ -86,15 +86,16 @@ def process_file(input_file, output_file):
                 'size_of_message': size,
                 'RSSI': -1000,
                 'SNR': -1000,
-                'frequency': freq
+                'frequency': round(float(freq), 3)
             })
 
     if new_rows:
         df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
 
     sort_cols = ['frequency', 'source', 'size_of_message', 'packet_ID'] if has_multiple_freqs else ['source', 'size_of_message', 'packet_ID']
+    df['frequency'] = df['frequency'].round(3)
     df = df.sort_values(by=sort_cols).reset_index(drop=True)
-    df.to_csv(output_file, index=False)
+    df.to_csv(output_file, index=False, float_format='%.3f')
     print(f"[OK] Bổ sung {len(new_rows)} gói tin mất vào: {os.path.basename(output_file)} (Tổng {len(df)} dòng)")
 
 def main():
