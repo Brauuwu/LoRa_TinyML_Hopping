@@ -35,7 +35,8 @@
 #define TEST_FREQ        433.575  // MHz (Kênh 3)
 
 #define TX_INTERVAL_MS      2000     // Gửi mỗi 2 giây
-#define TEST_PAYLOAD_SIZE   100       // Kích thước gói (bytes)
+#define TEST_PAYLOAD_SIZE   100      // Kích thước gói (bytes)
+#define TEST_TOTAL_PACKETS  100      // Mục tiêu đợt test: 100 gói
 
 // ── Chân phần cứng ESP32 ────────────────────────────────────────────────
 #define LORA_MOSI            27
@@ -90,7 +91,7 @@ void oledUpdate(int pktId, int state, unsigned long airTime) {
     display.setCursor(0, 15);
     display.printf("Freq: %.3f MHz", TEST_FREQ);
     display.setCursor(0, 27);
-    display.printf("Pkt : #%d  Size:%dB", pktId, TEST_PAYLOAD_SIZE);
+    display.printf("Pkt : #%d/%d Size:%dB", pktId + 1, TEST_TOTAL_PACKETS, TEST_PAYLOAD_SIZE);
     display.setCursor(0, 39);
     display.printf("ToA : %lu ms", airTime);
     display.setCursor(0, 51);
@@ -159,14 +160,21 @@ void loop() {
     if (now - lastTxTime < TX_INTERVAL_MS && lastTxTime != 0) return;
     lastTxTime = now;
 
-    // Xây dựng gói tin
+    // Xây dựng gói tin với payload ngẫu nhiên theo chuẩn bài báo
     uint8_t txBuffer[256];
-    memset(txBuffer, 'X', TEST_PAYLOAD_SIZE);
     txBuffer[0] = 'T';
     txBuffer[1] = (uint8_t)NODE_ID;
     txBuffer[2] = (uint8_t)((packetId >> 8) & 0xFF);
     txBuffer[3] = (uint8_t)(packetId & 0xFF);
     txBuffer[4] = (uint8_t)TEST_PAYLOAD_SIZE;
+    if (TEST_PAYLOAD_SIZE > 5) {
+        txBuffer[5] = '*'; // Dấu phân cách như trong bài báo
+        // Điền toàn bộ phần thân payload còn lại bằng chữ số ngẫu nhiên ('0'..'9')
+        for (int i = 6; i < TEST_PAYLOAD_SIZE - 1; i++) {
+            txBuffer[i] = (uint8_t)random(48, 58); // ASCII 48 ('0') -> 57 ('9')
+        }
+        txBuffer[TEST_PAYLOAD_SIZE - 1] = '\0';
+    }
 
     // Truyền
     digitalWrite(LED_PIN, HIGH);

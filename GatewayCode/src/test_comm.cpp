@@ -44,6 +44,9 @@
 #include "config.h"
 #include "sx1278_wiringpi.h"
 
+// ── Cấu hình số lượng gói test ─────────────────────────────────────────────
+#define TARGET_TEST_PACKETS 100       // Mục tiêu test: 100 gói (trước đây là 50)
+
 // ── Cấu trúc gói tin nhận được ──────────────────────────────────────────────
 struct TestPacket {
     char     timestamp[32];
@@ -55,6 +58,8 @@ struct TestPacket {
     int      rssi;
     float    snr;
     bool     crcError;
+    uint8_t  payload[256];
+    uint8_t  rawLen;
 };
 
 // ── Hàng đợi Thread-Safe ────────────────────────────────────────────────────
@@ -98,6 +103,35 @@ void getTimeStamp(char* buffer, size_t size) {
     snprintf(buffer, size, "%s.%03ld", timeStr, tv.tv_usec / 1000);
 }
 
+// ── Hàm tiện ích định dạng chuỗi hiển thị Payload ────────────────────────────
+std::string toAsciiString(const uint8_t* data, size_t len, size_t maxLen = 40) {
+    std::string s;
+    size_t n = (len < maxLen) ? len : maxLen;
+    for (size_t i = 0; i < n; i++) {
+        char c = (char)data[i];
+        if (c >= 32 && c <= 126) {
+            s += c;
+        } else {
+            s += '.';
+        }
+    }
+    if (len > maxLen) s += "...";
+    return s;
+}
+
+std::string toHexString(const uint8_t* data, size_t len, size_t maxLen = 16) {
+    char buf[8];
+    std::string s;
+    size_t n = (len < maxLen) ? len : maxLen;
+    for (size_t i = 0; i < n; i++) {
+        snprintf(buf, sizeof(buf), "%02X ", data[i]);
+        s += buf;
+    }
+    if (!s.empty() && s.back() == ' ') s.pop_back();
+    if (len > maxLen) s += "...";
+    return s;
+}
+
 // ── Real-Time Priority ─────────────────────────────────────────────────────
 bool setRealtimePriority(pthread_t thread, int priority) {
     struct sched_param param;
@@ -138,19 +172,32 @@ void task_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<TestPacket>* queue
                 pkt.nodeId      = '?';
                 pkt.packetId    = 0;
                 pkt.payloadSize = 0;
+                pkt.rawLen      = 0;
                 queue->push(pkt);
                 continue;
             }
 
-            if (len < 5 || rxBuffer[0] != 'T') {
-                continue; // Gói không hợp lệ → bỏ qua
-            }
+            if (len >= 4) {
+                pkt.rawLen = (uint8_t)(len > 255 ? 255 : len);
+                memcpy(pkt.payload, rxBuffer, pkt.rawLen);
 
-            pkt.crcError    = false;
-            pkt.nodeId      = (char)rxBuffer[1];
-            pkt.packetId    = ((uint16_t)rxBuffer[2] << 8) | rxBuffer[3];
-            pkt.payloadSize = rxBuffer[4];
-            queue->push(pkt);
+                // Hỗ trợ cả 2 chuẩn gói tin:
+                // 1. Chuẩn Comm Test:      [Byte 0]: 'T', [Byte 1]: Node ('A'..'C'), [Byte 2..3]: PktID, [Byte 4]: Size
+                // 2. Chuẩn Data Collection: [Byte 0]: Node ('A'..'C'), [Byte 1..2]: PktID, [Byte 3]: Size
+                if (rxBuffer[0] == 'T' && len >= 5 && rxBuffer[1] >= 'A' && rxBuffer[1] <= 'C') {
+                    pkt.crcError    = false;
+                    pkt.nodeId      = (char)rxBuffer[1];
+                    pkt.packetId    = ((uint16_t)rxBuffer[2] << 8) | rxBuffer[3];
+                    pkt.payloadSize = rxBuffer[4];
+                    queue->push(pkt);
+                } else if (rxBuffer[0] >= 'A' && rxBuffer[0] <= 'C') {
+                    pkt.crcError    = false;
+                    pkt.nodeId      = (char)rxBuffer[0];
+                    pkt.packetId    = ((uint16_t)rxBuffer[1] << 8) | rxBuffer[2];
+                    pkt.payloadSize = rxBuffer[3];
+                    queue->push(pkt);
+                }
+            }
         }
         usleep(1000);
     }
@@ -201,14 +248,30 @@ void task_logger(SafeQueue<TestPacket>* queue) {
                    pkt.nodeId, pkt.packetId, pkt.payloadSize,
                    pkt.rssi, pkt.snr);
 
+            // Hiển thị nội dung Payload (ASCII + HEX)
+            size_t dataOffset = (pkt.payload[0] == 'T') ? 5 : 4;
+            std::string hexStr = toHexString(pkt.payload, pkt.rawLen, 16);
+            if (pkt.rawLen > dataOffset) {
+                std::string dataStr = toAsciiString(pkt.payload + dataOffset, pkt.rawLen - dataOffset, 40);
+                printf("   └─ [Payload %uB] Data: \"%s\" | Raw Hex: [%s]\n",
+                       pkt.rawLen, dataStr.c_str(), hexStr.c_str());
+            } else {
+                std::string fullAscii = toAsciiString(pkt.payload, pkt.rawLen, 40);
+                printf("   └─ [Payload %uB] Text: \"%s\" | Raw Hex: [%s]\n",
+                       pkt.rawLen, fullAscii.c_str(), hexStr.c_str());
+            }
+
             // Thống kê nhanh mỗi 20 gói
             if (totalOk % 20 == 0) {
                 double avgRssi = (double)rssiSum / totalOk;
                 float  avgSnr  = snrSum / totalOk;
                 printf("──────────────┼────┼───────────┼──────┼────────┼──────┼───────────┼────────\n");
-                printf(" [STATS] Tổng:%u | CH1:%u CH2:%u CH3:%u | RSSI:%.1f | SNR:%.1f | CRC:%u\n",
-                       totalOk, chCount[0], chCount[1], chCount[2],
+                printf(" [STATS] Tổng:%u/%d | CH1:%u CH2:%u CH3:%u | RSSI:%.1f | SNR:%.1f | CRC:%u\n",
+                       totalOk, TARGET_TEST_PACKETS, chCount[0], chCount[1], chCount[2],
                        avgRssi, avgSnr, totalCrc);
+                if (totalOk % TARGET_TEST_PACKETS == 0) {
+                    printf(" >>> ĐÃ ĐẠT MỤC TIÊU TEST %d GÓI (Nhấn Ctrl+C để xem tổng kết) <<<\n", TARGET_TEST_PACKETS);
+                }
                 printf("──────────────┼────┼───────────┼──────┼────────┼──────┼───────────┼────────\n");
             }
         }

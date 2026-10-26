@@ -9,6 +9,9 @@ Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML
 ```text
 LoRa_TinyML_Hopping/
 ├── MCUCode/                             # Firmware nạp cho các End-Node (PlatformIO)
+│   ├── LoRaEN_CommTest/                 # Firmware kiểm tra truyền thông 2 chiều & đo PDR
+│   │   ├── platformio.ini
+│   │   └── src/main.cpp
 │   ├── LoRaEN_DataCollection/           # Firmware nạp cho 3 ESP32 để thu thập dữ liệu
 │   │   ├── platformio.ini
 │   │   └── src/main.cpp
@@ -24,6 +27,7 @@ LoRa_TinyML_Hopping/
 │   │   └── sx1278_wiringpi.h
 │   └── src/
 │       ├── sx1278_wiringpi.cpp          # Driver điều khiển SX1278 qua SPI
+│       ├── test_comm.cpp                # Chương trình kiểm tra đường truyền RF & phản hồi ACK
 │       └── main_gw.cpp                  # Luồng lắng nghe đồng thời 3 module Ra-02
 ├── TinyML/                              # Pipeline AI và phân tích dữ liệu (Python)
 │   ├── requirements.txt                 # Thư viện: TensorFlow, Scikit-learn, Pandas, Matplotlib
@@ -48,30 +52,48 @@ LoRa_TinyML_Hopping/
 ## 2. Sơ đồ đấu nối phần cứng
 
 ### A. 3 End-Nodes (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)
-- **SPI LoRa Ra-02**:
-  - `SCK`  $\rightarrow$ GPIO 18
-  - `MISO` $\rightarrow$ GPIO 19
-  - `MOSI` $\rightarrow$ GPIO 27
-  - `NSS`  $\rightarrow$ GPIO 5
-  - `RST`  $\rightarrow$ GPIO 14
-  - `DIO0` $\rightarrow$ GPIO 26
-- **I2C OLED SSD1306 (128x64)**:
-  - `SDA` $\rightarrow$ GPIO 21
-  - `SCL` $\rightarrow$ GPIO 22
-- **Nguồn**: 3.3V và GND.
 
-### B. Gateway (Raspberry Pi CM4 + 3 Module Ra-02)
-Dùng chung đường bus SPI0 của Raspberry Pi CM4:
-- `MOSI`: GPIO 10 (WiringPi 12)
-- `MISO`: GPIO 9 (WiringPi 13)
-- `SCLK`: GPIO 11 (WiringPi 14)
+| Thiết bị ngoại vi | Chân Module | Chân ESP32 (GPIO) | Ghi chú |
+| :--- | :--- | :--- | :--- |
+| **LoRa Ra-02 (SX1278)** | `MOSI` | **GPIO 27** | Bus SPI cứng (VSPI) |
+| | `MISO` | **GPIO 19** | Bus SPI cứng |
+| | `SCK` | **GPIO 18** | Bus SPI cứng |
+| | `NSS` (CS) | **GPIO 5** | Chip Select |
+| | `RST` | **GPIO 14** | Reset module LoRa |
+| | `DIO0` | **GPIO 26** | Ngắt thu/phát gói tin |
+| | `VCC` | **3.3V** | Dòng đỉnh khi phát ~120mA |
+| | `GND` | **GND** | Nối chung mass |
+| **OLED 0.96" SSD1306** | `SDA` | **GPIO 21** | Bus I2C |
+| | `SCL` | **GPIO 22** | Bus I2C |
+| | `VCC` | **3.3V** | Nguồn màn hình |
+| | `GND` | **GND** | Mass chung |
+| **Trạng thái LED** | `LED` | **GPIO 2** | Onboard LED báo truyền gói tin |
 
-Phân bố chân Chip Select (CS), Reset, DIO0 độc lập cho 3 Module:
-| Module Ra-02 | Kênh tần số | Chân CS (NSS) | Chân RST | Chân DIO0 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Module 1** | **433.175 MHz** | GPIO 8 (WiringPi 10) | GPIO 22 (WiringPi 3) | GPIO 25 (WiringPi 6) |
-| **Module 2** | **433.375 MHz** | GPIO 7 (WiringPi 11) | GPIO 23 (WiringPi 4) | GPIO 24 (WiringPi 5) |
-| **Module 3** | **433.575 MHz** | GPIO 27 (WiringPi 2) | GPIO 18 (WiringPi 1) | GPIO 17 (WiringPi 0) |
+---
+
+### B. Gateway (Raspberry Pi CM4 / Pi 4 + 3 Module Ra-02 433MHz)
+
+Được cấu hình chuẩn xác trong [`GatewayCode/include/config.h`](file:///e:/DATN/LoRa_TinyML_Hopping/GatewayCode/include/config.h):
+
+#### 1. Bus SPI0 dùng chung cho cả 3 Module:
+- **MOSI**: BCM GPIO 10 (WiringPi 12 / Chân vật lý Pin 19)
+- **MISO**: BCM GPIO 9  (WiringPi 13 / Chân vật lý Pin 21)
+- **SCLK**: BCM GPIO 11 (WiringPi 14 / Chân vật lý Pin 23)
+- **Nguồn**: Chân vật lý 3.3V (Pin 1, Pin 17) và GND (Pin 6, 9, 14, 20, 25)
+
+#### 2. Phân bố chân điều khiển độc lập cho từng Module:
+
+| Module Ra-02 | Kênh tần số | Tín hiệu | BCM GPIO | WiringPi Pin (trong Code) | Chân vật lý (40-Pin Header) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Module 1** | **433.175 MHz** | **CS (NSS)** | GPIO 8 (CE0) | **10** | **Pin 24** |
+| | (Kênh 1) | **RST** | GPIO 27 | **2** | **Pin 13** |
+| | | **DIO0** | GPIO 22 | **3** | **Pin 15** |
+| **Module 2** | **433.375 MHz** | **CS (NSS)** | GPIO 7 (CE1) | **11** | **Pin 26** |
+| | (Kênh 2) | **RST** | GPIO 17 | **0** | **Pin 11** |
+| | | **DIO0** | GPIO 18 | **1** | **Pin 12** |
+| **Module 3** | **433.575 MHz** | **CS (NSS)** | GPIO 25 | **6** | **Pin 22** |
+| | (Kênh 3) | **RST** | GPIO 24 | **5** | **Pin 18** |
+| | | **DIO0** | GPIO 23 | **4** | **Pin 16** |
 
 ---
 
@@ -87,10 +109,15 @@ Phân bố chân Chip Select (CS), Reset, DIO0 độc lập cho 3 Module:
    ```bash
    cd GatewayCode
    make
-   sudo ./lora_gw_3ch
+   # Chạy thu thập theo kịch bản đo cụ thể:
+   sudo ./lora_gw_3ch A_433.175
+   # Hoặc cho kịch bản 2 Node:
+   sudo ./lora_gw_3ch A_B_433.175
    ```
-   Gateway sẽ lắng nghe đồng thời 3 kênh và tự động sinh file `gateway_log_YYYYMMDD_HHMMSS.csv`.
-3. Cho 3 Node phát đồng thời ở các khoảng cách khác nhau trong ~15 - 30 phút để tạo ra các hiện tượng suy hao và va chạm sóng tự nhiên.
+   Gateway sẽ lắng nghe đồng thời 3 kênh và tự động sinh đồng thời 2 file:
+   - `csv/<TÊN_KỊCH_BẢN>.csv`: File dữ liệu bảng cho Python Pandas.
+   - `logs/<TÊN_KỊCH_BẢN>.txt`: File log thô theo chuẩn bài báo `LoRaEdgeTinyML`.
+3. Cho các Node phát tuần tự 6 mức kích thước (30B -> 250B) x 100 gói. Node sẽ tự động dừng phát hoàn toàn sau khi gửi đủ gói cuối.
 
 ---
 

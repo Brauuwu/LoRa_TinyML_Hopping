@@ -18,7 +18,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <pthread.h>
+#include <cmath>
 
 #include <iostream>
 #include <thread>
@@ -35,6 +37,9 @@
 #include "config.h"
 #include "sx1278_wiringpi.h"
 
+// ── Cấu hình số lượng gói tin ──────────────────────────────────────────────
+#define SAMPLES_PER_BURST   100       // Số gói mỗi mức payload (100 gói)
+
 // ── Cấu trúc dữ liệu gói tin nhận được ──────────────────────────────────────
 struct LoRaPacket {
     char timestamp[32];
@@ -46,6 +51,8 @@ struct LoRaPacket {
     float snr;
     int channelId; // 1, 2, hoặc 3
     bool crcError;
+    uint8_t payload[256];
+    uint8_t rawLen;
 };
 
 // ── Hàng đợi Thread-Safe (Thread-Safe Queue tương tự FreeRTOS Queue) ────────
@@ -104,6 +111,35 @@ void getTimeStamp(char* buffer, size_t size) {
     snprintf(buffer, size, "%s.%03ld", timeStr, tv.tv_usec / 1000);
 }
 
+// ── Hàm tiện ích định dạng chuỗi hiển thị Payload ────────────────────────────
+std::string toAsciiString(const uint8_t* data, size_t len, size_t maxLen = 40) {
+    std::string s;
+    size_t n = (len < maxLen) ? len : maxLen;
+    for (size_t i = 0; i < n; i++) {
+        char c = (char)data[i];
+        if (c >= 32 && c <= 126) {
+            s += c;
+        } else {
+            s += '.';
+        }
+    }
+    if (len > maxLen) s += "...";
+    return s;
+}
+
+std::string toHexString(const uint8_t* data, size_t len, size_t maxLen = 16) {
+    char buf[8];
+    std::string s;
+    size_t n = (len < maxLen) ? len : maxLen;
+    for (size_t i = 0; i < n; i++) {
+        snprintf(buf, sizeof(buf), "%02X ", data[i]);
+        s += buf;
+    }
+    if (!s.empty() && s.back() == ' ') s.pop_back();
+    if (len > maxLen) s += "...";
+    return s;
+}
+
 // ── Thiết lập Real-Time Scheduling (SCHED_FIFO) cho Thread ──────────────────
 bool setRealtimePriority(pthread_t thread, int priority) {
     struct sched_param param;
@@ -140,22 +176,42 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
             int len = radio->readPacket(rxBuffer, sizeof(rxBuffer), rssi, snr);
 
             if (len >= 4) {
-                char node = (char)rxBuffer[0];
-                // Chỉ nhận các gói hợp lệ từ 3 Node thử nghiệm ('A', 'B', 'C')
-                if (node < 'A' || node > 'C') {
-                    continue;
-                }
-
                 LoRaPacket pkt;
                 getTimeStamp(pkt.timestamp, sizeof(pkt.timestamp));
                 pkt.channelId = channelId;
                 pkt.frequency = radio->getFrequency();
-                pkt.sourceNode = node;
-                pkt.packetId = ((uint16_t)rxBuffer[1] << 8) | rxBuffer[2];
-                pkt.payloadSize = rxBuffer[3];
                 pkt.rssi = rssi;
                 pkt.snr = snr;
                 pkt.crcError = false;
+                pkt.rawLen = (uint8_t)(len > 255 ? 255 : len);
+                memcpy(pkt.payload, rxBuffer, pkt.rawLen);
+
+                // Hỗ trợ nhận diện các chuẩn gói tin:
+                // 1. Chuẩn Data Collection ASCII (Bài báo LoRaEdgeTinyML): "<Node><PktID>*<data>" (vd: "A0*2040...")
+                // 2. Chuẩn Data Collection nhị phân: [0]: Node, [1..2]: PktID, [3]: Size
+                // 3. Chuẩn Comm Test: [0]: 'T', [1]: Node, [2..3]: PktID, [4]: Size
+                if (rxBuffer[0] >= 'A' && rxBuffer[0] <= 'C') {
+                    pkt.sourceNode = (char)rxBuffer[0];
+                    const char* starPos = (const char*)memchr(rxBuffer, '*', len);
+                    if (starPos != nullptr) {
+                        // ASCII format chuẩn bài báo: "A0*...", "B99*..."
+                        pkt.packetId = (uint16_t)atoi((const char*)&rxBuffer[1]);
+                        pkt.payloadSize = (uint8_t)len;
+                    } else if (len >= 4) {
+                        // Binary format dự phòng
+                        pkt.packetId = ((uint16_t)rxBuffer[1] << 8) | rxBuffer[2];
+                        pkt.payloadSize = rxBuffer[3];
+                    } else {
+                        pkt.packetId = 0;
+                        pkt.payloadSize = (uint8_t)len;
+                    }
+                } else if (rxBuffer[0] == 'T' && len >= 5 && rxBuffer[1] >= 'A' && rxBuffer[1] <= 'C') {
+                    pkt.sourceNode = (char)rxBuffer[1];
+                    pkt.packetId = ((uint16_t)rxBuffer[2] << 8) | rxBuffer[3];
+                    pkt.payloadSize = rxBuffer[4];
+                } else {
+                    continue;
+                }
 
                 // Đẩy vào hàng đợi để Task_Logger xử lý (Non-blocking I/O)
                 queue->push(pkt);
@@ -170,6 +226,7 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
                 pkt.rssi = rssi;
                 pkt.snr = snr;
                 pkt.crcError = true;
+                pkt.rawLen = 0;
                 queue->push(pkt);
             }
         }
@@ -182,21 +239,28 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TASK 4: Task_Logger (Luồng xử lý I/O, Lưu trữ CSV & Hiển thị Console)
-// Chạy ở Priority bình thường, hoàn toàn không gây tắc nghẽn luồng RF
+// TASK 4: Task_Logger (Luồng xử lý I/O, Lưu trữ Song Song CSV & TXT Log)
+// Định dạng TXT Log tương thích hoàn toàn với Parser Regex của LoRaEdgeTinyML:
+// "(?P<time_slot>\d{2}:\d{2}:\d{2}.\d{3})\s*->\s*(?P<source>[A-Z])(?P<packet_ID>\d+)(?:\*.*?)..."
 // ═══════════════════════════════════════════════════════════════════════════
-void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& logFileName) {
-    FILE* logFile = fopen(logFileName.c_str(), "w");
-    if (!logFile) {
-        fprintf(stderr, "[FATAL] Task_Logger không thể mở file log: %s\n", logFileName.c_str());
-        return;
+void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& csvFilePath, const std::string& txtFilePath) {
+    FILE* csvFile = fopen(csvFilePath.c_str(), "w");
+    if (!csvFile) {
+        fprintf(stderr, "[FATAL] Task_Logger không thể mở file CSV: %s\n", csvFilePath.c_str());
+    } else {
+        // Ghi Header CSV chuẩn hóa cho Pipeline TinyML
+        fprintf(csvFile, "time_slot,source,packet_ID,size_of_message,RSSI,SNR,frequency\n");
+        fflush(csvFile);
     }
 
-    // Ghi Header CSV chuẩn hóa cho Pipeline TinyML
-    fprintf(logFile, "time_slot,source,packet_ID,size_of_message,RSSI,SNR,frequency\n");
-    fflush(logFile);
+    FILE* txtFile = fopen(txtFilePath.c_str(), "w");
+    if (!txtFile) {
+        fprintf(stderr, "[FATAL] Task_Logger không thể mở file TXT log: %s\n", txtFilePath.c_str());
+    }
 
-    printf("[RTOS] Task_Logger đã kích hoạt. Đang ghi dữ liệu vào: %s\n\n", logFileName.c_str());
+    printf("[RTOS] Task_Logger đã kích hoạt.\n");
+    printf("       CSV : %s\n", csvFilePath.c_str());
+    printf("       TXT : %s\n\n", txtFilePath.c_str());
     printf(" Timestamp    | Ch (MHz) | Node | Pkt ID | Size | RSSI (dBm) | SNR (dB)\n");
     printf("--------------+----------+------+--------+------+------------+---------\n");
 
@@ -229,26 +293,46 @@ void task_logger(SafeQueue<LoRaPacket>* queue, const std::string& logFileName) {
                    pkt.timestamp, pkt.frequency, pkt.sourceNode,
                    pkt.packetId, pkt.payloadSize, pkt.rssi, pkt.snr);
 
-            // 2. Ghi trực tiếp vào file CSV
-            fprintf(logFile, "%s,%c,%u,%u,%d,%.1f,%.3f\n",
-                    pkt.timestamp, pkt.sourceNode, pkt.packetId,
-                    pkt.payloadSize, pkt.rssi, pkt.snr, pkt.frequency);
-            fflush(logFile);
+            // Hiển thị nội dung Payload (ASCII)
+            std::string payloadStr((const char*)pkt.payload, pkt.rawLen);
+            std::string previewStr = toAsciiString(pkt.payload, pkt.rawLen, 40);
+            printf("   └─ [Payload %uB] \"%s\"\n", pkt.rawLen, previewStr.c_str());
 
-            // Thống kê nhanh mỗi 25 gói
-            if (totalPackets % 25 == 0) {
+            // 2. Ghi trực tiếp vào file CSV
+            if (csvFile) {
+                fprintf(csvFile, "%s,%c,%u,%u,%d,%.1f,%.3f\n",
+                        pkt.timestamp, pkt.sourceNode, pkt.packetId,
+                        pkt.payloadSize, pkt.rssi, pkt.snr, pkt.frequency);
+                fflush(csvFile);
+            }
+
+            // 3. Ghi vào file TXT log theo đúng định dạng bài báo LoRaEdgeTinyML:
+            // "HH:MM:SS.mmm -> <Payload> size_of_message <Size> RSSI <RSSI> SNR <SNR> Frequency <Freq>"
+            if (txtFile) {
+                int snrInt = (int)std::round(pkt.snr);
+                fprintf(txtFile, "%s -> %s size_of_message %u RSSI %d SNR %d Frequency %.2f\n",
+                        pkt.timestamp, payloadStr.c_str(), pkt.payloadSize, pkt.rssi, snrInt, pkt.frequency);
+                fflush(txtFile);
+            }
+
+            // Thống kê nhanh mỗi 100 gói
+            if (totalPackets % SAMPLES_PER_BURST == 0) {
                 printf("--------------+----------+------+--------+------+------------+---------\n");
-                printf(" [STATS] Ghi nhận:%u | CH1:%u CH2:%u CH3:%u | A:%u B:%u C:%u | CRC:%u\n",
-                       totalPackets, channelCounts[0], channelCounts[1], channelCounts[2],
+                printf(" [STATS %d PKTS] Ghi nhận:%u | CH1:%u CH2:%u CH3:%u | A:%u B:%u C:%u | CRC:%u\n",
+                       SAMPLES_PER_BURST, totalPackets, channelCounts[0], channelCounts[1], channelCounts[2],
                        nodeCounts[0], nodeCounts[1], nodeCounts[2], totalCrcErrors);
                 printf("--------------+----------+------+--------+------+------------+---------\n");
             }
         }
     }
 
-    fclose(logFile);
+    if (csvFile) fclose(csvFile);
+    if (txtFile) fclose(txtFile);
+
     printf("=============================================================================\n");
-    printf("[RTOS] Đã đóng file CSV an toàn: %s\n", logFileName.c_str());
+    printf("[RTOS] Đã đóng các file log an toàn:\n");
+    printf("  - CSV : %s\n", csvFilePath.c_str());
+    printf("  - TXT : %s\n", txtFilePath.c_str());
     printf("[THỐNG KÊ KẾT THÚC]\n");
     printf("  - Tổng gói hợp lệ ghi nhận : %u\n", totalPackets);
     printf("  - Tổng gói lỗi CRC         : %u\n", totalCrcErrors);
@@ -309,18 +393,30 @@ int main(int argc, char* argv[]) {
     radio3.begin();
     printf("OK\n\n");
 
-    // 4. Tạo tên file log theo ngày giờ
-    time_t rawtime;
-    time(&rawtime);
-    struct tm* timeinfo = localtime(&rawtime);
-    char logFileName[64];
-    strftime(logFileName, sizeof(logFileName), "gateway_log_%Y%m%d_%H%M%S.csv", timeinfo);
+    // 4. Quản lý thư mục và tên kịch bản đo đạc
+    mkdir("csv", 0777);
+    mkdir("logs", 0777);
+
+    std::string scenarioName;
+    if (argc > 1) {
+        scenarioName = argv[1]; // Ví dụ: "A_433.175", "A_B_433.175", "A_B_C_433.375"
+    } else {
+        time_t rawtime;
+        time(&rawtime);
+        struct tm* timeinfo = localtime(&rawtime);
+        char buf[64];
+        strftime(buf, sizeof(buf), "gw_%Y%m%d_%H%M%S", timeinfo);
+        scenarioName = buf;
+    }
+
+    std::string csvPath = "csv/" + scenarioName + ".csv";
+    std::string txtPath = "logs/" + scenarioName + ".txt";
 
     // 5. Khởi tạo hàng đợi và kích hoạt các Task thời gian thực
     SafeQueue<LoRaPacket> packetQueue;
 
     printf("[RTOS] Đang kích hoạt 4 Task thời gian thực...\n");
-    std::thread tLogger(task_logger, &packetQueue, std::string(logFileName));
+    std::thread tLogger(task_logger, &packetQueue, csvPath, txtPath);
     std::thread tRx1(task_lora_rx, 1, &radio1, &packetQueue);
     std::thread tRx2(task_lora_rx, 2, &radio2, &packetQueue);
     std::thread tRx3(task_lora_rx, 3, &radio3, &packetQueue);

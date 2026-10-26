@@ -149,7 +149,7 @@ def generate_mock_logs_if_empty():
 
     for ch in channels:
         for size in payload_sizes:
-            for pkt_id in range(50):
+            for pkt_id in range(100):
                 for node in nodes:
                     # Tỷ lệ mất gói tăng dần khi kích thước payload tăng (do AirTime tăng gây va chạm)
                     loss_prob = 0.05 + (size / 300.0) * 0.4
@@ -159,7 +159,7 @@ def generate_mock_logs_if_empty():
                     rssi = int(np.random.normal(-75 if node == 'A' else (-85 if node == 'B' else -110), 3))
                     snr = round(float(np.random.normal(9.0 if node == 'A' else (6.5 if node == 'B' else 3.5), 1.0)), 1)
                     records.append({
-                        'time_slot': f"12:{pkt_id:02d}:00.000",
+                        'time_slot': f"12:{pkt_id % 60:02d}:00.000",
                         'source': node,
                         'packet_ID': pkt_id,
                         'size_of_message': size,
@@ -196,7 +196,7 @@ if parsed_dfs:
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 3. Bước 2: Phát hiện xung đột & Gán nhãn gói mất (`02_add_missed_packets`)
-Trong kịch bản thực nghiệm, mỗi node được lập trình phát đều đặn 50 gói với `packet_ID` từ $0 \rightarrow 49$.
+Trong kịch bản thực nghiệm, mỗi node được lập trình phát đều đặn 100 gói với `packet_ID` từ $0 \rightarrow 99$.
 - Nếu Gateway chỉ nhận được các gói `0, 1, 3, 4` $\rightarrow$ Gói `2` đã bị xung đột hoặc suy hao nghiêm trọng dẫn đến mất gói (Packet Loss).
 - Thuật toán tiến hành chèn các gói tin bị khuyết với giá trị:
   $$\text{RSSI} = -1000 \text{ dBm}, \quad \text{SNR} = -1000 \text{ dB}$$
@@ -218,7 +218,10 @@ def impute_missed_packets(input_csv, output_csv):
             if sub.empty:
                 continue
 
-            all_ids = set(range(int(sub['packet_ID'].min()), int(sub['packet_ID'].max()) + 1))
+            EXPECTED_BURST_PACKETS = 100
+            min_id = int(sub['packet_ID'].min())
+            max_id = max(int(sub['packet_ID'].max()), EXPECTED_BURST_PACKETS - 1)
+            all_ids = set(range(min(0, min_id), max_id + 1))
             existing_ids = set(sub['packet_ID'])
             missing_ids = all_ids - existing_ids
 
@@ -260,27 +263,44 @@ print(f"Tổng gói: {total_pkts} | Nhận thành công: {received_pkts} | Mất
 # ═══════════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 4. Bước 3: Tạo đặc trưng chuỗi thời gian (Sliding Window) & Gán nhãn kênh (`03_generate_dataset`)
-Mỗi mẫu dữ liệu đầu vào sử dụng **bộ nhớ thời gian ($t_s = 5$ bước)**:
-- $\Delta_i(t)$: Trạng thái bận/rảnh của 3 kênh $CH_1, CH_2, CH_3$ ($1$: va chạm, $0$: thông suốt).
-- $RSSI_i(t), SNR_i(t)$: Chất lượng tín hiệu nhận được gần nhất.
-- $size\_of\_message, frequency$: Thông số truyền.
+Theo Table II và Mục III.C.1 của bài báo LoRaEdgeTinyML:
+Mỗi mẫu dữ liệu đầu vào sử dụng **bộ nhớ thời gian ($t_s = 10$ bước)**, mỗi bước gồm 8 thông số đặc trưng ($8 \times 10 = 80$ đặc trưng):
+- $\Delta_i(t)$: Trạng thái khả dụng của 3 kênh $CH_1, CH_2, CH_3$ ($1$: bận/mất sóng, $0$: khả dụng).
+- $SNR_i(t), RSSI_i(t)$: Chất lượng tín hiệu thu nhận được.
+- $size\_of\_message, packet\_ID, frequency$: Thông số truyền gói.
 
-**Nhãn mục tiêu ($y$):** Kênh tốt nhất ($0, 1, 2$) có xác suất truyền thành công cao nhất và RSSI tốt nhất cho lần phát tiếp theo.
+**Nhãn mục tiêu ($y$):** Kênh tốt nhất ($0, 1, 2$) có RSSI cao nhất (theo Công thức 19 bài báo: *"we label the data point with the channel that has highest RSSI"*).
 """)
 
 add_code(r"""
 CHANNELS = [433.175, 433.375, 433.575]
-WINDOW_SIZE = 5
+WINDOW_SIZE = 10
+
+def assign_channel_flags(row):
+    freq = row['frequency']
+    is_loss = (row['RSSI'] == -1000)
+    ch_idx = int(np.argmin([abs(freq - c) for c in CHANNELS]))
+    ch_flags = [1, 1, 1]
+    ch_flags[ch_idx] = 1 if is_loss else 0
+    return pd.Series(ch_flags, index=['CH1', 'CH2', 'CH3'])
 
 def generate_features_and_labels(df):
-    for i, ch in enumerate(CHANNELS, 1):
-        df[f'CH{i}'] = df.apply(
-            lambda r: 1 if (abs(r['frequency'] - ch) < 0.05 and r['RSSI'] == -1000) else 0,
-            axis=1
-        )
+    flags_df = df.apply(assign_channel_flags, axis=1)
+    df = pd.concat([df, flags_df], axis=1)
+
+    # Tìm kênh tốt nhất tại từng mốc (source, size, packet_ID)
+    best_lookup = {}
+    for (src, size, pid), grp in df.groupby(['source', 'size_of_message', 'packet_ID']):
+        valid = grp[grp['RSSI'] > -900]
+        if not valid.empty:
+            best_row = valid.loc[valid['RSSI'].idxmax()]
+            best_ch = int(np.argmin([abs(best_row['frequency'] - c) for c in CHANNELS]))
+        else:
+            best_ch = int(pid % len(CHANNELS))
+        best_lookup[(src, size, pid)] = best_ch
 
     samples = []
-    for source, group in df.groupby('source'):
+    for (source, size), group in df.groupby(['source', 'size_of_message']):
         group = group.sort_values(by=['packet_ID']).reset_index(drop=True)
         if len(group) <= WINDOW_SIZE:
             continue
@@ -292,30 +312,23 @@ def generate_features_and_labels(df):
             features = []
             for _, row in window.iterrows():
                 features.extend([
-                    row['CH1'],
-                    row['CH2'],
-                    row['CH3'],
-                    row['RSSI'] if row['RSSI'] != -1000 else -120.0,
-                    row['SNR'] if row['SNR'] != -1000 else -20.0,
-                    row['size_of_message'],
-                    row['frequency']
+                    float(row['CH1']),
+                    float(row['CH2']),
+                    float(row['CH3']),
+                    float(row['SNR']),
+                    float(row['RSSI']),
+                    float(row['size_of_message']),
+                    float(row['packet_ID']),
+                    float(row['frequency'])
                 ])
 
-            freq = target_row['frequency']
-            if abs(freq - CHANNELS[0]) < 0.05:
-                label_ch = 0
-            elif abs(freq - CHANNELS[1]) < 0.05:
-                label_ch = 1
-            else:
-                label_ch = 2
-
-            # Nếu kênh hiện tại bị va chạm -> hướng sang kênh khác
-            if target_row['RSSI'] == -1000:
-                label_ch = (label_ch + 1) % 3
+            target_pid = int(target_row['packet_ID'])
+            label_ch = best_lookup.get((source, size, target_pid), int(target_pid % len(CHANNELS)))
 
             sample_dict = {f"feat_{idx}": val for idx, val in enumerate(features)}
             sample_dict['target_channel'] = label_ch
             sample_dict['source'] = source
+            sample_dict['size_of_message'] = size
             samples.append(sample_dict)
 
     return pd.DataFrame(samples)
@@ -323,7 +336,7 @@ def generate_features_and_labels(df):
 ready_df = generate_features_and_labels(imputed_df)
 ready_out = os.path.join(READY_DIR, "dataset_ready.csv")
 ready_df.to_csv(ready_out, index=False)
-print(f"[SUCCESS] Đã tạo tập dữ liệu huấn luyện: {len(ready_df)} mẫu.")
+print(f"[SUCCESS] Đã tạo tập dữ liệu huấn luyện: {len(ready_df)} mẫu (mỗi mẫu {WINDOW_SIZE * 8} đặc trưng).")
 print(ready_df.head(5))
 """)
 
@@ -438,16 +451,15 @@ Sau đó, các bytes nhị phân được chuyển đổi thành một mảng C 
 """)
 
 add_code(r"""
-# Chuyển đổi sang TFLite
+# Chuyển đổi sang TFLite chuẩn Listing 1 bài báo (không lượng tử hóa ép kiểu)
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
-converter.optimizations = [tf.lite.Optimize.DEFAULT]
 tflite_model = converter.convert()
 
 tflite_path = os.path.join(MODELS_DIR, "channel_model.tflite")
 with open(tflite_path, "wb") as f:
     f.write(tflite_model)
 
-print(f"[OK] File TFLite đã xuất: {tflite_path} ({len(tflite_model)} bytes ~ {len(tflite_model)/1024:.2f} KB)")
+print(f"[OK] File TFLite đã xuất: {tflite_path} ({len(tflite_model)} bytes ~ {len(tflite_model)/1024:.2f} KB - khớp Figure 11 bài báo ~5.8 KB)")
 
 # Chuyển đổi thành header C model.h
 header_path = os.path.join(MODELS_DIR, "model.h")
