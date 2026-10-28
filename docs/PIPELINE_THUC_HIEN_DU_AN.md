@@ -58,6 +58,11 @@ flowchart TD
 
 #### 1. Trạm Gateway Đa Kênh (Multi-Channel Gateway)
 
+<p align="center">
+  <img src="../img/LoRa%20GW_bb.png" alt="Sơ đồ phần cứng trạm Gateway CM4 3 kênh" width="700"/>
+  <br><em>Hình: Sơ đồ kết nối phần cứng thực tế trạm Gateway đa kênh (Raspberry Pi CM4 + 3 Module Ra-02)</em>
+</p>
+
 - **Phần cứng**: Raspberry Pi Compute Module 4 (CM4) gắn 3 module LoRa Ra-02 (SX1278 433 MHz).
 - **Giao tiếp SPI**: Dùng chung bus phần cứng `SPI0` (`MOSI Pin 19`, `MISO Pin 21`, `SCLK Pin 23`), tách biệt 3 đường Chip Select độc lập (`CE0`, `CE1`, `GPIO 25`), 3 chân Reset và 3 chân ngắt `DIO0`.
 - **Phần mềm Gateway**:
@@ -69,6 +74,11 @@ flowchart TD
   - Giao diện Web Dashboard Router-style điều khiển trực quan qua mạng Wi-Fi.
 
 #### 2. Các Thiết bị Đầu cuối (End-Nodes)
+
+<p align="center">
+  <img src="../img/LoRa%20Node_bb.png" alt="Sơ đồ phần cứng LoRa End-Node" width="650"/>
+  <br><em>Hình: Sơ đồ kết nối phần cứng thực tế LoRa End-Node (ESP32 DevKit V1 + Ra-02 + OLED SSD1306)</em>
+</p>
 
 - **Phần cứng**: 3 mạch ESP32 DevKit V1 gắn module Ra-02 433 MHz và màn hình OLED 0.96" SSD1306 (giao tiếp I2C).
 - **Firmware kiến trúc FSM (Máy trạng thái hữu hạn)**:

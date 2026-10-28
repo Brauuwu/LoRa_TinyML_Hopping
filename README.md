@@ -57,6 +57,13 @@ LoRa_TinyML_Hopping/
 │   │   └── build_notebook.py            # Trình sinh tự động Jupyter Notebook từ các scripts
 │   ├── models/                          # Chứa mô hình tflite, model.h và checkpoint so sánh
 │   └── figures/                         # Biểu đồ PDR, RSSI, SNR, biểu đồ huấn luyện và ma trận nhầm lẫn
+├── docs/                                # Tài liệu kỹ thuật, kịch bản thực nghiệm & pipeline chi tiết
+│   ├── KICH_BAN_THU_THAP_DU_LIEU.md     # Danh mục 21 kịch bản đo kiểm đa Node
+│   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình tổng thể 6 giai đoạn của ĐATN
+│   └── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ đấu nối & hoạt động firmware
+├── img/                                 # Hình ảnh sơ đồ phần cứng thực tế (Fritzing Breadboard)
+│   ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32
+│   └── LoRa GW_bb.png                   # Sơ đồ đấu nối Gateway CM4 3 kênh
 └── README.md
 ```
 
@@ -65,6 +72,11 @@ LoRa_TinyML_Hopping/
 ## 2. Sơ đồ đấu nối phần cứng
 
 ### A. 3 End-Nodes (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)
+
+<p align="center">
+  <img src="img/LoRa%20Node_bb.png" alt="Sơ đồ kết nối phần cứng LoRa End-Node (ESP32 + Ra-02 + OLED)" width="680"/>
+  <br><em>Hình 1: Sơ đồ đấu nối phần cứng chi tiết của LoRa End-Node (ESP32 DevKit V1 + Module LoRa SX1278 Ra-02 + Màn hình OLED 0.96" SSD1306)</em>
+</p>
 
 | Thiết bị ngoại vi | Chân Module | Chân ESP32 (GPIO) | Ghi chú |
 | :--- | :--- | :--- | :--- |
@@ -85,6 +97,11 @@ LoRa_TinyML_Hopping/
 ---
 
 ### B. Gateway (Raspberry Pi CM4 / Pi 4 + 3 Module Ra-02 433MHz)
+
+<p align="center">
+  <img src="img/LoRa%20GW_bb.png" alt="Sơ đồ kết nối phần cứng Multi-Channel Gateway CM4 + 3x Ra-02" width="750"/>
+  <br><em>Hình 2: Sơ đồ đấu nối phần cứng trạm Gateway 3 kênh (Raspberry Pi CM4 / Pi 4 + 3 Module LoRa SX1278 Ra-02 433 MHz)</em>
+</p>
 
 Được cấu hình chuẩn xác trong [`GatewayCode/include/config.h`](file:///e:/DATN/LoRa_TinyML_Hopping/GatewayCode/include/config.h):
 

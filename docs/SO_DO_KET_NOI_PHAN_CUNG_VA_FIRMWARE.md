@@ -54,6 +54,11 @@ graph TB
 
 ### A. Thiết bị Đầu cuối: End-Node (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)
 
+<p align="center">
+  <img src="../img/LoRa%20Node_bb.png" alt="Sơ đồ đấu nối phần cứng LoRa End-Node" width="680"/>
+  <br><em>Hình: Sơ đồ đấu nối phần cứng thực tế của End-Node (ESP32 DevKit V1 + Module LoRa SX1278 Ra-02 + Màn hình OLED SSD1306)</em>
+</p>
+
 Mỗi End-Node bao gồm:
 
 1. **Vi điều khiển trung tâm**: ESP32 DevKit V1 (30 chân / 38 chân).
@@ -132,6 +137,11 @@ graph LR
 ---
 
 ### B. Trạm Gateway Đa Kênh (Raspberry Pi CM4 + 3 Module Ra-02 433MHz)
+
+<p align="center">
+  <img src="../img/LoRa%20GW_bb.png" alt="Sơ đồ đấu nối phần cứng trạm Gateway CM4 3 kênh" width="750"/>
+  <br><em>Hình: Sơ đồ đấu nối phần cứng thực tế của trạm Gateway 3 kênh (Raspberry Pi CM4 + 3 Module LoRa SX1278 Ra-02 433 MHz)</em>
+</p>
 
 Trạm Gateway sử dụng Raspberry Pi Compute Module 4 (CM4) kết nối với 3 module Ra-02 thông qua bus `SPI0` dùng chung, phân kênh bằng 3 đường Chip Select độc lập:
 
