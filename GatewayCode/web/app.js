@@ -129,6 +129,18 @@ function renderDashboard(data) {
         freqElem.textContent = `${Number(node.frequency).toFixed(3)} MHz (CH${node.channel_id || 1})`;
       }
 
+      // Đồng bộ ô chọn tần số OTA theo tần số thực tế đang thu thập
+      const selectElem = document.getElementById(`select-freq-${id}`);
+      if (selectElem && document.activeElement !== selectElem && node.frequency) {
+        const currentFreqVal = Number(node.frequency).toFixed(3);
+        for (let i = 0; i < selectElem.options.length; i++) {
+          if (Math.abs(parseFloat(selectElem.options[i].value) - parseFloat(currentFreqVal)) < 0.05) {
+            selectElem.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
       // RSSI & Signal Bars
       const rssiElem = document.getElementById(`rssi-${id}`);
       const barsElem = document.getElementById(`sig-bars-${id}`);
@@ -157,7 +169,7 @@ function renderDashboard(data) {
       // OTA Confirmed status
       const otaBadge = document.getElementById(`ota-badge-${id}`);
       if (otaBadge) {
-        if (node.cfg_confirmed) {
+        if (node.cfg_confirmed || node.state === "TX") {
           otaBadge.className = "ota-badge stable";
           otaBadge.textContent = "ỔN ĐỊNH ✓";
         } else {

@@ -350,6 +350,24 @@ void handleControlPacket(const char* payload, int len, int channelId, double fre
         return;
     }
 
+    // 5. Bản tin xác nhận hoàn thành đợt phát 600 gói (CTRL:ACK:DONE:<node>)
+    if (text.find("CTRL:ACK:DONE:") == 0 && text.length() >= 15) {
+        char nodeId = text[14];
+        int idx = nodeId - 'A';
+        time_t now = time(NULL);
+        if (idx >= 0 && idx < 3) {
+            std::lock_guard<std::mutex> lock(g_nodesMutex);
+            g_nodes[idx].online = true;
+            g_nodes[idx].lastSeen = now;
+            g_nodes[idx].state = "FINISHED";
+            g_nodes[idx].frequency = freq;
+            g_nodes[idx].channelId = channelId;
+            g_nodes[idx].cfgConfirmed = true;
+        }
+        addEventLog(timeStr, "CTRL", "Node " + std::string(1, nodeId) + " ĐÃ HOÀN THÀNH 600 GÓI TIN", nodeId, freq, rssi, snr);
+        return;
+    }
+
     // Các bản tin điều khiển khác
     addEventLog(timeStr, "CTRL", text, '?', freq, rssi, snr);
 }
@@ -397,7 +415,7 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
                 pkt.rawLen = (uint8_t)(len > 255 ? 255 : len);
                 memcpy(pkt.payload, rxBuffer, pkt.rawLen);
 
-                // Cập nhật trạng thái Node vào bảng in-memory
+                // Cập nhật trạng thái Node vào bảng in-memory trực tiếp từ gói tin dữ liệu thực tế
                 char sourceNode = (char)rxBuffer[0];
                 if (sourceNode >= 'A' && sourceNode <= 'C') {
                     int nIdx = sourceNode - 'A';
@@ -408,6 +426,9 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
                     g_nodes[nIdx].snr = snr;
                     g_nodes[nIdx].state = "TX";
                     g_nodes[nIdx].packetsReceived++;
+                    g_nodes[nIdx].frequency = radio->getFrequency();
+                    g_nodes[nIdx].channelId = channelId;
+                    g_nodes[nIdx].cfgConfirmed = true;
                 }
 
                 // Phân tích định dạng bài báo LoRaEdgeTinyML: "<Node><PktID>*<data>"
@@ -426,6 +447,19 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
                     }
                 } else if (rxBuffer[0] == 'T' && len >= 5 && rxBuffer[1] >= 'A' && rxBuffer[1] <= 'C') {
                     pkt.sourceNode = (char)rxBuffer[1];
+                    int nIdx = pkt.sourceNode - 'A';
+                    {
+                        std::lock_guard<std::mutex> lock(g_nodesMutex);
+                        g_nodes[nIdx].online = true;
+                        g_nodes[nIdx].lastSeen = time(NULL);
+                        g_nodes[nIdx].rssi = rssi;
+                        g_nodes[nIdx].snr = snr;
+                        g_nodes[nIdx].state = "TX";
+                        g_nodes[nIdx].packetsReceived++;
+                        g_nodes[nIdx].frequency = radio->getFrequency();
+                        g_nodes[nIdx].channelId = channelId;
+                        g_nodes[nIdx].cfgConfirmed = true;
+                    }
                     pkt.packetId = ((uint16_t)rxBuffer[2] << 8) | rxBuffer[3];
                     pkt.payloadSize = rxBuffer[4];
                 } else {

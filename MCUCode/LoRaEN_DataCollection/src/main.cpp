@@ -676,6 +676,12 @@ void loop() {
         Serial.println("==================================================");
 
         oledShowFinished();
+
+        // Gửi thông báo hoàn thành lên Gateway để cập nhật trạng thái Web UI
+        char ackDone[64];
+        snprintf(ackDone, sizeof(ackDone), "CTRL:ACK:DONE:%c", NODE_ID);
+        delay(random(50, 150));
+        sendControlResponse(ackDone);
         return;
       }
 
