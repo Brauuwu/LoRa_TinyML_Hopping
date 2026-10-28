@@ -25,7 +25,7 @@
 // 1. CẤU HÌNH ĐỊNH DANH NODE (NODE ID)
 // Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp code cho từng bo mạch!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'B'   // 'A', 'B', hoặc 'C'
+#define NODE_ID             'C'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. CẤU HÌNH TẦN SỐ KHỞI ĐỘNG MẶC ĐỊNH (DEFAULT STARTUP FREQUENCY)
@@ -34,7 +34,7 @@
 //    3: Kênh 3 - 433.575 MHz
 // Có thể thay đổi động từ xa qua giao diện Web Gateway (OTA Frequency Tuning)
 // ═══════════════════════════════════════════════════════════════════════════
-#define SELECTED_CHANNEL_NUM  2   // Đặt 1, 2, hoặc 3 mặc định khi mới cấp điện
+#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3 mặc định khi mới cấp điện
 
 // Bảng tra cứu tần số theo số kênh
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
@@ -306,26 +306,52 @@ void setup() {
   Serial.println("[READY] Node đã sẵn sàng ở chế độ CHỜ LỆNH...");
 }
 
+// ── Hàm kiểm tra đích đến của lệnh Downlink ─────────────────────────────────
+// targetStr: "ALL", "A", "B", "C", "A,B", "B,C", "A_B", "A+B", v.v.
+static bool isTargetMatched(String targetStr, char myNodeId) {
+  targetStr.trim();
+  targetStr.toUpperCase();
+  if (targetStr.length() == 0 || targetStr == "ALL" || targetStr == "*") {
+    return true;
+  }
+  for (unsigned int i = 0; i < targetStr.length(); i++) {
+    char c = targetStr.charAt(i);
+    if (c == myNodeId) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // ── Hàm xử lý toàn diện các gói tin Downlink từ Gateway ─────────────────────
 // Trả về true nếu lệnh yêu cầu chuyển sang phát dữ liệu (START)
 bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
-  String rxUpper = rxData;
+  String rxClean = rxData;
+  rxClean.trim();
+  String rxUpper = rxClean;
   rxUpper.toUpperCase();
-  rxUpper.trim();
 
   float rssi = radio.getRSSI();
   float snr = radio.getSNR();
   Serial.println();
   Serial.printf("[RX DOWNLINK] \"%s\" (RSSI: %.1f dBm, SNR: %.1f dB)\n", rxData.c_str(), rssi, snr);
 
+  // Chuẩn hóa loại bỏ tiền tố "CMD:" nếu có để tránh nhầm chữ 'C' trong "CMD"
+  String payload = rxUpper;
+  if (payload.startsWith("CMD:")) {
+    payload = payload.substring(4);
+    payload.trim();
+  }
+
   // 1. XỬ LÝ LỆNH PING (KIỂM TRA TRẠNG THÁI ONLINE / OFFLINE)
-  // Cú pháp: "CMD:PING:ALL" hoặc "CMD:PING:A", "CMD:PING:B"
-  if (rxUpper.startsWith("CMD:PING") || rxUpper.equals("PING")) {
-    bool targetMe = false;
-    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.indexOf(String(NODE_ID)) >= 0 || rxUpper.equals("PING")) {
-      targetMe = true;
+  // Cú pháp: "CMD:PING:ALL", "CMD:PING:A", "PING:B", "PING"
+  if (payload.startsWith("PING")) {
+    String target = "ALL";
+    int colon = payload.indexOf(':');
+    if (colon >= 0) {
+      target = payload.substring(colon + 1);
     }
-    if (targetMe) {
+    if (isTargetMatched(target, NODE_ID)) {
       String stateStr = (nodeState == STATE_WAIT_CMD) ? "WAIT" :
                         (nodeState == STATE_TRANSMITTING) ? "TX" : "DONE";
       // Phản hồi: CTRL:PONG:<NODE_ID>:<CHANNEL>:<FREQ>:<STATE>
@@ -334,62 +360,60 @@ bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
                NODE_ID, currentChannelNum, currentFrequency, stateStr.c_str());
       delay(random(20, 100)); // Tránh xung đột nếu nhiều node cùng trả lời
       sendControlResponse(pongMsg);
-      return false;
     }
+    return false;
   }
 
   // 2. XỬ LÝ LỆNH CẤU HÌNH TẦN SỐ OTA (OTA FREQUENCY CONFIGURATION)
   // Cú pháp: "CMD:CFG:<NODE>:<FREQ>" (Ví dụ: "CMD:CFG:A:433.175" hoặc "CMD:CFG:ALL:433.375")
-  if (rxUpper.startsWith("CMD:CFG:") || rxUpper.startsWith("CFG:")) {
-    int firstColon = rxData.indexOf(':', 4); // Bỏ qua "CMD:"
-    if (firstColon > 0) {
-      int secondColon = rxData.indexOf(':', firstColon + 1);
-      if (secondColon > 0) {
-        String targetNode = rxData.substring(firstColon + 1, secondColon);
-        targetNode.toUpperCase();
-        String freqStr = rxData.substring(secondColon + 1);
-        float newFreq = freqStr.toFloat();
+  if (payload.startsWith("CFG:")) {
+    int firstColon = payload.indexOf(':');
+    int secondColon = payload.indexOf(':', firstColon + 1);
+    if (firstColon >= 0 && secondColon > firstColon) {
+      String targetNode = payload.substring(firstColon + 1, secondColon);
+      String freqStr = payload.substring(secondColon + 1);
+      float newFreq = freqStr.toFloat();
 
-        if ((targetNode.indexOf("ALL") >= 0 || targetNode.indexOf(String(NODE_ID)) >= 0) && newFreq > 400.0 && newFreq < 450.0) {
-          Serial.printf("[OTA] Nhận yêu cầu đổi tần số sang %.3f MHz...\n", newFreq);
+      if (isTargetMatched(targetNode, NODE_ID) && newFreq > 400.0 && newFreq < 450.0) {
+        Serial.printf("[OTA] Nhận yêu cầu đổi tần số sang %.3f MHz...\n", newFreq);
 
-          // Cập nhật phần cứng SX1278
-          radio.standby();
-          int res = radio.setFrequency(newFreq);
-          if (res == RADIOLIB_ERR_NONE) {
-            currentFrequency = newFreq;
-            if (fabs(newFreq - 433.175) < 0.05) currentChannelNum = 1;
-            else if (fabs(newFreq - 433.375) < 0.05) currentChannelNum = 2;
-            else if (fabs(newFreq - 433.575) < 0.05) currentChannelNum = 3;
+        // Cập nhật phần cứng SX1278
+        radio.standby();
+        int res = radio.setFrequency(newFreq);
+        if (res == RADIOLIB_ERR_NONE) {
+          currentFrequency = newFreq;
+          if (fabs(newFreq - 433.175) < 0.05) currentChannelNum = 1;
+          else if (fabs(newFreq - 433.375) < 0.05) currentChannelNum = 2;
+          else if (fabs(newFreq - 433.575) < 0.05) currentChannelNum = 3;
 
-            oledShowConfigUpdated(currentFrequency, currentChannelNum);
+          oledShowConfigUpdated(currentFrequency, currentChannelNum);
 
-            // Gửi xác nhận cấu hình ổn định về Gateway
-            // Định dạng: CTRL:ACK:CFG:<NODE>:<FREQ>
-            char ackMsg[64];
-            snprintf(ackMsg, sizeof(ackMsg), "CTRL:ACK:CFG:%c:%.3f", NODE_ID, currentFrequency);
-            delay(50);
-            sendControlResponse(ackMsg);
+          // Gửi xác nhận cấu hình ổn định về Gateway
+          // Định dạng: CTRL:ACK:CFG:<NODE>:<FREQ>
+          char ackMsg[64];
+          snprintf(ackMsg, sizeof(ackMsg), "CTRL:ACK:CFG:%c:%.3f", NODE_ID, currentFrequency);
+          delay(50);
+          sendControlResponse(ackMsg);
 
-            delay(1500);
-            if (nodeState == STATE_WAIT_CMD) oledShowWaitingCommand(0);
-          } else {
-            Serial.printf("[OTA FAIL] Không thể thiết lập tần số! Mã lỗi: %d\n", res);
-          }
-          return false;
+          delay(1500);
+          if (nodeState == STATE_WAIT_CMD) oledShowWaitingCommand(0);
+        } else {
+          Serial.printf("[OTA FAIL] Không thể thiết lập tần số! Mã lỗi: %d\n", res);
         }
       }
     }
+    return false;
   }
 
   // 3. XỬ LÝ LỆNH DỪNG / RESET (CMD:STOP / CMD:RESET)
   // Cú pháp: "CMD:STOP:ALL" hoặc "CMD:STOP:A", "CMD:STOP:A,B"
-  if (rxUpper.indexOf("STOP") >= 0 || rxUpper.indexOf("RESET") >= 0) {
-    bool targetMe = false;
-    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.indexOf(String(NODE_ID)) >= 0 || rxUpper.equals("STOP")) {
-      targetMe = true;
+  if (payload.startsWith("STOP") || payload.startsWith("RESET")) {
+    String target = "ALL";
+    int colon = payload.indexOf(':');
+    if (colon >= 0) {
+      target = payload.substring(colon + 1);
     }
-    if (targetMe) {
+    if (isTargetMatched(target, NODE_ID)) {
       Serial.println("[DOWNLINK] >>> NHẬN LỆNH DỪNG/RESET TỪ GATEWAY! <<<");
       char ackStop[64];
       snprintf(ackStop, sizeof(ackStop), "CTRL:ACK:STOP:%c", NODE_ID);
@@ -401,32 +425,42 @@ bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
       totalPacketsSent = 0;
       lastTxTime = 0;
       oledShowWaitingCommand(0);
-      return false;
     }
+    return false;
   }
 
   // 4. XỬ LÝ LỆNH PHÁT (CMD:START)
   // Cú pháp hỗ trợ:
   //   - "CMD:START:ALL"        -> Tất cả các Node phát
   //   - "CMD:START:A"          -> Chỉ Node A phát
+  //   - "CMD:START:B"          -> Chỉ Node B phát
+  //   - "CMD:START:C"          -> Chỉ Node C phát
   //   - "CMD:START:A,B"        -> Đồng thời Node A và Node B phát
   //   - "CMD:START:B,C"        -> Đồng thời Node B và Node C phát
-  if (rxUpper.indexOf("START") >= 0) {
-    bool targetMe = false;
-    if (rxUpper.indexOf("ALL") >= 0 || rxUpper.equals("START") || rxUpper.indexOf("CMD:START:ALL") >= 0 || rxUpper.equals("CMD:START")) {
-      targetMe = true;
-      cmdReceived = "START:ALL";
-    } else if (rxUpper.indexOf(String(NODE_ID)) >= 0) {
-      targetMe = true;
-      cmdReceived = String("START:") + NODE_ID;
+  //   - "CMD:START:A,C"        -> Đồng thời Node A và Node C phát
+  //   - "START"                -> Mặc định phát tất cả
+  if (payload.startsWith("START")) {
+    String target = "ALL";
+    int colon = payload.indexOf(':');
+    if (colon >= 0) {
+      target = payload.substring(colon + 1);
+      target.trim();
     }
 
-    if (targetMe) {
+    if (isTargetMatched(target, NODE_ID)) {
+      cmdReceived = (target == "ALL" || target == "*") ? "START:ALL" : (String("START:") + NODE_ID);
+      Serial.printf("[DOWNLINK] >>> KHỚP ĐÍCH ĐẾN! Node [%c] được yêu cầu phát (target='%s') <<<\n",
+                    NODE_ID, target.c_str());
+
       // Gửi xác nhận bắt đầu về Gateway
       char ackStart[64];
       snprintf(ackStart, sizeof(ackStart), "CTRL:ACK:START:%c", NODE_ID);
       sendControlResponse(ackStart);
       return true; // Kích hoạt phát dữ liệu
+    } else {
+      Serial.printf("[DOWNLINK] Lệnh START cho Node khác (target='%s'), Node [%c] KHÔNG phát.\n",
+                    target.c_str(), NODE_ID);
+      return false;
     }
   }
 
