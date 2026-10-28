@@ -331,6 +331,13 @@ bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
   String rxUpper = rxClean;
   rxUpper.toUpperCase();
 
+  // 0. BẢO VỆ CHỐNG DỘI / VÒNG LẶP ECHO:
+  // Nếu gói tin là bản tin phản hồi từ Node khác (bắt đầu bằng "CTRL:") hoặc là gói dữ liệu (chứa ký tự phân tách '*')
+  // thì bỏ qua ngay lập tức, TUYỆT ĐỐI không xử lý như lệnh Downlink từ Gateway!
+  if (rxUpper.startsWith("CTRL:") || rxUpper.indexOf('*') >= 0) {
+    return false;
+  }
+
   float rssi = radio.getRSSI();
   float snr = radio.getSNR();
   Serial.println();
@@ -414,10 +421,8 @@ bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
       target = payload.substring(colon + 1);
     }
     if (isTargetMatched(target, NODE_ID)) {
-      Serial.println("[DOWNLINK] >>> NHẬN LỆNH DỪNG/RESET TỪ GATEWAY! <<<");
-      char ackStop[64];
-      snprintf(ackStop, sizeof(ackStop), "CTRL:ACK:STOP:%c", NODE_ID);
-      sendControlResponse(ackStop);
+      static unsigned long lastAckStopTime = 0;
+      bool wasRunning = (nodeState != STATE_WAIT_CMD);
 
       nodeState = STATE_WAIT_CMD;
       packetCount = 0;
@@ -425,6 +430,16 @@ bool handleDownlinkPacket(const String& rxData, String& cmdReceived) {
       totalPacketsSent = 0;
       lastTxTime = 0;
       oledShowWaitingCommand(0);
+
+      // Chống spam: Chỉ gửi ACK nếu Node đang chạy hoặc lần gửi gần nhất cách đây > 2.0s
+      if (wasRunning || millis() - lastAckStopTime > 2000) {
+        lastAckStopTime = millis();
+        Serial.println("[DOWNLINK] >>> NHẬN LỆNH DỪNG/RESET TỪ GATEWAY! <<<");
+        char ackStop[64];
+        snprintf(ackStop, sizeof(ackStop), "CTRL:ACK:STOP:%c", NODE_ID);
+        delay(random(30, 100)); // Tránh xung đột nếu nhiều node cùng phản hồi
+        sendControlResponse(ackStop);
+      }
     }
     return false;
   }

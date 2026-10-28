@@ -312,11 +312,18 @@ void handleControlPacket(const char* payload, int len, int channelId, double fre
     if (text.find("CTRL:ACK:START:") == 0 && text.length() >= 16) {
         char nodeId = text[15];
         int idx = nodeId - 'A';
+        time_t now = time(NULL);
+        static time_t lastStartLog[3] = {0, 0, 0};
+
         if (idx >= 0 && idx < 3) {
             std::lock_guard<std::mutex> lock(g_nodesMutex);
             g_nodes[idx].online = true;
-            g_nodes[idx].lastSeen = time(NULL);
+            g_nodes[idx].lastSeen = now;
             g_nodes[idx].state = "TX";
+
+            // Chống spam log: Chỉ ghi log nếu cách lần ghi trước > 2 giây
+            if (now - lastStartLog[idx] < 2) return;
+            lastStartLog[idx] = now;
         }
         addEventLog(timeStr, "CTRL", "Node " + std::string(1, nodeId) + " xác nhận START", nodeId, freq, rssi, snr);
         return;
@@ -326,11 +333,18 @@ void handleControlPacket(const char* payload, int len, int channelId, double fre
     if (text.find("CTRL:ACK:STOP:") == 0 && text.length() >= 15) {
         char nodeId = text[14];
         int idx = nodeId - 'A';
+        time_t now = time(NULL);
+        static time_t lastStopLog[3] = {0, 0, 0};
+
         if (idx >= 0 && idx < 3) {
             std::lock_guard<std::mutex> lock(g_nodesMutex);
             g_nodes[idx].online = true;
-            g_nodes[idx].lastSeen = time(NULL);
+            g_nodes[idx].lastSeen = now;
             g_nodes[idx].state = "WAIT";
+
+            // Chống spam log: Chỉ ghi log nếu cách lần ghi trước > 2 giây
+            if (now - lastStopLog[idx] < 2) return;
+            lastStopLog[idx] = now;
         }
         addEventLog(timeStr, "CTRL", "Node " + std::string(1, nodeId) + " xác nhận STOP / RESET", nodeId, freq, rssi, snr);
         return;
