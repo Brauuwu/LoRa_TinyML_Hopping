@@ -25,7 +25,7 @@
 // 1. CẤU HÌNH ĐỊNH DANH NODE (NODE ID)
 // Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp code cho từng bo mạch!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'A'   // 'A', 'B', hoặc 'C'
+#define NODE_ID             'B'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. CẤU HÌNH TẦN SỐ KHỞI ĐỘNG MẶC ĐỊNH (DEFAULT STARTUP FREQUENCY)
@@ -34,7 +34,7 @@
 //    3: Kênh 3 - 433.575 MHz
 // Có thể thay đổi động từ xa qua giao diện Web Gateway (OTA Frequency Tuning)
 // ═══════════════════════════════════════════════════════════════════════════
-#define SELECTED_CHANNEL_NUM  1   // Đặt 1, 2, hoặc 3 mặc định khi mới cấp điện
+#define SELECTED_CHANNEL_NUM  2   // Đặt 1, 2, hoặc 3 mặc định khi mới cấp điện
 
 // Bảng tra cứu tần số theo số kênh
 const float CHANNELS[3] = {433.175, 433.375, 433.575};
