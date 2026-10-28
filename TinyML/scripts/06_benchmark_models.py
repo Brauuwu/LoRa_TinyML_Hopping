@@ -42,46 +42,65 @@ NUM_CHANNELS = len(CHANNELS_DATA)
 ONE_HOT = np.eye(NUM_CHANNELS)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../data/MLdataready")
+READY_FILE = os.path.join(os.path.dirname(__file__), "../data/ready/dataset_ready.csv")
 OUT_DIR = os.path.join(os.path.dirname(__file__), "../models/comparison")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 
 def load_data():
-    """Nạp dữ liệu thực tế từ MLdataready (ABC hoặc A)"""
+    """Nạp dữ liệu từ data/ready/dataset_ready.csv hoặc MLdataready"""
+    if os.path.exists(READY_FILE):
+        try:
+            df_ready = pd.read_csv(READY_FILE)
+            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+                X_all = df_ready[feat_cols].values
+                y_all = df_ready['target_channel'].values
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=NUM_CHANNELS)
+                return raw_inputs, raw_outputs
+        except Exception:
+            pass
+
     raw_inputs = []
     raw_outputs = []
 
     for ch_idx in range(NUM_CHANNELS):
         ch = CHANNELS_DATA[ch_idx]
 
-        # Ưu tiên thư mục ABC (tổng hợp nhiều Node), fallback sang A
         csv_path = os.path.join(DATA_DIR, "ABC", f"{ch}.csv")
         if not os.path.exists(csv_path):
             csv_path = os.path.join(DATA_DIR, "A", f"{ch}.csv")
         if not os.path.exists(csv_path):
-            print(f"[WARN] Không tìm thấy dữ liệu kênh {ch}")
             continue
 
-        df = pd.read_csv(csv_path, names=headers, skiprows=1)
-        num_recordings = int(df.shape[0] / SAMPLES_PER_CHANNEL)
-        target = ONE_HOT[ch_idx]
+        try:
+            df = pd.read_csv(csv_path, names=headers, skiprows=1)
+            num_recordings = int(df.shape[0] / SAMPLES_PER_CHANNEL)
+            target = ONE_HOT[ch_idx]
 
-        for i in range(num_recordings):
-            tensor = []
-            for j in range(SAMPLES_PER_CHANNEL):
-                idx = i * SAMPLES_PER_CHANNEL + j
-                tensor.append([
-                    float(df['CH1'][idx]),
-                    float(df['CH2'][idx]),
-                    float(df['CH3'][idx]),
-                    float(df['SNR'][idx]),
-                    float(df['RSSI'][idx]),
-                    float(df['size_of_message'][idx]),
-                    float(df['packet_ID'][idx]),
-                    float(df['frequency'][idx])
-                ])
-            raw_inputs.append(tensor)
-            raw_outputs.append(target)
+            for i in range(num_recordings):
+                tensor = []
+                for j in range(SAMPLES_PER_CHANNEL):
+                    idx = i * SAMPLES_PER_CHANNEL + j
+                    tensor.append([
+                        float(df['CH1'][idx]),
+                        float(df['CH2'][idx]),
+                        float(df['CH3'][idx]),
+                        float(df['SNR'][idx]),
+                        float(df['RSSI'][idx]),
+                        float(df['size_of_message'][idx]),
+                        float(df['packet_ID'][idx]),
+                        float(df['frequency'][idx])
+                    ])
+                raw_inputs.append(tensor)
+                raw_outputs.append(target)
+        except Exception:
+            pass
+
+    if not raw_inputs:
+        print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 -> 02 -> 03 trước.")
+        return np.array([]), np.array([])
 
     return np.array(raw_inputs), np.array(raw_outputs)
 

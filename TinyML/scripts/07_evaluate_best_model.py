@@ -42,12 +42,33 @@ NUM_CHANNELS = len(CHANNELS_DATA)
 ONE_HOT = np.eye(NUM_CHANNELS)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../data/MLdataready")
+READY_FILE = os.path.join(os.path.dirname(__file__), "../data/ready/dataset_ready.csv")
 FORMATTED_DIR = os.path.join(os.path.dirname(__file__), "../data/formattedCSV")
 OUT_DIR = os.path.join(os.path.dirname(__file__), "../models/comparison")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 
 def load_data():
+    if os.path.exists(READY_FILE):
+        try:
+            df_ready = pd.read_csv(READY_FILE)
+            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+                X_all = df_ready[feat_cols].values
+                y_all = df_ready['target_channel'].values
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=NUM_CHANNELS)
+                sample_meta = []
+                for _, row in df_ready.iterrows():
+                    sample_meta.append({
+                        'size': int(row.get('size_of_message', 30)),
+                        'pkt_id': 0,
+                        'true_ch': int(row['target_channel'])
+                    })
+                return raw_inputs, raw_outputs, sample_meta
+        except Exception:
+            pass
+
     raw_inputs, raw_outputs, sample_meta = [], [], []
 
     for ch_idx in range(NUM_CHANNELS):
@@ -58,28 +79,35 @@ def load_data():
         if not os.path.exists(csv_path):
             continue
 
-        df = pd.read_csv(csv_path, names=headers, skiprows=1)
-        num_rec = int(df.shape[0] / SAMPLES_PER_CHANNEL)
-        target = ONE_HOT[ch_idx]
+        try:
+            df = pd.read_csv(csv_path, names=headers, skiprows=1)
+            num_rec = int(df.shape[0] / SAMPLES_PER_CHANNEL)
+            target = ONE_HOT[ch_idx]
 
-        for i in range(num_rec):
-            tensor = []
-            for j in range(SAMPLES_PER_CHANNEL):
-                idx = i * SAMPLES_PER_CHANNEL + j
-                tensor.append([
-                    float(df['CH1'][idx]), float(df['CH2'][idx]), float(df['CH3'][idx]),
-                    float(df['SNR'][idx]), float(df['RSSI'][idx]),
-                    float(df['size_of_message'][idx]),
-                    float(df['packet_ID'][idx]), float(df['frequency'][idx])
-                ])
-            raw_inputs.append(tensor)
-            raw_outputs.append(target)
-            last_idx = (i + 1) * SAMPLES_PER_CHANNEL - 1
-            sample_meta.append({
-                'size': int(df['size_of_message'][last_idx]),
-                'pkt_id': int(df['packet_ID'][last_idx]),
-                'true_ch': ch_idx
-            })
+            for i in range(num_rec):
+                tensor = []
+                for j in range(SAMPLES_PER_CHANNEL):
+                    idx = i * SAMPLES_PER_CHANNEL + j
+                    tensor.append([
+                        float(df['CH1'][idx]), float(df['CH2'][idx]), float(df['CH3'][idx]),
+                        float(df['SNR'][idx]), float(df['RSSI'][idx]),
+                        float(df['size_of_message'][idx]),
+                        float(df['packet_ID'][idx]), float(df['frequency'][idx])
+                    ])
+                raw_inputs.append(tensor)
+                raw_outputs.append(target)
+                last_idx = (i + 1) * SAMPLES_PER_CHANNEL - 1
+                sample_meta.append({
+                    'size': int(df['size_of_message'][last_idx]),
+                    'pkt_id': int(df['packet_ID'][last_idx]),
+                    'true_ch': ch_idx
+                })
+        except Exception:
+            pass
+
+    if not raw_inputs:
+        print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 -> 02 -> 03 trước.")
+        return np.array([]), np.array([]), []
 
     return np.array(raw_inputs), np.array(raw_outputs), sample_meta
 
