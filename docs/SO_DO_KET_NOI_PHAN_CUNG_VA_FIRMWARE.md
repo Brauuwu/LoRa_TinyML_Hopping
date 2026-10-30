@@ -399,12 +399,20 @@ flowchart TD
     KeepChannel --> SendPkt
     RndChannel --> TuneRadio
   
-    SendPkt --> WaitAck[Bật cờ nhận và đợi gói phản hồi/đo lường]
-    WaitAck --> RecordStatus[Ghi nhận trạng thái: Thành công hoặc Rớt gói]
-    RecordStatus --> PushBuffer[Đẩy đặc trưng gói vừa phát vào Ring Buffer]
-    PushBuffer --> UpdateOLED[Cập nhật OLED: Kênh hiện tại, PDR %, Số lần nhảy kênh]
+    SendPkt --> WaitAck[Mở cửa sổ nhận ACK Downlink trong 1000ms]
+    WaitAck --> CheckAckResult{Có nhận được ACK 4B từ GW?}
+    CheckAckResult -- Có: Thành công --> ParseAck[Bóc tách RSSI_gw & SNR_gw đo tại Gateway]
+    CheckAckResult -- Timeout 1000ms --> SetPenalty[Gán điểm phạt: ch_busy=1, RSSI=-1000, SNR=-1000]
+    ParseAck --> PushBuffer[Đẩy đặc trưng vào Bộ đệm trượt 10 bước]
+    SetPenalty --> PushBuffer
+    PushBuffer --> UpdateOLED[Cập nhật OLED: Kênh hiện tại, PDR %, Số lần nhảy kênh, Latency us]
     UpdateOLED --> WaitTxTimer
 ```
+
+#### Cơ chế Phản hồi Kín & Thu nhận CSI Thời gian thực:
+- **Nguyên lý:** Mặc dù tập dữ liệu huấn luyện được ghi log tại Gateway, ESP32 vẫn tái tạo trọn vẹn không gian trạng thái kênh nhờ gói **ACK Downlink 4-byte** (`[0xAA, Seq, RSSI, SNR]`, Time-on-Air chỉ ~25ms).
+- **Xử lý mất gói / va chạm tại biên:** Khi xảy ra va chạm trên không, Gateway không nhận được gì nên không thể phản hồi. ESP32 phát hiện sự kiện này thông qua cơ chế **Timeout 1000ms**, từ đó tự động nạp hình phạt `RSSI = -1000` và `SNR = -1000` vào bộ đệm trượt theo đúng quy tắc tiền xử lý dữ liệu.
+- *Xem chi tiết kiến trúc đa nhân và mã nguồn FreeRTOS tại [KIEN_TRUC_FREERTOS_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md).*
 
 #### Đặc tính kỹ thuật khi suy luận nhúng trên ESP32:
 

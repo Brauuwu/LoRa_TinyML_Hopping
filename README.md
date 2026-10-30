@@ -156,8 +156,9 @@ graph TD
     T_ML -->|xHopDecisionQueue| T_RAD
 ```
 
-- **Core 0 (PRO_CPU):** Làm chủ module RF SX1278, bảo đảm phát sóng và lắng nghe Downlink chính xác đến micro-giây.
+- **Core 0 (PRO_CPU):** Làm chủ module RF SX1278, bảo đảm phát sóng Uplink và mở cửa sổ nhận ACK chính xác đến micro-giây.
 - **Core 1 (APP_CPU):** Đảm nhận tính toán suy luận mạng nơ-ron và quét màn hình OLED qua I2C mà hoàn toàn không gây trễ hoặc nghẽn bus SPI của LoRa.
+- **Cơ chế Phản hồi Kín (Closed-Loop Feedback):** Mặc dù dữ liệu huấn luyện thu tại Gateway, ESP32 vẫn có đầy đủ thông tin thời gian thực nhờ gói **ACK 4-byte** (`[0xAA, Seq, RSSI, SNR]`, ToA ~25ms). Khi xảy ra va chạm/mất gói, cơ chế **Timeout 1000ms** tự động kích hoạt nạp điểm phạt `RSSI = -1000` và `SNR = -1000` vào bộ đệm trượt 80 chiều. Chi tiết xem tại [`docs/KIEN_TRUC_FREERTOS_FIRMWARE.md`](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md).
 
 ---
 
