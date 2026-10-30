@@ -1,6 +1,6 @@
 # Tối ưu hóa kênh truyền LoRa với TinyML (Channel Hopping Optimization)
 
-Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML) trên vi điều khiển ESP32 và Gateway Raspberry Pi lắng nghe đa kênh thời gian thực (Dải tần 433 MHz).
+Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML) trên vi điều khiển ESP32 và Gateway Raspberry Pi CM4 lắng nghe đa kênh thời gian thực (Dải tần 433 MHz).
 
 ---
 
@@ -12,10 +12,10 @@ LoRa_TinyML_Hopping/
 │   ├── LoRaEN_CommTest/                 # Firmware kiểm tra truyền thông 2 chiều & đo PDR
 │   │   ├── platformio.ini
 │   │   └── src/main.cpp
-│   ├── LoRaEN_DataCollection/           # Firmware nạp cho 3 ESP32 để thu thập dữ liệu
+│   ├── LoRaEN_DataCollection/           # Firmware thu thập dữ liệu (FreeRTOS Đa nhiệm)
 │   │   ├── platformio.ini
 │   │   └── src/main.cpp
-│   └── LoRaEN_TinyMLHopping/            # Firmware nạp cho ESP32 thực hiện suy luận TinyML
+│   └── LoRaEN_TinyMLHopping/            # Firmware nhảy kênh thông minh TinyML (FreeRTOS Dual-Core)
 │       ├── platformio.ini
 │       └── src/
 │           ├── main.cpp
@@ -39,28 +39,36 @@ LoRa_TinyML_Hopping/
 │       ├── test_comm.cpp                # Chương trình kiểm tra đường truyền RF & phản hồi ACK
 │       └── main_gw.cpp                  # Luồng lắng nghe đồng thời 3 module Ra-02 & bộ lọc Control
 ├── TinyML/                              # Pipeline AI và phân tích dữ liệu (Python)
-│   ├── LoRa_TinyML_Pipeline.ipynb       # Jupyter Notebook hoàn chỉnh, đồng bộ 100% với các scripts
+│   ├── LoRa_TinyML_Pipeline.ipynb       # Jupyter Notebook hoàn chỉnh, tách riêng từng cặp plaintext+code
 │   ├── requirements.txt                 # Thư viện: TensorFlow, Scikit-learn, Pandas, Matplotlib, Seaborn
-│   ├── data/                            # Kiến trúc thư mục chuẩn bị cho thu thập dữ liệu thực tế
-│   │   ├── logs/                        # Nơi đặt các file log thô (.txt, .csv) thu thập từ Gateway
-│   │   ├── parsed/                      # Output bước 1: CSV đã chuẩn hóa các trường dữ liệu
-│   │   ├── imputed/                     # Output bước 2: Đã phát hiện và gán nhãn gói mất (-1000 dBm)
-│   │   └── ready/                       # Output bước 3: Dataset chuỗi thời gian (Sliding Window)
+│   ├── data/                            # Kiến trúc dữ liệu đa tầng chuẩn hóa
+│   │   ├── logs/                        # File log thô (.txt) thu thập trực tiếp từ Gateway
+│   │   ├── parsed/                      # Output bước 1: CSV bóc tách 7 trường dữ liệu chuẩn
+│   │   ├── imputed/                     # Output bước 2: Đã phát hiện và bù nhãn gói mất (-1000 dBm)
+│   │   ├── MLData/                      # Phân chia theo Node (A, B, C) và tách riêng theo kênh tần số
+│   │   ├── MLdataready/                 # Gom nhóm theo kênh (A, B, C, ABC) với 8 cột chuẩn
+│   │   └── ready/                       # Cửa sổ trượt chuỗi thời gian (dataset_ready.csv, ts = 10 bước)
 │   ├── scripts/
-│   │   ├── 01_data_parser.py            # Trích xuất và chuẩn hóa log Gateway sang CSV
-│   │   ├── 02_add_missed_packets.py     # Phát hiện va chạm & điền nhãn gói mất
-│   │   ├── 03_generate_dataset.py       # Tạo cửa sổ thời gian (Sliding Window ts = 10 bước)
-│   │   ├── 04_train_model.py            # Huấn luyện FCNN Baseline + EarlyStopping, xuất model.h
-│   │   ├── 05_evaluate_comparison.py    # Đánh giá so sánh: Fixed vs Random vs TinyML
-│   │   ├── 06_benchmark_models.py       # So sánh 5 kiến trúc: FCNN, 1D-CNN, GRU, SepCNN, ResNet
-│   │   ├── 07_evaluate_best_model.py    # Đánh giá chuyên sâu mô hình tốt nhất (Confusion Matrix, PDR)
+│   │   ├── 01_data_parser.py            # Trích xuất và chuẩn hóa log Gateway sang CSV (1-to-1)
+│   │   ├── 02_add_missed_packets.py     # Phát hiện va chạm & điền nhãn phạt gói mất (RSSI/SNR = -1000)
+│   │   ├── 03_generate_dataset.py       # Tạo cấu trúc MLData, MLdataready và Sliding Window
+│   │   ├── 04_train_model.py            # Huấn luyện đa thuật toán (FCNN, 1D-CNN, GRU, SepCNN, ResNet)
+│   │   ├── 05_evaluate_comparison.py    # Đánh giá so sánh: Fixed vs Random vs TinyML Hopping
+│   │   ├── 06_benchmark_models.py       # Phân tích chuyên sâu Trade-off phần cứng và tối ưu hóa vi điều khiển
+│   │   ├── 07_evaluate_best_model.py    # Đánh giá toàn diện mô hình tốt nhất (Confusion Matrix, Latency)
+│   │   ├── 08_pdr_calculation.py        # Thống kê chi tiết PDR và chất lượng kênh thu theo Node & Payload
+│   │   ├── 09_plot_hopping_comparison.py# Vẽ biểu đồ cột đa chiều so sánh SNR, RSSI, PDR qua 6 mức tải
+│   │   ├── 10_plot_model_sizes.py       # Phân tích dung lượng bộ nhớ (Flash/RAM Footprint) trên MCU
+│   │   ├── 11_export_latex_tables.py    # Tự động xuất toàn bộ bảng số liệu sang mã LaTeX Table (.tex)
 │   │   └── build_notebook.py            # Trình sinh tự động Jupyter Notebook từ các scripts
-│   ├── models/                          # Chứa mô hình tflite, model.h và checkpoint so sánh
-│   └── figures/                         # Biểu đồ PDR, RSSI, SNR, biểu đồ huấn luyện và ma trận nhầm lẫn
-├── docs/                                # Tài liệu kỹ thuật, kịch bản thực nghiệm & pipeline chi tiết
-│   ├── KICH_BAN_THU_THAP_DU_LIEU.md     # Danh mục 21 kịch bản đo kiểm đa Node
-│   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình tổng thể 6 giai đoạn của ĐATN
-│   └── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ đấu nối & hoạt động firmware
+│   ├── models/                          # Chứa mô hình tflite, model.h và bảng so sánh benchmark
+│   └── figures/                         # Biểu đồ huấn luyện, ma trận nhầm lẫn, biểu đồ đối sánh PDR/RSSI/SNR
+├── docs/                                # Tài liệu kỹ thuật, kịch bản thực nghiệm & kiến trúc hệ thống
+│   ├── KICH_BAN_THU_THAP_DU_LIEU.md     # Danh mục 21 kịch bản đo kiểm đa Node và phân bổ tần số
+│   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình tổng thể 6 giai đoạn của Đồ án Tốt nghiệp
+│   ├── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ đấu nối phần cứng & nguyên lý firmware
+│   ├── KIEN_TRUC_FREERTOS_FIRMWARE.md   # Thiết kế Đa nhiệm FreeRTOS trên ESP32 Dual-Core
+│   └── tables/                          # Mã nguồn bảng LaTeX (.tex) tự động sinh sẵn sàng cho Báo cáo
 ├── img/                                 # Hình ảnh sơ đồ phần cứng thực tế (Fritzing Breadboard)
 │   ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32
 │   └── LoRa GW_bb.png                   # Sơ đồ đấu nối Gateway CM4 3 kênh
@@ -78,7 +86,7 @@ LoRa_TinyML_Hopping/
   <br><em>Hình 1: Sơ đồ đấu nối phần cứng chi tiết của LoRa End-Node (ESP32 DevKit V1 + Module LoRa SX1278 Ra-02 + Màn hình OLED 0.96" SSD1306)</em>
 </p>
 
-| Thiết bị ngoại vi | Chân Module | Chân ESP32 (GPIO) | Ghi chú |
+| Thiết bị ngoại vi | Chân Module | Chân ESP32 (GPIO) | Ghi chú kỹ thuật |
 | :--- | :--- | :--- | :--- |
 | **LoRa Ra-02 (SX1278)** | `MOSI` | **GPIO 27** | Bus SPI cứng (VSPI) |
 | | `MISO` | **GPIO 19** | Bus SPI cứng |
@@ -127,114 +135,113 @@ LoRa_TinyML_Hopping/
 
 ---
 
-## 3. Quy trình thực hiện đồ án từng bước
+## 3. Kiến trúc Đa nhiệm FreeRTOS trên ESP32
+
+Để đảm bảo tính thời gian thực cao và tận dụng tối đa vi xử lý 2 nhân của ESP32, toàn bộ firmware được tái cấu trúc theo mô hình **FreeRTOS SMP Dual-Core** (chi tiết xem tại [`docs/KIEN_TRUC_FREERTOS_FIRMWARE.md`](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md)):
+
+```mermaid
+graph TD
+    subgraph CORE0 [Core 0: Tác vụ Vô tuyến Thời gian thực]
+        T_RAD["Task 1: LoRa Radio Task (Priority 3 - Cao nhất)<br>Quản lý SX1278 qua VSPI, Đổi tần số tức thời, Ngắt DIO0"]
+    end
+
+    subgraph CORE1 [Core 1: Trí tuệ nhân tạo & Giao diện]
+        T_ML["Task 2: TinyML Inference Task (Priority 2)<br>Quản lý bộ đệm 10 bước, Forward Pass model.h, Bấm giờ Latency"]
+        T_APP["Task 3: Sensor/Traffic App (Priority 1)<br>Định thời chu kỳ 3.0s, Đóng gói payload 30-250B"]
+        T_DISP["Task 4: Display UI Task (Priority 0 - Thấp nhất)<br>Vẽ OLED SSD1306 qua I2C (5 FPS), Hoàn toàn không chặn LoRa SPI"]
+    end
+
+    T_APP -->|xTxQueue| T_RAD
+    T_RAD -->|Direct Task Notification| T_ML
+    T_ML -->|xHopDecisionQueue| T_RAD
+```
+
+- **Core 0 (PRO_CPU):** Làm chủ module RF SX1278, bảo đảm phát sóng và lắng nghe Downlink chính xác đến micro-giây.
+- **Core 1 (APP_CPU):** Đảm nhận tính toán suy luận mạng nơ-ron và quét màn hình OLED qua I2C mà hoàn toàn không gây trễ hoặc nghẽn bus SPI của LoRa.
+
+---
+
+## 4. Quy trình Thực hiện Đồ án Từng bước
 
 ### Bước 1: Thu thập dữ liệu thực tế (Data Collection)
-1. **Nạp firmware cho 3 Node**:
-   - Mở [MCUCode/LoRaEN_DataCollection/src/main.cpp](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_DataCollection/src/main.cpp).
+1. **Nạp firmware cho các Node**:
+   - Mở [`MCUCode/LoRaEN_DataCollection/src/main.cpp`](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_DataCollection/src/main.cpp).
    - Đặt `#define NODE_ID 'A'`, nạp cho Node 1 qua cổng COM tương ứng.
-   - Đổi thành `#define NODE_ID 'B'`, nạp cho Node 2.
-   - Đổi thành `#define NODE_ID 'C'`, nạp cho Node 3.
-   - *Khi vừa cấp điện, các Node sẽ ở chế độ **CHỜ LỆNH** (màn hình OLED báo `NODE [x] - CHO LENH`), sẵn sàng nhận lệnh từ Web Gateway hoặc nút bấm.*
-
-2. **Cài đặt Nginx & Web Dashboard trên Raspberry Pi CM4 (Chỉ chạy 1 lần đầu)**:
-   ```bash
-   cd ~/LoRa_TinyML_Hopping/GatewayCode
-   sudo chmod +x setup_webserver.sh
-   sudo ./setup_webserver.sh
-   ```
-   *Script tự động cài đặt Nginx, cấu hình Virtual Host cổng 80, và copy giao diện Web Admin vào `/var/www/loragw`.*
-
-3. **Khởi động Gateway Daemon trên Raspberry Pi CM4**:
+   - Đổi thành `#define NODE_ID 'B'`, nạp cho Node 2; đổi thành `#define NODE_ID 'C'`, nạp cho Node 3.
+2. **Khởi động Gateway Daemon & Web Dashboard trên Raspberry Pi CM4**:
    ```bash
    cd ~/LoRa_TinyML_Hopping/GatewayCode
    make clean && make
    sudo ./lora_gw_3ch
    ```
-
-4. **Truy cập Giao diện Web Dashboard (Port 80 qua Wi-Fi)**:
-   - Mở trình duyệt trên máy tính hoặc điện thoại kết nối cùng mạng Wi-Fi với CM4:
-     `http://<ĐỊA_CHỈ_IP_WIFI_CỦA_CM4>/`
-   - **Các chức năng chính trên Web Dashboard**:
-     - **Quản lý phiên đo**: Đặt tên kịch bản đo ngay trên Web (ví dụ: `A_433_175`, `A_B_433_375`, `ALL_NODES`). Hệ thống tự động ghi nhật ký vào `logs/<TÊN>.txt` và `csv/<TÊN>.csv`.
-     - **Gửi lệnh phát Downlink**: Tùy chọn kích hoạt riêng lẻ (A, B hoặc C), kích hoạt 2 Node đồng thời (A+B, B+C, A+C), hoặc kích hoạt TẤT CẢ (ALL).
-     - **Dừng / Reset**: Gửi lệnh `CMD:STOP` để dừng phát và đưa các Node về trạng thái chờ lệnh tức thời.
-     - **Cấu hình tần số OTA (Over-The-Air)**: Điều chỉnh tần số từ xa cho từng Node, hiển thị trạng thái xác nhận `ỔN ĐỊNH ✓` trước khi phát.
-     - **Giám sát thời gian thực**: Trạng thái Online/Offline, chất lượng sóng 4 vạch RSSI, giá trị SNR, và Console log gói tin.
-     - **Bộ lọc Control Traffic**: Các bản tin Ping/Pong, ACK, OTA Config chỉ dùng điều khiển và **tuyệt đối không bị ghi vào file dataset**.
-
-5. **Tiến trình phát gói tin**:
-   - Khi nhận lệnh `START`, các Node phát tuần tự 6 mức kích thước payload: `30B -> 74B -> 118B -> 162B -> 206B -> 250B` $\times$ 100 gói/mức (= 600 gói/phiên).
-   - Khi hoàn thành, Node hiển thị `HOÀN THÀNH` trên OLED và tiếp tục duy trì lắng nghe lệnh cho phiên tiếp theo.
+3. **Kích hoạt phiên đo từ Web Dashboard**:
+   - Truy cập `http://<IP_CM4>/` từ trình duyệt.
+   - Chọn kịch bản phát: Đơn Node (A, B, C) hoặc Đa Node đồng thời (A+B, A+B+C).
+   - Mỗi phiên đo tự động phát 6 mức kích thước payload: `30B -> 74B -> 118B -> 162B -> 206B -> 250B` $\times$ 100 gói/mức (= 600 gói/phiên).
 
 ---
 
 ### Bước 2: Huấn luyện mô hình TinyML trên Python
-1. **Cài đặt môi trường Python**:
+1. **Cài đặt môi trường**:
    ```bash
    cd TinyML
    pip install -r requirements.txt
    ```
-
 2. **Chuyển dữ liệu log thực tế vào pipeline**:
-   - Copy các file log thu được từ Gateway vào thư mục [TinyML/data/logs/](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/data/logs).
-
-3. **Chạy chuỗi script tiền xử lý và huấn luyện**:
+   - Copy các file log thu được từ Gateway vào thư mục [`TinyML/data/logs/`](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/data/logs).
+3. **Chạy chuỗi script tiền xử lý và huấn luyện đa thuật toán**:
    ```bash
-   # Bước 1: Trích xuất log Gateway thành CSV chuẩn
+   # Bước 1: Trích xuất log Gateway thành CSV chuẩn (1-to-1)
    python scripts/01_data_parser.py
 
-   # Bước 2: Phát hiện va chạm & gán nhãn gói mất (RSSI = -1000 dBm)
+   # Bước 2: Phát hiện va chạm & bù nhãn gói mất (RSSI = -1000 dBm, SNR = -1000 dB)
    python scripts/02_add_missed_packets.py
 
-   # Bước 3: Tạo cửa sổ trượt bộ nhớ thời gian (ts = 10 bước x 8 đặc trưng = 80 chiều)
+   # Bước 3: Phân tách MLData theo Node/Kênh và tạo cửa sổ trượt Sliding Window (ts = 10)
    python scripts/03_generate_dataset.py
 
-   # Bước 4: Huấn luyện mô hình FCNN Baseline & xuất mã nhúng C
+   # Bước 4: Tổng hợp huấn luyện đa thuật toán (FCNN, 1D-CNN, GRU, SepCNN, ResNet)
    python scripts/04_train_model.py
    ```
-   - Script 04 huấn luyện mạng nơ-ron FCNN siêu nhẹ: `Dense(10, ReLU) -> Dense(10, ReLU, L1) -> Dense(3, Softmax)`.
-   - Tích hợp `EarlyStopping(patience=25)` tránh overfitting.
-   - Vẽ đường cong Loss / Accuracy lưu tại `TinyML/figures/training_trends.png`.
-   - Xuất mô hình `TinyML/models/channel_model.tflite` (~5.8 KB) và tự động sinh mảng C byte `model.h` đồng bộ sang firmware ESP32.
+   - Script 04 tự động huấn luyện và đánh giá đối sánh 5 thuật toán, xuất bảng tổng hợp ra `models/models_benchmark_summary.csv` và biểu đồ đường cong học tập `figures/multi_model_training_comparison.png`.
+   - Mô hình tối ưu được tự động chọn, chuyển đổi sang TensorFlow Lite `models/channel_model.tflite` và xuất mã mảng C byte `models/model.h`, đồng thời đồng bộ thẳng sang firmware ESP32.
 
-4. **Sử dụng Jupyter Notebook (Tùy chọn)**:
-   - Toàn bộ pipeline trên có thể chạy trực tiếp, trực quan từng bước qua file [LoRa_TinyML_Pipeline.ipynb](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/LoRa_TinyML_Pipeline.ipynb).
-   - Nếu muốn tái tạo Notebook tự động: `python scripts/build_notebook.py`.
+4. **Sử dụng Jupyter Notebook Trực quan**:
+   - Mở file [`TinyML/LoRa_TinyML_Pipeline.ipynb`](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/LoRa_TinyML_Pipeline.ipynb).
+   - Toàn bộ quá trình huấn luyện từng thuật toán được chia thành **các cặp plaintext + code độc lập**, giúp dễ dàng theo dõi và trực quan hóa từng mô hình.
 
 ---
 
-### Bước 3: Đánh giá so sánh & Benchmark kiến trúc nơ-ron
-1. **So sánh 3 cơ chế quản lý kênh**:
+### Bước 3: Đánh giá Đối sánh, Phân tích Bộ nhớ & Xuất Bảng LaTeX
+1. **Đánh giá so sánh 3 cơ chế quản lý kênh**:
    ```bash
    python scripts/05_evaluate_comparison.py
    ```
-   Tính toán và vẽ biểu đồ đối chứng:
-   - **Average RSSI**: So sánh cường độ tín hiệu giữa Random Hopping và TinyML.
-   - **Average SNR**: So sánh chất lượng tín hiệu.
-   - **PDR (Packet Delivery Ratio)**: So sánh tỷ lệ nhận gói tin thành công giữa **Fixed Channel** (kênh cố định), **Random Hopping** (nhảy ngẫu nhiên) và **TinyML Hopping**.
+   Tính toán và vẽ biểu đồ đối chứng qua 6 mức kích thước tải:
+   - **Fixed Channel (Kênh cố định):** Thấy rõ hiện tượng nghẽn mạng và sụt giảm PDR.
+   - **Random Hopping (Nhảy ngẫu nhiên):** Tỷ lệ nhận cải thiện vừa phải nhưng vẫn có xác suất trùng kênh.
+   - **TinyML Predictive Hopping:** Dự đoán né kênh nghẽn thành công, nâng PDR lên $> 90\%$.
 
-2. **Benchmark 5 kiến trúc mạng nơ-ron**:
+2. **Benchmark Trade-off phần cứng & Đánh giá chuyên sâu mô hình tốt nhất**:
    ```bash
    python scripts/06_benchmark_models.py
-   ```
-   Huấn luyện và so sánh:
-   - **Baseline FCNN (MLP)**: Tối ưu cho Flash/RAM nhỏ nhất.
-   - **1D-CNN (Temporal Convolution)**: Nắm bắt tương quan chuỗi thời gian cục bộ.
-   - **GRU (Gated Recurrent Unit)**: Nắm bắt phụ thuộc thời gian dài hạn.
-   - **Separable 1D-CNN**: Kiến trúc tích chập tách biệt theo chiều sâu (MobileNet-style), giảm 60% tham số.
-   - **Residual 1D-CNN (ResNet-1D)**: Kết nối tắt giúp hội tụ ổn định.
-
-3. **Đánh giá chuyên sâu mô hình tối ưu**:
-   ```bash
    python scripts/07_evaluate_best_model.py
    ```
-   - Xuất Confusion Matrix (Ma trận nhầm lẫn), Precision, Recall, F1-Score cho từng kênh tần số.
-   - Phân tích chi tiết độ trễ suy luận (Inference Latency) và dung lượng bộ nhớ.
+   - Xuất Confusion Matrix (Ma trận nhầm lẫn), Precision, Recall, F1-Score cho từng kênh.
+   - Phân tích chi tiết độ trễ suy luận thời gian thực ($\mu s$) và mức độ tiêu thụ bộ nhớ.
+
+3. **Thống kê PDR chi tiết, Vẽ đồ thị đa panel & Xuất mã LaTeX**:
+   ```bash
+   python scripts/08_pdr_calculation.py
+   python scripts/09_plot_hopping_comparison.py
+   python scripts/10_plot_model_sizes.py
+   python scripts/11_export_latex_tables.py
+   ```
+   - Tự động xuất toàn bộ bảng số liệu sang các file mã nguồn LaTeX Table (`.tex`) lưu tại `docs/tables/`, sẵn sàng đưa trực tiếp vào Luận văn Tốt nghiệp.
 
 ---
 
-### Bước 4: Triển khai kiểm chứng thời gian thực trên Node
-1. Mở project [MCUCode/LoRaEN_TinyMLHopping](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_TinyMLHopping) trên PlatformIO.
+### Bước 4: Triển khai Kiểm chứng Thời gian thực trên Node
+1. Mở project [`MCUCode/LoRaEN_TinyMLHopping`](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_TinyMLHopping) trên PlatformIO.
 2. Kiểm tra file `src/model.h` (đã được sinh tự động từ Bước 2).
-3. Nạp firmware vào ESP32 để kích hoạt chế độ nhảy kênh thông minh thời gian thực và theo dõi kết quả PDR trực tiếp trên màn hình OLED.
+3. Nạp firmware vào ESP32 để kích hoạt chế độ nhảy kênh thông minh TinyML thời gian thực và theo dõi kết quả PDR, số lần nhảy kênh (Hops), độ trễ suy luận AI ($\mu s$) trực tiếp trên màn hình OLED SSD1306.
