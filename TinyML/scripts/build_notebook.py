@@ -280,66 +280,93 @@ print(f"Tổng: {total} | Nhận: {total - lost} | Mất: {lost} ({lost/total*10
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 5: Bước 3 - Tạo dataset
+# CELL 5: Bước 3 - Tạo MLData & MLdataready
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 4. Bước 3: Tạo dataset chuỗi thời gian (`03_generate_dataset`)
-Mỗi mẫu: cửa sổ trượt $t_s = 10$ bước, mỗi bước 8 đặc trưng → 80 chiều input.
-Nhãn: kênh có RSSI cao nhất tại bước $t_s + 1$.
+## 4. Bước 3: Phân chia tập dữ liệu Machine Learning (`03_generate_dataset`)
+Chuẩn hóa cấu trúc 2 tầng chuẩn bài báo:
+- **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`) và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
+- **`data/MLdataready/`**: Gom nhóm theo kênh tần số cho từng Node (`A/`, `B/`, `C/`) và toàn mạng (`ABC/`).
+- **`data/ready/dataset_ready.csv`**: Cửa sổ trượt chuỗi thời gian ($t_s = 10$ bước, 80 đặc trưng input, nhãn `target_channel`).
 """)
 
 add_code(r"""
+MLDATA_DIR = os.path.join(BASE_DIR, "data/MLData")
+MLDATAREADY_DIR = os.path.join(BASE_DIR, "data/MLdataready")
+
+for node in ['A', 'B', 'C']:
+    os.makedirs(os.path.join(MLDATA_DIR, node), exist_ok=True)
+    os.makedirs(os.path.join(MLDATAREADY_DIR, node), exist_ok=True)
+os.makedirs(os.path.join(MLDATAREADY_DIR, "ABC"), exist_ok=True)
+
 CHANNELS = [433.175, 433.375, 433.575]
+CH_NAMES = ["433_175", "433_375", "433_575"]
 WINDOW_SIZE = 10
 
 def assign_ch_flags(row):
     freq = row['frequency']
-    is_loss = (row['RSSI'] == -1000)
+    is_loss = (row['RSSI'] <= -900)
     ch_idx = int(np.argmin([abs(freq - c) for c in CHANNELS]))
     flags = [1, 1, 1]
     flags[ch_idx] = 1 if is_loss else 0
     return pd.Series(flags, index=['CH1', 'CH2', 'CH3'])
 
-def generate_features_and_labels(df):
-    flags_df = df.apply(assign_ch_flags, axis=1)
-    df = pd.concat([df, flags_df], axis=1)
+# 1. Tạo MLData/{A, B, C}/
+flags_df = imputed_df.apply(assign_ch_flags, axis=1)
+flagged_all = pd.concat([imputed_df, flags_df], axis=1)
 
-    best_lookup = {}
-    for (src, size, pid), grp in df.groupby(['source', 'size_of_message', 'packet_ID']):
-        valid = grp[grp['RSSI'] > -900]
-        if not valid.empty:
-            best_ch = int(np.argmin([abs(valid.loc[valid['RSSI'].idxmax(), 'frequency'] - c) for c in CHANNELS]))
-        else:
-            best_ch = int(pid % len(CHANNELS))
-        best_lookup[(src, size, pid)] = best_ch
+mldata_cols = ['packet_ID', 'source', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
+for node in ['A', 'B', 'C']:
+    sub_node = flagged_all[flagged_all['source'] == node]
+    if not sub_node.empty:
+        sub_node[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, f"data_node_{node}.csv"), index=False)
 
-    samples = []
-    for (source, size), group in df.groupby(['source', 'size_of_message']):
-        group = group.sort_values('packet_ID').reset_index(drop=True)
-        if len(group) <= WINDOW_SIZE:
-            continue
-        for i in range(len(group) - WINDOW_SIZE):
-            window = group.iloc[i:i + WINDOW_SIZE]
-            target = group.iloc[i + WINDOW_SIZE]
-            features = []
-            for _, r in window.iterrows():
-                features.extend([float(r['CH1']), float(r['CH2']), float(r['CH3']),
-                                 float(r['SNR']), float(r['RSSI']),
-                                 float(r['size_of_message']), float(r['packet_ID']),
-                                 float(r['frequency'])])
-            pid = int(target['packet_ID'])
-            label = best_lookup.get((source, size, pid), int(pid % len(CHANNELS)))
-            d = {f"feat_{j}": v for j, v in enumerate(features)}
-            d['target_channel'] = label
-            d['source'] = source
-            d['size_of_message'] = size
-            samples.append(d)
-    return pd.DataFrame(samples)
+# 2. Tạo MLdataready/{A, B, C, ABC}/
+for ci, (ch_name, ch_f) in enumerate(zip(CH_NAMES, CHANNELS)):
+    ch_sub = flagged_all[abs(flagged_all['frequency'] - ch_f) < 0.1]
+    for node in ['A', 'B', 'C']:
+        node_ch = ch_sub[ch_sub['source'] == node]
+        node_ch[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv"), index=False)
+    ch_sub[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv"), index=False)
 
-ready_df = generate_features_and_labels(imputed_df)
+print(f"[OK] Đã tạo MLData và MLdataready ({len(flagged_all)} dòng dữ liệu)")
+
+# 3. Tạo vector cửa sổ trượt dataset_ready.csv
+best_lookup = {}
+for (src, size, pid), grp in flagged_all.groupby(['source', 'size_of_message', 'packet_ID']):
+    valid = grp[grp['RSSI'] > -900]
+    if not valid.empty:
+        best_ch = int(np.argmin([abs(valid.loc[valid['RSSI'].idxmax(), 'frequency'] - c) for c in CHANNELS]))
+    else:
+        best_ch = int(pid % len(CHANNELS))
+    best_lookup[(src, size, pid)] = best_ch
+
+samples = []
+for (source, size), group in flagged_all.groupby(['source', 'size_of_message']):
+    group = group.sort_values('packet_ID').reset_index(drop=True)
+    if len(group) <= WINDOW_SIZE:
+        continue
+    for i in range(len(group) - WINDOW_SIZE):
+        window = group.iloc[i:i + WINDOW_SIZE]
+        target = group.iloc[i + WINDOW_SIZE]
+        features = []
+        for _, r in window.iterrows():
+            features.extend([float(r['CH1']), float(r['CH2']), float(r['CH3']),
+                             float(r['SNR']), float(r['RSSI']),
+                             float(r['size_of_message']), float(r['packet_ID']),
+                             float(r['frequency'])])
+        pid = int(target['packet_ID'])
+        label = best_lookup.get((source, size, pid), int(pid % len(CHANNELS)))
+        d = {f"feat_{j}": v for j, v in enumerate(features)}
+        d['target_channel'] = label
+        d['source'] = source
+        d['size_of_message'] = size
+        samples.append(d)
+
+ready_df = pd.DataFrame(samples)
 ready_out = os.path.join(READY_DIR, "dataset_ready.csv")
 ready_df.to_csv(ready_out, index=False)
-print(f"[SUCCESS] Dataset: {len(ready_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu)")
+print(f"[SUCCESS] Dataset Sliding Window: {len(ready_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu) -> {ready_out}")
 ready_df.head(5)
 """)
 
