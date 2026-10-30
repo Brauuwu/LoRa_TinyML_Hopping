@@ -3,14 +3,15 @@
 """
 06_benchmark_models.py
 Huấn luyện và so sánh các kiến trúc mạng nơ-ron cho Channel Hopping:
-  1. Baseline FCNN (MLP)
+  1. Baseline FCNN (MLP - Bài báo gốc)
   2. 1D-CNN (Temporal Convolution)
   3. GRU (Gated Recurrent Unit)
   4. Depthwise Separable 1D-CNN (MobileNet-style)
   5. Residual 1D-CNN (ResNet-1D)
 
-Đọc dữ liệu thực tế từ data/MLdataready/, huấn luyện đồng thời,
-so sánh Accuracy/Params/TFLite size.
+Đọc dữ liệu theo đúng phương pháp bài báo từ data/MLdataready/ABC/,
+tự nhận dạng cấu hình kênh (433 MHz hoặc 868 MHz).
+Huấn luyện đồng thời, so sánh Accuracy/Params/TFLite size.
 """
 
 import os
@@ -33,51 +34,51 @@ SEED = 1337
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
-# Các kênh tần số làm việc của hệ thống (433 MHz Band)
-CHANNELS_DATA = ["433_175", "433_375", "433_575"]
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MLDATA_READY_DIR = os.path.join(SCRIPT_DIR, "../data/MLdataready")
+READY_FILE = os.path.join(SCRIPT_DIR, "../data/ready/dataset_ready.csv")
+OUT_DIR = os.path.join(SCRIPT_DIR, "../models/comparison")
+os.makedirs(OUT_DIR, exist_ok=True)
 
 headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
 SAMPLES_PER_CHANNEL = 10
-NUM_CHANNELS = len(CHANNELS_DATA)
-ONE_HOT = np.eye(NUM_CHANNELS)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "../data/MLdataready")
-READY_FILE = os.path.join(os.path.dirname(__file__), "../data/ready/dataset_ready.csv")
-OUT_DIR = os.path.join(os.path.dirname(__file__), "../models/comparison")
-os.makedirs(OUT_DIR, exist_ok=True)
+
+def detect_channels():
+    """Tự động nhận dạng cấu hình kênh từ MLdataready/ABC/."""
+    abc_dir = os.path.join(MLDATA_READY_DIR, "ABC")
+    if not os.path.isdir(abc_dir):
+        return None
+    channel_names = sorted([
+        os.path.splitext(f)[0]
+        for f in os.listdir(abc_dir) if f.endswith(".csv")
+    ])
+    return channel_names if channel_names else None
 
 
 def load_data():
-    """Nạp dữ liệu từ data/ready/dataset_ready.csv hoặc MLdataready"""
-    if os.path.exists(READY_FILE):
-        try:
-            df_ready = pd.read_csv(READY_FILE)
-            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
-                X_all = df_ready[feat_cols].values
-                y_all = df_ready['target_channel'].values
-                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
-                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=NUM_CHANNELS)
-                return raw_inputs, raw_outputs
-        except Exception:
-            pass
+    """
+    Nạp dữ liệu theo phương pháp bài báo gốc (đọc từ MLdataready/ABC/).
+    Fallback sang dataset_ready.csv nếu chưa có dữ liệu MLdataready.
+    """
+    channel_names = detect_channels()
 
-    raw_inputs = []
-    raw_outputs = []
+    if channel_names:
+        NUM_CHANNELS = len(channel_names)
+        ONE_HOT = np.eye(NUM_CHANNELS)
+        raw_inputs = []
+        raw_outputs = []
 
-    for ch_idx in range(NUM_CHANNELS):
-        ch = CHANNELS_DATA[ch_idx]
+        for ch_idx, ch_name in enumerate(channel_names):
+            csv_path = os.path.join(MLDATA_READY_DIR, "ABC", f"{ch_name}.csv")
+            if not os.path.exists(csv_path):
+                csv_path = os.path.join(MLDATA_READY_DIR, "A", f"{ch_name}.csv")
+            if not os.path.exists(csv_path):
+                continue
 
-        csv_path = os.path.join(DATA_DIR, "ABC", f"{ch}.csv")
-        if not os.path.exists(csv_path):
-            csv_path = os.path.join(DATA_DIR, "A", f"{ch}.csv")
-        if not os.path.exists(csv_path):
-            continue
-
-        try:
+            target = ONE_HOT[ch_idx]
             df = pd.read_csv(csv_path, names=headers, skiprows=1)
             num_recordings = int(df.shape[0] / SAMPLES_PER_CHANNEL)
-            target = ONE_HOT[ch_idx]
 
             for i in range(num_recordings):
                 tensor = []
@@ -95,28 +96,44 @@ def load_data():
                     ])
                 raw_inputs.append(tensor)
                 raw_outputs.append(target)
+
+        if raw_inputs:
+            return np.array(raw_inputs), np.array(raw_outputs)
+
+    # Fallback: Đọc từ dataset_ready.csv
+    if os.path.exists(READY_FILE):
+        try:
+            df_ready = pd.read_csv(READY_FILE)
+            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+                X_all = df_ready[feat_cols].values
+                y_all = df_ready['target_channel'].values
+                num_ch = len(np.unique(y_all))
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
+                return raw_inputs, raw_outputs
         except Exception:
             pass
 
-    if not raw_inputs:
-        print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 -> 02 -> 03 trước.")
-        return np.array([]), np.array([])
-
-    return np.array(raw_inputs), np.array(raw_outputs)
+    print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 → 03 trước.")
+    return np.array([]), np.array([])
 
 
-# Định nghĩa các kiến trúc mô hình
-def build_fcnn(T, F):
+# ── Định nghĩa các kiến trúc mô hình ─────────────────────────────────────
+
+def build_fcnn(T, F, num_ch):
+    """1. Baseline FCNN (Bài báo gốc)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T * F,)),
         layers.Dense(10, activation='relu'),
         layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4)),
-        layers.Dense(NUM_CHANNELS, activation='softmax')
+        layers.Dense(num_ch, activation='softmax')
     ], name="Baseline_FCNN")
     return m, True
 
 
-def build_cnn1d(T, F):
+def build_cnn1d(T, F, num_ch):
+    """2. 1D-CNN (Temporal Convolution)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F)),
         layers.Conv1D(16, kernel_size=3, padding='same', activation='relu'),
@@ -125,36 +142,40 @@ def build_cnn1d(T, F):
         layers.Conv1D(32, kernel_size=3, padding='same', activation='relu'),
         layers.GlobalAveragePooling1D(),
         layers.Dense(16, activation='relu'),
-        layers.Dense(NUM_CHANNELS, activation='softmax')
+        layers.Dense(num_ch, activation='softmax')
     ], name="1D_CNN")
     return m, False
 
 
-def build_gru(T, F):
+def build_gru(T, F, num_ch):
+    """3. GRU (Gated Recurrent Unit)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F)),
         layers.GRU(16, return_sequences=False),
         layers.Dense(16, activation='relu'),
-        layers.Dense(NUM_CHANNELS, activation='softmax')
+        layers.Dense(num_ch, activation='softmax')
     ], name="GRU_RNN")
     return m, False
 
 
-def build_separable_cnn(T, F):
+def build_separable_cnn(T, F, num_ch):
+    """4. Depthwise Separable 1D-CNN (MobileNet-style)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F)),
         layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu'),
         layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu'),
         layers.GlobalAveragePooling1D(),
-        layers.Dense(NUM_CHANNELS, activation='softmax')
+        layers.Dense(num_ch, activation='softmax')
     ], name="Separable_1D_CNN")
     return m, False
 
 
-def build_resnet1d(T, F):
+def build_resnet1d(T, F, num_ch):
+    """5. Residual 1D-CNN (ResNet-1D với Skip Connection)"""
     inputs = layers.Input(shape=(T, F))
     x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(inputs)
 
+    # Residual Block
     res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(x)
     res = layers.Conv1D(16, kernel_size=3, padding='same')(res)
     x = layers.add([x, res])
@@ -162,14 +183,16 @@ def build_resnet1d(T, F):
 
     x = layers.GlobalAveragePooling1D()(x)
     x = layers.Dense(16, activation='relu')(x)
-    outputs = layers.Dense(NUM_CHANNELS, activation='softmax')(x)
+    outputs = layers.Dense(num_ch, activation='softmax')(x)
 
     m = models.Model(inputs=inputs, outputs=outputs, name="ResNet_1D")
     return m, False
 
 
 def main():
-    print("=== BƯỚC 6: SO SÁNH KIẾN TRÚC MẠNG NƠ-RON ===")
+    print("=" * 72)
+    print(" BƯỚC 6: SO SÁNH KIẾN TRÚC MẠNG NƠ-RON (BENCHMARK)")
+    print("=" * 72)
 
     raw_inputs, raw_outputs = load_data()
     if len(raw_inputs) == 0:
@@ -177,16 +200,17 @@ def main():
         return
 
     N, T, F = raw_inputs.shape
-    print(f"[DATA] {N} mẫu, chuỗi {T} bước x {F} đặc trưng")
+    NUM_CHANNELS = raw_outputs.shape[1]
+    print(f"[DATA] {N} mẫu, chuỗi {T} bước x {F} đặc trưng, {NUM_CHANNELS} kênh")
 
-    # Chuẩn hóa
+    # Chuẩn hóa StandardScaler
     flattened = raw_inputs.reshape(N * T, F)
     scaler = StandardScaler()
     flattened_scaled = scaler.fit_transform(flattened)
     X_seq = flattened_scaled.reshape(N, T, F)
     X_flat = X_seq.reshape(N, T * F)
 
-    # Chia tập cố định
+    # Chia tập train/val/test cố định
     idx_train, idx_temp = train_test_split(np.arange(N), test_size=0.4, random_state=SEED)
     idx_val, idx_test = train_test_split(idx_temp, test_size=0.5, random_state=SEED)
 
@@ -200,7 +224,7 @@ def main():
     BATCH_SIZE = 8
 
     for factory in model_factories:
-        model, is_flat = factory(T, F)
+        model, is_flat = factory(T, F, NUM_CHANNELS)
         name = model.name
         print(f"\n{'='*55}")
         print(f" Đang huấn luyện: {name}")

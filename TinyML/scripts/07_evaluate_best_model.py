@@ -7,6 +7,7 @@
   2. Mạng LoRa: PDR, RSSI, SNR so sánh Random vs FCNN vs Best Model
   3. TinyML: Inference Latency, Params, TFLite size
 
+Đọc dữ liệu từ MLdataready/ABC/ (tự nhận dạng kênh tần số).
 Toàn bộ dữ liệu lấy từ file CSV thực nghiệm, không bịa số liệu.
 """
 
@@ -34,55 +35,49 @@ SEED = 1337
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
-CHANNELS_DATA = ["433_175", "433_375", "433_575"]
-CHANNEL_LABELS = ["CH1 (433.175 MHz)", "CH2 (433.375 MHz)", "CH3 (433.575 MHz)"]
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MLDATA_READY_DIR = os.path.join(SCRIPT_DIR, "../data/MLdataready")
+READY_FILE = os.path.join(SCRIPT_DIR, "../data/ready/dataset_ready.csv")
+IMPUTED_DIR = os.path.join(SCRIPT_DIR, "../data/imputed")
+FORMATTED_DIR = os.path.join(SCRIPT_DIR, "../data/formattedCSV")
+OUT_DIR = os.path.join(SCRIPT_DIR, "../models/comparison")
+os.makedirs(OUT_DIR, exist_ok=True)
+
 headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
 SAMPLES_PER_CHANNEL = 10
-NUM_CHANNELS = len(CHANNELS_DATA)
-ONE_HOT = np.eye(NUM_CHANNELS)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "../data/MLdataready")
-READY_FILE = os.path.join(os.path.dirname(__file__), "../data/ready/dataset_ready.csv")
-FORMATTED_DIR = os.path.join(os.path.dirname(__file__), "../data/formattedCSV")
-OUT_DIR = os.path.join(os.path.dirname(__file__), "../models/comparison")
-os.makedirs(OUT_DIR, exist_ok=True)
+
+def detect_channels():
+    """Tự động nhận dạng cấu hình kênh từ MLdataready/ABC/."""
+    abc_dir = os.path.join(MLDATA_READY_DIR, "ABC")
+    if not os.path.isdir(abc_dir):
+        return None
+    channel_names = sorted([
+        os.path.splitext(f)[0]
+        for f in os.listdir(abc_dir) if f.endswith(".csv")
+    ])
+    return channel_names if channel_names else None
 
 
 def load_data():
-    if os.path.exists(READY_FILE):
-        try:
-            df_ready = pd.read_csv(READY_FILE)
-            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
-                X_all = df_ready[feat_cols].values
-                y_all = df_ready['target_channel'].values
-                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
-                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=NUM_CHANNELS)
-                sample_meta = []
-                for _, row in df_ready.iterrows():
-                    sample_meta.append({
-                        'size': int(row.get('size_of_message', 30)),
-                        'pkt_id': 0,
-                        'true_ch': int(row['target_channel'])
-                    })
-                return raw_inputs, raw_outputs, sample_meta
-        except Exception:
-            pass
+    """Nạp dữ liệu theo phương pháp bài báo gốc từ MLdataready/ABC/."""
+    channel_names = detect_channels()
 
-    raw_inputs, raw_outputs, sample_meta = [], [], []
+    if channel_names:
+        NUM_CHANNELS = len(channel_names)
+        ONE_HOT = np.eye(NUM_CHANNELS)
+        raw_inputs, raw_outputs, sample_meta = [], [], []
 
-    for ch_idx in range(NUM_CHANNELS):
-        ch = CHANNELS_DATA[ch_idx]
-        csv_path = os.path.join(DATA_DIR, "ABC", f"{ch}.csv")
-        if not os.path.exists(csv_path):
-            csv_path = os.path.join(DATA_DIR, "A", f"{ch}.csv")
-        if not os.path.exists(csv_path):
-            continue
+        for ch_idx, ch_name in enumerate(channel_names):
+            csv_path = os.path.join(MLDATA_READY_DIR, "ABC", f"{ch_name}.csv")
+            if not os.path.exists(csv_path):
+                csv_path = os.path.join(MLDATA_READY_DIR, "A", f"{ch_name}.csv")
+            if not os.path.exists(csv_path):
+                continue
 
-        try:
+            target = ONE_HOT[ch_idx]
             df = pd.read_csv(csv_path, names=headers, skiprows=1)
             num_rec = int(df.shape[0] / SAMPLES_PER_CHANNEL)
-            target = ONE_HOT[ch_idx]
 
             for i in range(num_rec):
                 tensor = []
@@ -102,26 +97,51 @@ def load_data():
                     'pkt_id': int(df['packet_ID'][last_idx]),
                     'true_ch': ch_idx
                 })
+
+        if raw_inputs:
+            return np.array(raw_inputs), np.array(raw_outputs), sample_meta, channel_names
+
+    # Fallback: Đọc từ dataset_ready.csv
+    if os.path.exists(READY_FILE):
+        try:
+            df_ready = pd.read_csv(READY_FILE)
+            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+                X_all = df_ready[feat_cols].values
+                y_all = df_ready['target_channel'].values
+                num_ch = len(np.unique(y_all))
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
+                sample_meta = []
+                for _, row in df_ready.iterrows():
+                    sample_meta.append({
+                        'size': int(row.get('size_of_message', 30)),
+                        'pkt_id': 0,
+                        'true_ch': int(row['target_channel'])
+                    })
+                ch_names = [f"CH{i+1}" for i in range(num_ch)]
+                return raw_inputs, raw_outputs, sample_meta, ch_names
         except Exception:
             pass
 
-    if not raw_inputs:
-        print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 -> 02 -> 03 trước.")
-        return np.array([]), np.array([]), []
-
-    return np.array(raw_inputs), np.array(raw_outputs), sample_meta
+    print("[INFO] Chưa có dữ liệu. Hãy chạy các bước 01 → 03 trước.")
+    return np.array([]), np.array([]), [], []
 
 
 def main():
-    print("=== BƯỚC 7: ĐÁNH GIÁ TOÀN DIỆN MÔ HÌNH TỐT NHẤT ===")
+    print("=" * 72)
+    print(" BƯỚC 7: ĐÁNH GIÁ TOÀN DIỆN MÔ HÌNH TỐT NHẤT")
+    print("=" * 72)
 
-    raw_inputs, raw_outputs, sample_meta = load_data()
+    raw_inputs, raw_outputs, sample_meta, channel_names = load_data()
     if len(raw_inputs) == 0:
         print("[ERROR] Không nạp được dữ liệu!")
         return
 
     N, T, F = raw_inputs.shape
-    print(f"[DATA] {N} mẫu, chuỗi {T}x{F}")
+    NUM_CHANNELS = raw_outputs.shape[1]
+    CHANNEL_LABELS = [f"CH {ch}" for ch in channel_names]
+    print(f"[DATA] {N} mẫu, chuỗi {T}x{F}, {NUM_CHANNELS} kênh: {channel_names}")
 
     # Chuẩn hóa
     flat = raw_inputs.reshape(N * T, F)
@@ -199,12 +219,19 @@ def main():
     print("     PHẦN 2: CHỈ SỐ MẠNG LORA (DỮ LIỆU THỰC)")
     print(f"{'='*80}")
 
-    # Đọc dữ liệu kênh thực tế từ formattedCSV
+    # Đọc dữ liệu kênh thực tế
     channel_data = {}
-    for ch in CHANNELS_DATA:
-        f_path = os.path.join(FORMATTED_DIR, f"A_B_C_{ch}.csv")
-        if os.path.exists(f_path):
-            channel_data[ch] = pd.read_csv(f_path)
+    for ch in channel_names:
+        # Thử nhiều pattern file name
+        for prefix in ["A_B_C_", ""]:
+            f_path = os.path.join(IMPUTED_DIR, f"{prefix}{ch}.csv")
+            if os.path.exists(f_path):
+                channel_data[ch] = pd.read_csv(f_path)
+                break
+            f_path = os.path.join(FORMATTED_DIR, f"{prefix}{ch}.csv")
+            if os.path.exists(f_path):
+                channel_data[ch] = pd.read_csv(f_path)
+                break
 
     test_meta = [sample_meta[i] for i in idx_test]
     sizes = sorted(set(m['size'] for m in test_meta))
@@ -215,14 +242,14 @@ def main():
         if not subset_idx:
             continue
 
-        rand_choices = np.random.choice([0, 1, 2], size=len(subset_idx))
+        rand_choices = np.random.choice(list(range(NUM_CHANNELS)), size=len(subset_idx))
         fcnn_choices = [y_pred_fcnn[i] for i in subset_idx]
         best_choices = [y_pred_cls[i] for i in subset_idx]
 
         def eval_choices(choices):
             received, rssi_vals, snr_vals = 0, [], []
             for ch_idx in choices:
-                ch_name = CHANNELS_DATA[ch_idx]
+                ch_name = channel_names[ch_idx]
                 df_ch = channel_data.get(ch_name)
                 if df_ch is not None:
                     sub = df_ch[df_ch['size_of_message'] == size]
