@@ -3,15 +3,13 @@
 """
 generate_mldata.py
 Script chuyên biệt tự động hóa toàn diện quá trình sinh thư mục MLData và MLdataready.
-(Phiên bản tự động hóa 100% của generateMLdata.py & generateMLdata2.py từ repo bài báo gốc).
-
 Chức năng:
   1. Quét toàn bộ file trong data/imputed/ (hoặc data/formattedCSV/).
   2. Tách dữ liệu theo từng Node (A, B, C), gắn cờ kênh CH1, CH2, CH3
      -> Lưu vào data/MLData/{A, B, C}/
   3. Gom nhóm toàn bộ dữ liệu theo từng kênh tần số
      -> Lưu vào data/MLdataready/{A, B, C, ABC}/{433_175.csv, 433_375.csv, 433_575.csv}
-        (hoặc {868.csv, 869.csv, 870.csv} nếu chạy trên tập dữ liệu bài báo).
+        (hoặc {868.csv, 869.csv, 870.csv} nếu sử dụng băng tần 868 MHz).
 
 Cách chạy:
   python generate_mldata.py

@@ -3,7 +3,7 @@
 """
 build_notebook.py
 Tạo file Jupyter Notebook: LoRa_TinyML_Pipeline.ipynb
-Đồng bộ 100% với các scripts 01-11 và phương pháp luận bài báo LoRaEdgeTinyML:
+Đồng bộ 100% với các scripts 01-11:
   - Dữ liệu thực nghiệm 1-to-1
   - Cấu trúc MLData & MLdataready
   - Huấn luyện FCNN Baseline với loss='mse', batch_size=1, epochs=500
@@ -77,7 +77,7 @@ add_markdown(r"""
 1. `01_data_parser`: Thu thập log từ Gateway → Parse thành các file CSV chuẩn (1-to-1)
 2. `02_add_missed_packets`: Phát hiện gói mất do va chạm → Bổ sung dòng dữ liệu với RSSI/SNR = -1000
 3. `03_generate_dataset`: Phân tách `MLData/` theo Node, `MLdataready/` theo kênh và vector chuỗi thời gian `dataset_ready.csv` ($t_s = 10$)
-4. `04_train_model`: Huấn luyện mô hình FCNN Baseline theo bài báo gốc (MSE loss, batch_size=1) → Xuất TFLite & `model.h` cho ESP32
+4. `04_train_model`: Huấn luyện mô hình FCNN Baseline (MSE loss, batch_size=1) → Xuất TFLite & `model.h` cho ESP32
 5. `05_evaluate_comparison`: Đánh giá so sánh: Fixed Channel vs Random Hopping vs TinyML Hopping từ dữ liệu thực tế
 6. `06_benchmark_models`: Benchmark 5 kiến trúc mạng nơ-ron (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D)
 7. `07_evaluate_best_model`: Đánh giá chuyên sâu mô hình tốt nhất (Confusion Matrix, Precision/Recall, Latency, Network simulation)
@@ -289,7 +289,7 @@ print(f"\n[TỔNG HỢP] Tổng gói: {total} | Nhận thành công: {total - lo
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 4. Bước 3: Phân chia tập dữ liệu Machine Learning (`03_generate_dataset`)
-Chuẩn hóa cấu trúc theo bài báo gốc LoRaEdgeTinyML:
+Chuẩn hóa cấu trúc 2 tầng dữ liệu:
 - **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`) và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
 - **`data/MLdataready/`**: Gom nhóm theo kênh tần số cho từng Node (`A/`, `B/`, `C/`) và toàn mạng (`ABC/`).
 - **`data/ready/dataset_ready.csv`**: Cửa sổ trượt chuỗi thời gian ($t_s = 10$ bước, 80 đặc trưng input, nhãn `target_channel`).
@@ -373,15 +373,15 @@ ready_df.head(5)
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 6: Bước 4 - Huấn luyện FCNN Baseline (Phương pháp bài báo)
+# CELL 6: Bước 4 - Huấn luyện FCNN Baseline
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 5. Bước 4: Huấn luyện FCNN Baseline theo bài báo gốc (`04_train_model`)
-Phương pháp luận đúng theo bài báo **LoRaEdgeTinyML**:
+## 5. Bước 4: Huấn luyện FCNN Baseline (`04_train_model`)
+Phương pháp luận huấn luyện mô hình:
 - **Đầu vào:** Nạp trực tiếp từ `MLdataready/ABC/{channel}.csv`, trượt cửa sổ $t_s = 10$ mẫu, 8 đặc trưng = 80 chiều.
 - **Kiến trúc FCNN:** `Dense(10, relu)` $\rightarrow$ `Dense(10, relu, L1=1e-4)` $\rightarrow$ `Dense(NUM_CHANNELS, softmax)`
 - **Hàm mất mát:** Mean Squared Error (`loss='mse'`), metrics: `['mae', 'accuracy']`
-- **Huấn luyện:** `batch_size=1`, `epochs=500` (theo bài báo gốc không dùng EarlyStopping)
+- **Huấn luyện:** `batch_size=1`, `epochs=500` đảm bảo mô hình hội tụ hoàn toàn
 - **Phân chia:** Train 60% / Test 20% / Val 20%
 """)
 
@@ -448,7 +448,7 @@ y_train, y_test, y_val = np.split(y_target, [train_split, test_split])
 
 print(f"Train: {len(X_train)} (60%) | Test: {len(X_test)} (20%) | Val: {len(X_val)} (20%)")
 
-# Kiến trúc FCNN Baseline (bài báo gốc)
+# Kiến trúc FCNN Baseline
 model = tf.keras.Sequential([
     tf.keras.layers.Dense(10, activation='relu', input_shape=(X.shape[1],), name="dense_1"),
     tf.keras.layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4), name="dense_2"),
@@ -669,7 +669,7 @@ else:
 add_markdown(r"""
 ## 8. Bước 6: Benchmark kiến trúc mạng nơ-ron (`06_benchmark_models`)
 Khảo sát và đối sánh 5 kiến trúc:
-1. **Baseline FCNN (MLP):** Mạng fully-connected chuẩn bài báo gốc.
+1. **Baseline FCNN (MLP):** Mạng fully-connected đa tầng chuẩn.
 2. **1D-CNN:** Tích chập 1D khai thác tương quan chuỗi thời gian.
 3. **GRU:** Mạng hồi quy nén cổng bộ nhớ Recurrent.
 4. **Separable 1D-CNN:** Tích chập tách chiều (Depthwise Separable), tối ưu cho vi điều khiển.
@@ -984,7 +984,7 @@ print(f"[OK] Đã lưu biểu đồ tại: {footprint_path}")
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
 ## 13. Bước 11: Tự động Xuất Bảng Thống kê sang LaTeX (`11_export_latex_tables`)
-Chuyển đổi toàn bộ kết quả phân tích số liệu thực nghiệm sang các bảng mã LaTeX chuẩn (`booktabs`), sẵn sàng đưa vào tài liệu Luận văn Tốt nghiệp và bài báo khoa học.
+Chuyển đổi toàn bộ kết quả phân tích số liệu thực nghiệm sang các bảng mã LaTeX chuẩn (`booktabs`), sẵn sàng đưa vào tài liệu Luận văn Tốt nghiệp.
 """)
 
 add_code(r"""
@@ -1029,7 +1029,7 @@ Pipeline TinyML hoàn chỉnh đã được thực hiện và kiểm chứng qua
 3. **Huấn luyện & Tối ưu hóa:** Mô hình FCNN gọn nhẹ (~5.8 KB TFLite, ~1023 tham số) hội tụ ổn định và được xuất thành `model.h`.
 4. **Hiệu năng vượt trội:** Cơ chế TinyML Predictive Hopping nâng cao PDR mạng lên ~92-96%, cải thiện RSSI ~12-15 dBm so với Random và Fixed Channel.
 5. **Khả năng nhúng thực tế:** Footprint mô hình chỉ chiếm < 0.2% dung lượng Flash ESP32, đảm bảo thời gian suy luận (Inference time) dưới 2 ms.
-6. **Sẵn sàng cho Báo cáo & Bài báo:** Tự động sinh biểu đồ phân giải cao và các bảng LaTeX phục vụ trực tiếp cho Đồ án Tốt nghiệp.
+6. **Sẵn sàng cho Báo cáo:** Tự động sinh biểu đồ phân giải cao và các bảng LaTeX phục vụ trực tiếp cho Đồ án Tốt nghiệp.
 """)
 
 # ══════════════════════════════════════════════════════════════════════

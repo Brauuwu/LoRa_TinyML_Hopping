@@ -11,7 +11,7 @@ Ví dụ:
   logs/A_B_C_433_575.txt -> parsed/A_B_C_433_575.csv
 
 Hỗ trợ các định dạng:
-  1. Log text chuẩn bài báo LoRaEdgeTinyML & Gateway txt file:
+  1. Log text Gateway txt file:
      "11:45:51.918 -> A0*152087041786616005564650518 size_of_message 30 RSSI -88 SNR 10 Frequency 433.175"
   2. Log console Gateway dạng pipe:
      " 12:00:00.123 |  433.175 |   A  |      0 |   30 |        -75 |     9.0"
@@ -38,7 +38,7 @@ if sys.platform == "win32":
 # 1. BIỂU THỨC CHÍNH QUY (REGEX) TRÍCH XUẤT CÁC ĐỊNH DẠNG LOG
 # ═════════════════════════════════════════════════════════════════════════════
 
-# Regex 1: Log text chuẩn (Paper LoRaEdgeTinyML & Gateway txt file)
+# Regex 1: Log text chuẩn Gateway txt file
 # Cú pháp: "11:45:51.918 -> A0*... size_of_message 30 RSSI -88 SNR 10 Frequency 433.175"
 PATTERN_TEXT_LOG = re.compile(
     r"(?P<time_slot>\d{2}:\d{2}:\d{2}[.:]\d{3})\s*->\s*"

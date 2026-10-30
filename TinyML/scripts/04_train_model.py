@@ -5,14 +5,14 @@
 Huấn luyện mô hình FCNN phân loại kênh LoRa tối ưu (Channel Hopping),
 chuyển đổi sang TensorFlow Lite và xuất mã C header (model.h) cho ESP32.
 
-Phương pháp luận đúng theo bài báo LoRaEdgeTinyML:
+Phương pháp luận:
   - Đọc dữ liệu từ data/MLdataready/ABC/{channel}.csv
   - Cửa sổ trượt SAMPLES_PER_CHANNEL = 10 bước, 8 đặc trưng/bước = 80 input
   - One-hot encoding cho NUM_CHANNELS lớp
   - Chuẩn hóa StandardScaler
   - FCNN: Dense(10, relu) → Dense(10, relu, L1=1e-4) → Dense(3, softmax)
   - Huấn luyện: loss='mse', metrics=['mae', 'accuracy'], batch_size=1, epochs=500
-  - Không dùng EarlyStopping (đúng theo bài báo gốc)
+  - Huấn luyện 500 epochs đảm bảo mô hình hội tụ hoàn toàn
   - Chia tập: Train 60% / Test 20% / Val 20%
 
 Cách chạy:
@@ -51,7 +51,7 @@ SEED = 1337
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
-# Tham số huấn luyện (đúng theo bài báo gốc)
+# Tham số huấn luyện
 SAMPLES_PER_CHANNEL = 10
 EPOCHS = 500
 BATCH_SIZE = 1
@@ -77,7 +77,7 @@ def detect_channels():
 
 def load_data_from_mldataready(channel_names):
     """
-    Đọc dữ liệu từ MLdataready/ABC/ theo đúng phương pháp bài báo gốc.
+    Đọc dữ liệu từ MLdataready/ABC/.
     Mỗi file CSV tương ứng 1 kênh → one-hot label.
     Cửa sổ trượt SAMPLES_PER_CHANNEL = 10 bước, 8 đặc trưng/bước.
     """
@@ -156,10 +156,10 @@ def convert_bytes_to_c_header(tflite_bytes, output_path, array_name="model"):
 
 def main():
     print("=" * 72)
-    print(" BƯỚC 4: HUẤN LUYỆN MÔ HÌNH TINYML FCNN (PHƯƠNG PHÁP BÀI BÁO GỐC)")
+    print(" BƯỚC 4: HUẤN LUYỆN MÔ HÌNH TINYML FCNN")
     print("=" * 72)
 
-    # Ưu tiên đọc từ MLdataready/ABC/ (phương pháp bài báo gốc)
+    # Ưu tiên đọc từ MLdataready/ABC/
     channel_names = detect_channels()
     use_mldataready = False
 
@@ -181,18 +181,18 @@ def main():
 
     print(f"\n[DATA] Tổng: {len(inputs)} mẫu, Input: {inputs.shape[1]} chiều, Output: {NUM_CHANNELS} kênh")
 
-    # Chuẩn hóa StandardScaler (đúng bài báo gốc)
+    # Chuẩn hóa StandardScaler
     scaler = StandardScaler()
     inputs = scaler.fit_transform(inputs)
 
-    # Shuffle ngẫu nhiên (đúng bài báo gốc)
+    # Shuffle ngẫu nhiên
     num_inputs = len(inputs)
     randomize = np.arange(num_inputs)
     np.random.shuffle(randomize)
     inputs = inputs[randomize]
     outputs = outputs[randomize]
 
-    # Chia tập: 60% Train / 20% Test / 20% Val (đúng bài báo gốc)
+    # Chia tập: 60% Train / 20% Test / 20% Val
     TRAIN_SPLIT = int(0.6 * num_inputs)
     TEST_SPLIT = int(0.2 * num_inputs + TRAIN_SPLIT)
 
@@ -201,14 +201,14 @@ def main():
 
     print(f"Train: {len(inputs_train)} (60%) | Test: {len(inputs_test)} (20%) | Val: {len(inputs_val)} (20%)")
 
-    # Kiến trúc FCNN Baseline (đúng bài báo gốc)
+    # Kiến trúc FCNN Baseline
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(10, activation='relu'),
         tf.keras.layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(l1=1e-4)),
         tf.keras.layers.Dense(NUM_CHANNELS, activation='softmax')
     ])
 
-    # Compile (đúng bài báo gốc: MSE loss, Adam mặc định lr=0.001)
+    # Compile (MSE loss, Adam mặc định lr=0.001)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(),
         loss='mse',
@@ -242,7 +242,7 @@ def main():
     best_epoch_acc = history.history['accuracy'][int(np.argmin(history.history['loss']))]
     print(f"Accuracy at best loss epoch: {best_epoch_acc:.4f}")
 
-    # ═══════════ VẼ BIỂU ĐỒ HUẤN LUYỆN (đúng bài báo gốc) ═══════════
+    # ═══════════ VẼ BIỂU ĐỒ HUẤN LUYỆN ═══════════
     plt.rcParams["figure.figsize"] = (20, 10)
     loss = history.history['loss']
     val_loss = history.history['val_loss']

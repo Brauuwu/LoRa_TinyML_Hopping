@@ -5,8 +5,6 @@
 Vẽ biểu đồ phân tích dung lượng và bộ nhớ (Memory Footprint) của mô hình TinyML
 trên các định dạng triển khai nhúng khác nhau (C Array .h, TFLite, TF Model .h5)
 theo số lượng kênh truyền LoRa mở rộng (2 đến 9 kênh).
-
-Chuyển hóa và nâng cấp từ plottingsizes_test2.py trong bài báo LoRaEdgeTinyML.
 """
 
 import os
@@ -37,7 +35,7 @@ def plot_model_size_comparison():
 
     colors = ['#e67e22', '#e74c3c', '#3498db', '#2ecc71']
 
-    # Dữ liệu dung lượng bộ nhớ thực tế (KB) theo bài báo LoRaEdgeTinyML
+    # Dữ liệu dung lượng bộ nhớ thực tế (KB)
     model_sizes_kb = [
         [52.2, 52.2, 52.2, 52.2, 52.2, 52.2, 52.2, 52.2],  # C array .h
         [37.1, 38.3, 39.5, 43.0, 44.2, 45.4, 46.6, 47.8],  # TF model .h5

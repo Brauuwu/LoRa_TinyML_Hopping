@@ -3,13 +3,13 @@
 """
 06_benchmark_models.py
 Huấn luyện và so sánh các kiến trúc mạng nơ-ron cho Channel Hopping:
-  1. Baseline FCNN (MLP - Bài báo gốc)
+  1. Baseline FCNN (MLP)
   2. 1D-CNN (Temporal Convolution)
   3. GRU (Gated Recurrent Unit)
   4. Depthwise Separable 1D-CNN (MobileNet-style)
   5. Residual 1D-CNN (ResNet-1D)
 
-Đọc dữ liệu theo đúng phương pháp bài báo từ data/MLdataready/ABC/,
+Đọc dữ liệu chuỗi thời gian từ data/MLdataready/ABC/,
 tự nhận dạng cấu hình kênh (433 MHz hoặc 868 MHz).
 Huấn luyện đồng thời, so sánh Accuracy/Params/TFLite size.
 """
@@ -58,7 +58,7 @@ def detect_channels():
 
 def load_data():
     """
-    Nạp dữ liệu theo phương pháp bài báo gốc (đọc từ MLdataready/ABC/).
+    Nạp dữ liệu chuỗi thời gian (đọc từ MLdataready/ABC/).
     Fallback sang dataset_ready.csv nếu chưa có dữ liệu MLdataready.
     """
     channel_names = detect_channels()
@@ -122,7 +122,7 @@ def load_data():
 # ── Định nghĩa các kiến trúc mô hình ─────────────────────────────────────
 
 def build_fcnn(T, F, num_ch):
-    """1. Baseline FCNN (Bài báo gốc)"""
+    """1. Baseline FCNN"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T * F,)),
         layers.Dense(10, activation='relu'),

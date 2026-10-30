@@ -229,7 +229,7 @@ def main():
         build_sliding_window_dataset(combined_df, channels_cfg)
 
     print("-" * 74)
-    print("[HOÀN THÀNH] Đã tạo thành công cấu trúc MLData và MLdataready chuẩn bài báo!")
+    print("[HOÀN THÀNH] Đã tạo thành công cấu trúc MLData và MLdataready!")
     print("=" * 74)
 
 

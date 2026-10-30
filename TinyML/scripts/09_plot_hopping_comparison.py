@@ -12,8 +12,6 @@ Các biểu đồ bao gồm:
   2. Average RSSI Chart (dBm) theo kích thước gói tin
   3. Packet Delivery Ratio (PDR %) theo kích thước gói tin
   4. Combined Multi-Panel Chart tổng hợp
-
-Chuyển hóa và nâng cấp từ barchart_plotting_hopping.py trong LoRaEdgeTinyML.
 """
 
 import os

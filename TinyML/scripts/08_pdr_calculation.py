@@ -4,7 +4,6 @@
 08_pdr_calculation.py
 Tính toán chi tiết tỉ lệ truyền thành công (Packet Delivery Ratio - PDR)
 và thống kê chất lượng liên kết vô tuyến (RSSI, SNR) theo từng Node và kích thước gói tin.
-Chuyển hóa từ PDR_calculation.py trong bài báo LoRaEdgeTinyML.
 
 Cách chạy:
   python 08_pdr_calculation.py

@@ -3,9 +3,7 @@
 """
 11_export_latex_tables.py
 Tự động chuyển đổi các bảng số liệu thực nghiệm CSV thành mã LaTeX Table (.tex)
-chuẩn bài báo khoa học và luận văn tốt nghiệp (sử dụng gói booktabs).
-
-Chuyển hóa và nâng cấp từ csv_to_latex_table.py trong LoRaEdgeTinyML.
+chuẩn luận văn tốt nghiệp (sử dụng gói booktabs).
 
 Cách chạy:
   python 11_export_latex_tables.py

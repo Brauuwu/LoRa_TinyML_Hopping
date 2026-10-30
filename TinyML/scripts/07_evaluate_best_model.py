@@ -60,7 +60,7 @@ def detect_channels():
 
 
 def load_data():
-    """Nạp dữ liệu theo phương pháp bài báo gốc từ MLdataready/ABC/."""
+    """Nạp dữ liệu chuỗi thời gian từ MLdataready/ABC/."""
     channel_names = detect_channels()
 
     if channel_names:
