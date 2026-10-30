@@ -25,7 +25,7 @@
 // 1. CẤU HÌNH ĐỊNH DANH NODE (NODE ID)
 // Thay đổi thành 'A', 'B' hoặc 'C' tương ứng khi nạp code cho từng bo mạch!
 // ═══════════════════════════════════════════════════════════════════════════
-#define NODE_ID             'C'   // 'A', 'B', hoặc 'C'
+#define NODE_ID             'A'   // 'A', 'B', hoặc 'C'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. CẤU HÌNH TẦN SỐ KHỞI ĐỘNG MẶC ĐỊNH (DEFAULT STARTUP FREQUENCY)
