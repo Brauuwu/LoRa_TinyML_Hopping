@@ -243,6 +243,9 @@ graph LR
 
 ## 3. Kiến trúc & Nguyên lý Hoạt động của Firmware
 
+> [!NOTE]
+> Để đáp ứng tính thời gian thực cao và tận dụng vi xử lý 2 nhân (Dual-Core) của ESP32, toàn bộ thiết kế phân chia đa nhiệm, gán Core và cơ chế đồng bộ hóa IPC bằng FreeRTOS được đặc tả chi tiết tại: [KIEN_TRUC_FREERTOS_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md).
+
 ### A. Firmware End-Node Thu thập Dữ liệu (`LoRaEN_DataCollection`)
 
 Firmware được xây dựng theo mô hình **Máy trạng thái hữu hạn (FSM)** kết hợp **Xử lý ngắt không chặn**:
