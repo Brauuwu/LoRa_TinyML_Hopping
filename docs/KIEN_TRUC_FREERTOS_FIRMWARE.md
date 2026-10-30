@@ -1,6 +1,7 @@
 # KIẾN TRÚC ĐA NHIỆM FREERTOS CHO FIRMWARE END-NODE ESP32
 
 ## Đề tài: Tối Ưu Hóa Kênh Truyền LoRa Dựa Trên TinyML (LoRa TinyML Channel Hopping)
+
 ## Hệ điều hành thời gian thực: FreeRTOS SMP (Dual-Core Xtensa LX6 @ 240 MHz)
 
 ---
@@ -8,6 +9,7 @@
 ## 1. Tổng quan & Lý do Cốt lõi Áp dụng FreeRTOS
 
 Trong các ứng dụng IoT không dây nâng cao, vi điều khiển ESP32 phải đồng thời đảm nhận nhiều tác vụ có yêu cầu thời gian khác nhau:
+
 1. **Tác vụ vô tuyến LoRa (Time-Critical):** Đòi hỏi tính thời gian thực cực cao qua bus SPI và ngắt phần cứng `DIO0`.
 2. **Tác vụ suy luận Trí tuệ nhân tạo (Compute-Intensive):** Mô hình mạng nơ-ron TinyML tính toán vector 80 chiều, chuẩn hóa đặc trưng và dự đoán kênh truyền.
 3. **Tác vụ hiển thị màn hình OLED (I/O-Bound):** Giao tiếp I2C tốc độ thấp, mỗi khung hình đồ họa chiếm tới **$20 - 35\text{ ms}$ CPU blocking**.
@@ -60,11 +62,11 @@ graph TB
 
 ### Chi tiết các Task trong Firmware Thu thập:
 
-| Tên Task | Core | Độ ưu tiên | Kích thước Stack | Cơ chế kích hoạt | Nhiệm vụ chính |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **`vTaskRadioManager`** | **Core 0** | **Priority 3** *(Cao nhất)* | `4096 bytes` | Event-driven (Ngắt `DIO0` & Queue) | • Khởi tạo và làm chủ bus VSPI chip SX1278.<br>• Ở chế độ chờ: Lắng nghe liên tục gói Downlink (`CTRL:PING`, `CMD:START`, `CMD:STOP`, `CTRL:SET_FREQ`).<br>• Phản hồi gói `PONG` hoặc xác nhận `ACK`.<br>• Nhận gói từ `xTxQueue` để phát Uplink lên Gateway. |
-| **`vTaskTrafficGenerator`** | **Core 1** | **Priority 2** | `3072 bytes` | Định kỳ bằng `vTaskDelayUntil` | • Duyệt qua 6 mức payload: $30, 74, 118, 162, 206, 250\text{ bytes}$.<br>• Mỗi mức phát 100 gói (tổng 600 gói).<br>• Định thời chính xác chu kỳ: $T_{interval} = 3000\text{ ms} + \text{random}(0 .. 500\text{ ms})$.<br>• Khi nhận cờ STOP từ Radio Task: Dừng định thời ngay lập tức mà không cần khởi động lại vi điều khiển. |
-| **`vTaskDisplayUI`** | **Core 1** | **Priority 0** *(Thấp nhất)* | `3072 bytes` | Định kỳ mỗi $200\text{ ms}$ ($5\text{ FPS}$) | • Làm chủ bus I2C màn hình OLED SSD1306.<br>• Hiển thị: Trạng thái (CHỜ LỆNH / ĐANG PHÁT / HOÀN THÀNH), Kênh tần số hiện tại, số gói đã gửi.<br>• Hoàn toàn không làm ảnh hưởng đến độ trễ phát của LoRa. |
+| Tên Task                           |       Core       |             Độ ưu tiên             | Kích thước Stack |                 Cơ chế kích hoạt                 | Nhiệm vụ chính                                                                                                                                                                                                                                                                                                                                             |
+| :---------------------------------- | :--------------: | :------------------------------------: | :-----------------: | :--------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`vTaskRadioManager`**     | **Core 0** |  **Priority 3** *(Cao nhất)*  |   `4096 bytes`   |        Event-driven (Ngắt `DIO0` & Queue)        | • Khởi tạo và làm chủ bus VSPI chip SX1278.• Ở chế độ chờ: Lắng nghe liên tục gói Downlink (`CTRL:PING`, `CMD:START`, `CMD:STOP`, `CTRL:SET_FREQ`).• Phản hồi gói `PONG` hoặc xác nhận `ACK`.• Nhận gói từ `xTxQueue` để phát Uplink lên Gateway.                                                                |
+| **`vTaskTrafficGenerator`** | **Core 1** |          **Priority 2**          |   `3072 bytes`   |         Định kỳ bằng `vTaskDelayUntil`         | • Duyệt qua 6 mức payload: $30, 74, 118, 162, 206, 250\text{ bytes}$.• Mỗi mức phát 100 gói (tổng 600 gói).• Định thời chính xác chu kỳ: $T_{interval} = 3000\text{ ms} + \text{random}(0 .. 500\text{ ms})$.• Khi nhận cờ STOP từ Radio Task: Dừng định thời ngay lập tức mà không cần khởi động lại vi điều khiển. |
+| **`vTaskDisplayUI`**        | **Core 1** | **Priority 0** *(Thấp nhất)* |   `3072 bytes`   | Định kỳ mỗi $200\text{ ms}$ ($5\text{ FPS}$) | • Làm chủ bus I2C màn hình OLED SSD1306.• Hiển thị: Trạng thái (CHỜ LỆNH / ĐANG PHÁT / HOÀN THÀNH), Kênh tần số hiện tại, số gói đã gửi.• Hoàn toàn không làm ảnh hưởng đến độ trễ phát của LoRa.                                                                                                                    |
 
 ---
 
@@ -103,12 +105,12 @@ sequenceDiagram
 
 ### Chi tiết các Task trong Firmware Nhảy Kênh TinyML:
 
-| Tên Task | Core | Độ ưu tiên | Kích thước Stack | Cơ chế kích hoạt | Nhiệm vụ chính |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **`vTaskLoRaRadio`** | **Core 0** | **Priority 3** *(Cao nhất)* | `4096 bytes` | Hướng sự kiện | • Kiểm tra `xHopDecisionQueue`: Nếu có quyết định chuyển kênh, gọi ngay `radio.setFrequency(new_freq)` và tăng `hopCount++`.<br>• Lấy gói từ `xTxQueue` và thực thi phát sóng.<br>• Khi phát xong: Kích hoạt `vTaskTinyMLInference` qua Direct Task Notification. |
-| **`vTaskTinyMLInference`** | **Core 1** | **Priority 2** | `8192 bytes` *(Cấp đủ cho mạng nơ-ron)* | Direct Task Notification | • Được bảo vệ bởi `xHistoryMutex`.<br>• Quản lý mảng trượt `history[10][8]`.<br>• Chuẩn hóa dữ liệu theo tham số `mean` và `scale` của `StandardScaler`.<br>• Thực thi hàm suy luận `run_model_inference()`.<br>• Đẩy quyết định vào `xHopDecisionQueue`. |
-| **`vTaskSensorApp`** | **Core 1** | **Priority 1** | `2048 bytes` | Định kỳ mỗi $3.0\text{ giây}$ | • Đọc cảm biến thật hoặc sinh gói dữ liệu mô phỏng.<br>• Tăng số thứ tự gói `packet_ID++`.<br>• Gửi gói vào `xTxQueue`. |
-| **`vTaskDisplayUI`** | **Core 1** | **Priority 0** | `3072 bytes` | Định kỳ mỗi $200\text{ ms}$ | • Hiển thị giao diện giám sát tại biên (Edge Telemetry): Tần số kênh, PDR ước tính, Số lần nhảy kênh, Thời gian suy luận ($\mu s$). |
+| Tên Task                          |       Core       |            Độ ưu tiên            |               Kích thước Stack               |         Cơ chế kích hoạt         | Nhiệm vụ chính                                                                                                                                                                                                                                                                           |
+| :--------------------------------- | :--------------: | :----------------------------------: | :----------------------------------------------: | :----------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`vTaskLoRaRadio`**       | **Core 0** | **Priority 3** *(Cao nhất)* |                  `4096 bytes`                  |          Hướng sự kiện          | • Kiểm tra `xHopDecisionQueue`: Nếu có quyết định chuyển kênh, gọi ngay `radio.setFrequency(new_freq)` và tăng `hopCount++`.• Lấy gói từ `xTxQueue` và thực thi phát sóng.• Khi phát xong: Kích hoạt `vTaskTinyMLInference` qua Direct Task Notification. |
+| **`vTaskTinyMLInference`** | **Core 1** |         **Priority 2**         | `8192 bytes` *(Cấp đủ cho mạng nơ-ron)* |       Direct Task Notification       | • Được bảo vệ bởi `xHistoryMutex`.• Quản lý mảng trượt `history[10][8]`.• Chuẩn hóa dữ liệu theo tham số `mean` và `scale` của `StandardScaler`.• Thực thi hàm suy luận `run_model_inference()`.• Đẩy quyết định vào `xHopDecisionQueue`.     |
+| **`vTaskSensorApp`**       | **Core 1** |         **Priority 1**         |                  `2048 bytes`                  | Định kỳ mỗi $3.0\text{ giây}$ | • Đọc cảm biến thật hoặc sinh gói dữ liệu mô phỏng.• Tăng số thứ tự gói `packet_ID++`.• Gửi gói vào `xTxQueue`.                                                                                                                                                   |
+| **`vTaskDisplayUI`**       | **Core 1** |         **Priority 0**         |                  `3072 bytes`                  |  Định kỳ mỗi $200\text{ ms}$  | • Hiển thị giao diện giám sát tại biên (Edge Telemetry): Tần số kênh, PDR ước tính, Số lần nhảy kênh, Thời gian suy luận ($\mu s$).                                                                                                                                   |
 
 ---
 
