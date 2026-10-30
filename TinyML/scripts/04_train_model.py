@@ -96,25 +96,21 @@ def load_data_from_mldataready(channel_names):
             continue
 
         output = ONE_HOT[ch_idx]
-        df = pd.read_csv(csv_path, names=headers, skiprows=1)
+        df = pd.read_csv(csv_path)
+        feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
+        if not all(c in df.columns for c in feature_cols):
+            df = pd.read_csv(csv_path, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
+        df = df.reset_index(drop=True)
+        if not all(c in df.columns for c in feature_cols):
+            print(f"  [WARN] File '{ch_name}.csv' thiếu các cột đặc trưng, bỏ qua.")
+            continue
 
-        num_recordings = int(df.shape[0] / SAMPLES_PER_CHANNEL)
-        print(f"  Kênh '{ch_name}': {num_recordings} recording(s) (tổng {df.shape[0]} dòng)")
+        arr = df[feature_cols].to_numpy(dtype=float)
+        num_recordings = int(len(arr) / SAMPLES_PER_CHANNEL)
+        print(f"  Kênh '{ch_name}': {num_recordings} recording(s) (tổng {len(arr)} dòng)")
 
         for i in range(num_recordings):
-            tensor = []
-            for j in range(SAMPLES_PER_CHANNEL):
-                idx = i * SAMPLES_PER_CHANNEL + j
-                tensor += [
-                    float(df['CH1'][idx]),
-                    float(df['CH2'][idx]),
-                    float(df['CH3'][idx]),
-                    float(df['SNR'][idx]),
-                    float(df['RSSI'][idx]),
-                    float(df['size_of_message'][idx]),
-                    float(df['packet_ID'][idx]),
-                    float(df['frequency'][idx])
-                ]
+            tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].flatten().tolist()
             inputs.append(tensor)
             outputs.append(output)
 

@@ -125,6 +125,7 @@ def generate_mldata_and_ready(files, channels_cfg):
 
     # BƯỚC 2: TỔNG HỢP VÀO MLdataready THEO KÊNH TẦN SỐ
     print(" [2/3] Đang nhóm theo kênh tần số vào data/MLdataready/{A, B, C, ABC}...")
+    ready_headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
     for ch_name, ch_freq in channels_cfg:
         # Lọc dữ liệu thuộc kênh tần số này
         ch_mask = (abs(combined_df['frequency'] - ch_freq) < 0.1)
@@ -135,14 +136,14 @@ def generate_mldata_and_ready(files, channels_cfg):
             node_ch = ch_df[ch_df['source'] == node]
             out_node_ch = os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv")
             if not node_ch.empty:
-                node_ch[headers].to_csv(out_node_ch, index=False)
+                node_ch[ready_headers].to_csv(out_node_ch, index=False)
             else:
-                pd.DataFrame(columns=headers).to_csv(out_node_ch, index=False)
+                pd.DataFrame(columns=ready_headers).to_csv(out_node_ch, index=False)
 
         # 2b. Xuất tổng hợp cho toàn mạng ABC
         out_abc = os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv")
         if not ch_df.empty:
-            ch_df[headers].to_csv(out_abc, index=False)
+            ch_df[ready_headers].to_csv(out_abc, index=False)
             print(f"       + Kênh {ch_name} ({ch_freq} MHz): {len(ch_df)} dòng -> MLdataready/ABC/{ch_name}.csv")
 
     return combined_df

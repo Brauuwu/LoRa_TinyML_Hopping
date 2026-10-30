@@ -77,23 +77,19 @@ def load_data():
                 continue
 
             target = ONE_HOT[ch_idx]
-            df = pd.read_csv(csv_path, names=headers, skiprows=1)
-            num_recordings = int(df.shape[0] / SAMPLES_PER_CHANNEL)
+            df = pd.read_csv(csv_path)
+            feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
+            if not all(c in df.columns for c in feature_cols):
+                df = pd.read_csv(csv_path, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
+            df = df.reset_index(drop=True)
+            if not all(c in df.columns for c in feature_cols):
+                continue
+
+            arr = df[feature_cols].to_numpy(dtype=float)
+            num_recordings = int(len(arr) / SAMPLES_PER_CHANNEL)
 
             for i in range(num_recordings):
-                tensor = []
-                for j in range(SAMPLES_PER_CHANNEL):
-                    idx = i * SAMPLES_PER_CHANNEL + j
-                    tensor.append([
-                        float(df['CH1'][idx]),
-                        float(df['CH2'][idx]),
-                        float(df['CH3'][idx]),
-                        float(df['SNR'][idx]),
-                        float(df['RSSI'][idx]),
-                        float(df['size_of_message'][idx]),
-                        float(df['packet_ID'][idx]),
-                        float(df['frequency'][idx])
-                    ])
+                tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].tolist()
                 raw_inputs.append(tensor)
                 raw_outputs.append(target)
 

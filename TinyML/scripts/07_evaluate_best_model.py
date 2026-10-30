@@ -76,25 +76,25 @@ def load_data():
                 continue
 
             target = ONE_HOT[ch_idx]
-            df = pd.read_csv(csv_path, names=headers, skiprows=1)
-            num_rec = int(df.shape[0] / SAMPLES_PER_CHANNEL)
+            df = pd.read_csv(csv_path)
+            feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
+            if not all(c in df.columns for c in feature_cols):
+                df = pd.read_csv(csv_path, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
+            df = df.reset_index(drop=True)
+            if not all(c in df.columns for c in feature_cols):
+                continue
+
+            arr = df[feature_cols].to_numpy(dtype=float)
+            num_rec = int(len(arr) / SAMPLES_PER_CHANNEL)
 
             for i in range(num_rec):
-                tensor = []
-                for j in range(SAMPLES_PER_CHANNEL):
-                    idx = i * SAMPLES_PER_CHANNEL + j
-                    tensor.append([
-                        float(df['CH1'][idx]), float(df['CH2'][idx]), float(df['CH3'][idx]),
-                        float(df['SNR'][idx]), float(df['RSSI'][idx]),
-                        float(df['size_of_message'][idx]),
-                        float(df['packet_ID'][idx]), float(df['frequency'][idx])
-                    ])
+                tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].tolist()
                 raw_inputs.append(tensor)
                 raw_outputs.append(target)
                 last_idx = (i + 1) * SAMPLES_PER_CHANNEL - 1
                 sample_meta.append({
-                    'size': int(df['size_of_message'][last_idx]),
-                    'pkt_id': int(df['packet_ID'][last_idx]),
+                    'size': int(df['size_of_message'].iloc[last_idx]) if 'size_of_message' in df.columns else 30,
+                    'pkt_id': int(df['packet_ID'].iloc[last_idx]) if 'packet_ID' in df.columns else 0,
                     'true_ch': ch_idx
                 })
 

@@ -346,13 +346,14 @@ for node in ['A', 'B', 'C']:
         if not ch_sub.empty:
             ch_sub[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, f"{ch_name}_{node}.csv"), index=False)
 
-# 2. Tạo MLdataready/{A, B, C, ABC}/
+# 2. Tạo MLdataready/{A, B, C, ABC}/ (8 cột chuẩn: không chứa cột source)
+ready_cols = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
 for ci, (ch_name, ch_f) in enumerate(zip(CH_NAMES, CHANNELS)):
     ch_sub = flagged_all[abs(flagged_all['frequency'] - ch_f) < 0.1]
     for node in ['A', 'B', 'C']:
         node_ch = ch_sub[ch_sub['source'] == node]
-        node_ch[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv"), index=False)
-    ch_sub[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv"), index=False)
+        node_ch[ready_cols].to_csv(os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv"), index=False)
+    ch_sub[ready_cols].to_csv(os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv"), index=False)
 
 print(f"[OK] Đã tạo MLData (tách theo Node và Kênh) và MLdataready ({len(flagged_all)} dòng dữ liệu)")
 
@@ -418,28 +419,27 @@ abc_dir = os.path.join(MLDATAREADY_DIR, "ABC")
 channel_names = sorted([os.path.splitext(f)[0] for f in os.listdir(abc_dir) if f.endswith(".csv")]) if os.path.isdir(abc_dir) else []
 
 inputs, outputs = [], []
+feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
 if channel_names:
     print(f"[DATA] Nạp trực tiếp từ MLdataready/ABC/ ({len(channel_names)} kênh: {channel_names})")
     NUM_CHANNELS = len(channel_names)
     ONE_HOT = np.eye(NUM_CHANNELS)
-    headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
     for ch_idx, ch_name in enumerate(channel_names):
         csv_p = os.path.join(abc_dir, f"{ch_name}.csv")
         if not os.path.exists(csv_p):
             csv_p = os.path.join(MLDATAREADY_DIR, "A", f"{ch_name}.csv")
         if not os.path.exists(csv_p):
             continue
-        df_ch = pd.read_csv(csv_p, names=headers, skiprows=1)
-        num_rec = int(df_ch.shape[0] / SAMPLES_PER_CHANNEL)
+        df_ch = pd.read_csv(csv_p)
+        if not all(c in df_ch.columns for c in feature_cols):
+            df_ch = pd.read_csv(csv_p, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
+        df_ch = df_ch.reset_index(drop=True)
+        if not all(c in df_ch.columns for c in feature_cols):
+            continue
+        arr = df_ch[feature_cols].to_numpy(dtype=float)
+        num_rec = int(len(arr) / SAMPLES_PER_CHANNEL)
         for i in range(num_rec):
-            tensor = []
-            for j in range(SAMPLES_PER_CHANNEL):
-                idx = i * SAMPLES_PER_CHANNEL + j
-                tensor += [
-                    float(df_ch['CH1'][idx]), float(df_ch['CH2'][idx]), float(df_ch['CH3'][idx]),
-                    float(df_ch['SNR'][idx]), float(df_ch['RSSI'][idx]), float(df_ch['size_of_message'][idx]),
-                    float(df_ch['packet_ID'][idx]), float(df_ch['frequency'][idx])
-                ]
+            tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].flatten().tolist()
             inputs.append(tensor)
             outputs.append(ONE_HOT[ch_idx])
     X = np.array(inputs)
@@ -714,13 +714,16 @@ for ci, ch in enumerate(ch_names_bench):
         p = os.path.join(MLDATAREADY_DIR, "A", f"{ch}.csv")
     if not os.path.exists(p):
         continue
-    df_ch = pd.read_csv(p, names=ml_headers, skiprows=1)
-    n_rec = int(df_ch.shape[0] / SAMPLES)
+    df_ch = pd.read_csv(p)
+    if not all(c in df_ch.columns for c in feature_cols):
+        df_ch = pd.read_csv(p, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
+    df_ch = df_ch.reset_index(drop=True)
+    if not all(c in df_ch.columns for c in feature_cols):
+        continue
+    arr_b = df_ch[feature_cols].to_numpy(dtype=float)
+    n_rec = int(len(arr_b) / SAMPLES)
     for i in range(n_rec):
-        t = []
-        for j in range(SAMPLES):
-            idx = i * SAMPLES + j
-            t.append([float(df_ch[c][idx]) for c in ['CH1','CH2','CH3','SNR','RSSI','size_of_message','packet_ID','frequency']])
+        t = arr_b[i * SAMPLES : (i + 1) * SAMPLES].tolist()
         raw_in.append(t)
         raw_out.append(ONE_HOT_BENCH[ci])
 

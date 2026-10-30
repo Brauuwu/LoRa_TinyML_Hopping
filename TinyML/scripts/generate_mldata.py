@@ -143,6 +143,7 @@ def generate_all(input_dir=None):
 
     # BƯỚC 2: XUẤT RA MLdataready/{A, B, C, ABC}/ THEO TỪNG KÊNH
     print("\n [2/2] Đang gom nhóm theo kênh tần số vào MLdataready/{A, B, C, ABC}...")
+    ready_headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
     for ch_name, ch_freq in channels_cfg:
         ch_data = combined[abs(combined['frequency'] - ch_freq) < 0.1]
 
@@ -151,14 +152,14 @@ def generate_all(input_dir=None):
             node_ch = ch_data[ch_data['source'] == node]
             out_node_file = os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv")
             if not node_ch.empty:
-                node_ch[headers].to_csv(out_node_file, index=False)
+                node_ch[ready_headers].to_csv(out_node_file, index=False)
             else:
-                pd.DataFrame(columns=headers).to_csv(out_node_file, index=False)
+                pd.DataFrame(columns=ready_headers).to_csv(out_node_file, index=False)
 
         # Cho toàn mạng ABC
         out_abc_file = os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv")
         if not ch_data.empty:
-            ch_data[headers].to_csv(out_abc_file, index=False)
+            ch_data[ready_headers].to_csv(out_abc_file, index=False)
             print(f"       + Kênh {ch_name} ({ch_freq} MHz): {len(ch_data):,} dòng -> data/MLdataready/ABC/{ch_name}.csv")
 
     print("-" * 74)
