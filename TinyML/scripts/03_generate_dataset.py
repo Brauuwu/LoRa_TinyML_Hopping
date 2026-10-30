@@ -4,10 +4,10 @@
 03_generate_dataset.py
 Tạo các tập dữ liệu Machine Learning từ dữ liệu đã qua bổ sung gói mất (imputed):
 
-1. Tạo thư mục MLData/ (phân chia theo từng End-Node A, B, C):
-   - data/MLData/A/ : Chứa các file đo liên quan đến Node A
-   - data/MLData/B/ : Chứa các file đo liên quan đến Node B
-   - data/MLData/C/ : Chứa các file đo liên quan đến Node C
+1. Tạo thư mục MLData/ (phân chia theo từng End-Node A, B, C và tách theo tần số):
+   - data/MLData/A/ : Chứa các file đo của Node A tách riêng theo từng kênh tần số
+   - data/MLData/B/ : Chứa các file đo của Node B tách riêng theo từng kênh tần số
+   - data/MLData/C/ : Chứa các file đo của Node C tách riêng theo từng kênh tần số
    - Bổ sung các cờ kênh CH1, CH2, CH3 dựa trên tần số và chất lượng thu.
 
 2. Tạo thư mục MLdataready/ (tổng hợp theo từng kênh tần số):
@@ -106,11 +106,17 @@ def generate_mldata_and_ready(files, channels_cfg):
         df_flagged = assign_channel_flags(df, channels_cfg)
         all_rows.append(df_flagged)
 
+        # Phân tách theo từng Node và theo từng KÊNH TẦN SỐ
         for node in ['A', 'B', 'C']:
             node_sub = df_flagged[df_flagged['source'] == node]
-            if not node_sub.empty:
-                out_mldata = os.path.join(MLDATA_DIR, node, f"{stem}_{node}.csv")
-                node_sub[headers].to_csv(out_mldata, index=False)
+            if node_sub.empty:
+                continue
+            for ch_name, ch_freq in channels_cfg:
+                node_ch_sub = node_sub[abs(node_sub['frequency'] - ch_freq) < 0.1]
+                if not node_ch_sub.empty:
+                    fname_out = f"{stem}_{node}.csv" if ch_name in stem else f"{stem}_{ch_name}_{node}.csv"
+                    out_mldata = os.path.join(MLDATA_DIR, node, fname_out)
+                    node_ch_sub[headers].to_csv(out_mldata, index=False)
 
     if not all_rows:
         return None

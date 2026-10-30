@@ -290,7 +290,7 @@ print(f"\n[TỔNG HỢP] Tổng gói: {total} | Nhận thành công: {total - lo
 add_markdown(r"""
 ## 4. Bước 3: Phân chia tập dữ liệu Machine Learning (`03_generate_dataset`)
 Chuẩn hóa cấu trúc 2 tầng dữ liệu:
-- **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`) và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
+- **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`), tách thành các file riêng biệt theo từng kênh tần số (ví dụ: `433_175_A.csv`, `433_375_A.csv`, `433_575_A.csv` hoặc theo từng file phiên đo) và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
 - **`data/MLdataready/`**: Gom nhóm theo kênh tần số cho từng Node (`A/`, `B/`, `C/`) và toàn mạng (`ABC/`).
 - **`data/ready/dataset_ready.csv`**: Cửa sổ trượt chuỗi thời gian ($t_s = 10$ bước, 80 đặc trưng input, nhãn `target_channel`).
 """)
@@ -313,15 +313,38 @@ def assign_ch_flags(row):
     flags[ch_idx] = 1 if is_loss else 0
     return pd.Series(flags, index=['CH1', 'CH2', 'CH3'])
 
-# 1. Tạo MLData/{A, B, C}/
+# 1. Tạo MLData/{A, B, C}/: Tách theo từng Node và theo từng KÊNH TẦN SỐ
 flags_df = imputed_df.apply(assign_ch_flags, axis=1)
 flagged_all = pd.concat([imputed_df, flags_df], axis=1)
-
 mldata_cols = ['packet_ID', 'source', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
+
+# 1a. Phân tách theo từng phiên đo và theo từng kênh tần số
+for pf in parsed_csv_files:
+    in_p = os.path.join(IMPUTED_DIR, pf)
+    if not os.path.exists(in_p):
+        continue
+    df_f = pd.read_csv(in_p)
+    df_f_flagged = pd.concat([df_f, df_f.apply(assign_ch_flags, axis=1)], axis=1)
+    stem_f = os.path.splitext(pf)[0]
+    for node in ['A', 'B', 'C']:
+        node_df = df_f_flagged[df_f_flagged['source'] == node]
+        if node_df.empty:
+            continue
+        for ch_name, ch_f in zip(CH_NAMES, CHANNELS):
+            ch_data = node_df[abs(node_df['frequency'] - ch_f) < 0.1]
+            if not ch_data.empty:
+                fname_out = f"{stem_f}_{node}.csv" if ch_name in stem_f else f"{stem_f}_{ch_name}_{node}.csv"
+                ch_data[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, fname_out), index=False)
+
+# 1b. Đồng thời xuất file tổng hợp theo kênh tần số cho từng Node
 for node in ['A', 'B', 'C']:
     sub_node = flagged_all[flagged_all['source'] == node]
-    if not sub_node.empty:
-        sub_node[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, f"data_node_{node}.csv"), index=False)
+    if sub_node.empty:
+        continue
+    for ch_name, ch_f in zip(CH_NAMES, CHANNELS):
+        ch_sub = sub_node[abs(sub_node['frequency'] - ch_f) < 0.1]
+        if not ch_sub.empty:
+            ch_sub[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, f"{ch_name}_{node}.csv"), index=False)
 
 # 2. Tạo MLdataready/{A, B, C, ABC}/
 for ci, (ch_name, ch_f) in enumerate(zip(CH_NAMES, CHANNELS)):
@@ -331,7 +354,7 @@ for ci, (ch_name, ch_f) in enumerate(zip(CH_NAMES, CHANNELS)):
         node_ch[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, node, f"{ch_name}.csv"), index=False)
     ch_sub[mldata_cols].to_csv(os.path.join(MLDATAREADY_DIR, "ABC", f"{ch_name}.csv"), index=False)
 
-print(f"[OK] Đã tạo MLData và MLdataready ({len(flagged_all)} dòng dữ liệu)")
+print(f"[OK] Đã tạo MLData (tách theo Node và Kênh) và MLdataready ({len(flagged_all)} dòng dữ liệu)")
 
 # 3. Tạo vector cửa sổ trượt dataset_ready.csv
 best_lookup = {}

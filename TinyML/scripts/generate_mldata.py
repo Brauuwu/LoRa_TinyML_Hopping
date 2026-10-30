@@ -118,12 +118,18 @@ def generate_all(input_dir=None):
         df_flagged = assign_channel_flags(df, channels_cfg)
         all_dfs.append(df_flagged)
 
+        # Phân tách theo từng Node và theo từng KÊNH TẦN SỐ
         for node in ['A', 'B', 'C']:
             node_data = df_flagged[df_flagged['source'] == node]
-            if not node_data.empty:
-                out_path = os.path.join(MLDATA_DIR, node, f"{stem}_{node}.csv")
-                node_data[headers].to_csv(out_path, index=False)
-                file_counts[node] += 1
+            if node_data.empty:
+                continue
+            for ch_name, ch_freq in channels_cfg:
+                node_ch_data = node_data[abs(node_data['frequency'] - ch_freq) < 0.1]
+                if not node_ch_data.empty:
+                    fname_out = f"{stem}_{node}.csv" if ch_name in stem else f"{stem}_{ch_name}_{node}.csv"
+                    out_path = os.path.join(MLDATA_DIR, node, fname_out)
+                    node_ch_data[headers].to_csv(out_path, index=False)
+                    file_counts[node] += 1
 
     print(f"       + Node A: {file_counts['A']} files trong data/MLData/A/")
     print(f"       + Node B: {file_counts['B']} files trong data/MLData/B/")
