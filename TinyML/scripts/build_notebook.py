@@ -6,9 +6,9 @@ Tạo file Jupyter Notebook: LoRa_TinyML_Pipeline.ipynb
 Đồng bộ 100% với các scripts 01-11:
   - Dữ liệu thực nghiệm 1-to-1
   - Cấu trúc MLData & MLdataready
-  - Huấn luyện FCNN Baseline với loss='mse', batch_size=1, epochs=500
-  - Benchmark 5 kiến trúc mạng nơ-ron
-  - Đánh giá toàn diện mô hình tốt nhất (Separable 1D-CNN)
+  - Huấn luyện đa thuật toán (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D) tách thành từng cặp markdown + code
+  - Bảng tổng hợp đối sánh và xuất mô hình tối ưu sang TFLite & model.h cho ESP32
+  - Đánh giá toàn diện mô hình tốt nhất (Confusion Matrix, Precision/Recall, Latency)
   - Phân tích PDR, Footprint bộ nhớ MCU và xuất bảng LaTeX.
 """
 
@@ -77,10 +77,10 @@ add_markdown(r"""
 1. `01_data_parser`: Thu thập log từ Gateway → Parse thành các file CSV chuẩn (1-to-1)
 2. `02_add_missed_packets`: Phát hiện gói mất do va chạm → Bổ sung dòng dữ liệu với RSSI/SNR = -1000
 3. `03_generate_dataset`: Phân tách `MLData/` theo Node, `MLdataready/` theo kênh và vector chuỗi thời gian `dataset_ready.csv` ($t_s = 10$)
-4. `04_train_model`: Huấn luyện mô hình FCNN Baseline (MSE loss, batch_size=1) → Xuất TFLite & `model.h` cho ESP32
+4. `04_train_model`: Tổng hợp huấn luyện đa thuật toán (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D) → Xuất TFLite & `model.h` cho ESP32
 5. `05_evaluate_comparison`: Đánh giá so sánh: Fixed Channel vs Random Hopping vs TinyML Hopping từ dữ liệu thực tế
-6. `06_benchmark_models`: Benchmark 5 kiến trúc mạng nơ-ron (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D)
-7. `07_evaluate_best_model`: Đánh giá chuyên sâu mô hình tốt nhất (Confusion Matrix, Precision/Recall, Latency, Network simulation)
+6. `06_benchmark_models`: Phân tích chuyên sâu Trade-off phần cứng và tối ưu hóa vi điều khiển
+7. `07_evaluate_best_model`: Đánh giá chuyên sâu mô hình tối ưu (Confusion Matrix, Precision/Recall, Latency, Network simulation)
 8. `08_pdr_calculation`: Thống kê chi tiết tỉ lệ truyền thành công (PDR) và chất lượng kênh thu theo Node & Payload Size
 9. `09_plot_hopping_comparison`: Trực quan hóa biểu đồ cột so sánh SNR, RSSI, PDR qua 6 mức kích thước tải
 10. `10_plot_model_sizes`: Phân tích dung lượng bộ nhớ (Flash/RAM Footprint) mô hình TinyML trên vi điều khiển
@@ -98,104 +98,84 @@ add_code(r"""
 import os
 import re
 import json
-import shutil
 import time
+import shutil
 import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
 
 import tensorflow as tf
-from tensorflow.keras import regularizers, layers, models
+from tensorflow.keras import layers, models, regularizers
 
+# Cố định Seed đảm bảo tính tái lập (Reproducibility)
 SEED = 1337
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
-BASE_DIR = os.getcwd()
-DATA_DIR = os.path.join(BASE_DIR, "data")
-LOGS_DIR = os.path.join(DATA_DIR, "logs")
-PARSED_DIR = os.path.join(DATA_DIR, "parsed")
-IMPUTED_DIR = os.path.join(DATA_DIR, "imputed")
-READY_DIR = os.path.join(DATA_DIR, "ready")
-FORMATTED_DIR = os.path.join(DATA_DIR, "formattedCSV")
-MLDATA_DIR = os.path.join(DATA_DIR, "MLData")
-MLDATAREADY_DIR = os.path.join(DATA_DIR, "MLdataready")
+BASE_DIR = os.path.dirname(os.path.abspath('__file__'))
+LOGS_DIR = os.path.join(BASE_DIR, "data/logs")
+PARSED_DIR = os.path.join(BASE_DIR, "data/parsed")
+IMPUTED_DIR = os.path.join(BASE_DIR, "data/imputed")
+FORMATTED_DIR = os.path.join(BASE_DIR, "data/formattedCSV")
+MLDATA_DIR = os.path.join(BASE_DIR, "data/MLData")
+MLDATAREADY_DIR = os.path.join(BASE_DIR, "data/MLdataready")
+READY_DIR = os.path.join(BASE_DIR, "data/ready")
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 FIGURES_DIR = os.path.join(BASE_DIR, "figures")
 
-for d in [LOGS_DIR, PARSED_DIR, IMPUTED_DIR, READY_DIR, MLDATA_DIR, MLDATAREADY_DIR, MODELS_DIR, FIGURES_DIR]:
+for d in [PARSED_DIR, IMPUTED_DIR, MLDATA_DIR, MLDATAREADY_DIR, READY_DIR, MODELS_DIR, FIGURES_DIR]:
     os.makedirs(d, exist_ok=True)
 
-print(f"[OK] TensorFlow: {tf.__version__}")
-print(f"[OK] Thư mục gốc: {BASE_DIR}")
+print(f"[OK] TensorFlow Version: {tf.__version__}")
+print(f"[OK] Thư mục gốc dữ liệu: {os.path.abspath(LOGS_DIR)}")
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 3: Bước 1 - Trích xuất Log
+# CELL 3: Bước 1 - Data Parser
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 2. Bước 1: Trích xuất và chuẩn hóa Log Gateway (`01_data_parser`)
-Hỗ trợ cả định dạng Pipe-separated (`|`) và Text log (`->`).
-Mỗi file log được chuyển đổi thành file CSV tương ứng (quan hệ 1-to-1).
+## 2. Bước 1: Trích xuất Dữ liệu Thô từ Gateway (`01_data_parser`)
+Bóc tách các trường thông tin vô tuyến từ log Serial/File văn bản của Gateway sang định dạng bảng CSV (ánh xạ 1-to-1).
+Các trường dữ liệu chuẩn gồm: `time_slot`, `source`, `packet_ID`, `size_of_message`, `RSSI`, `SNR`, `frequency`.
 """)
 
 add_code(r"""
-PATTERN_PIPE = re.compile(
-    r"(?P<time_slot>\d{2}:\d{2}:\d{2}\.\d{3})\s*\|\s*"
-    r"(?P<source>[A-Z])\s*\|\s*"
-    r"(?P<packet_ID>\d+)\s*\|\s*"
-    r"(?P<size_of_message>\d+)\s*(?:B)?\s*\|\s*"
-    r"(?P<RSSI>-?\d+)\s*\|\s*"
-    r"(?P<SNR>-?\d+(?:\.\d+)?)\s*\|\s*"
-    r"(?P<frequency>\d{3}\.\d{3})"
-)
-
 PATTERN_TEXT = re.compile(
     r"(?P<time_slot>\d{2}:\d{2}:\d{2}\.\d{3})\s*->\s*"
-    r"(?P<source>[A-Z])(?P<packet_ID>\d+)(?:\*.*?)\s*.*?"
+    r"(?P<source>[A-Za-z])(?P<packet_ID>\d+)(?:\*.*?)\s*.*?"
     r"size_of_message\s+(?P<size_of_message>\d+)\s*"
     r"RSSI\s+(?P<RSSI>-?\d+)\s*"
     r"SNR\s+(?P<SNR>-?\d+(?:\.\d+)?)\s*"
-    r"Frequency\s+(?P<frequency>\d+\.\d+)",
-    re.IGNORECASE
+    r"Frequency\s+(?P<frequency>\d+\.\d+)"
 )
 
-REQUIRED_COLS = ['time_slot', 'source', 'packet_ID', 'size_of_message', 'RSSI', 'SNR', 'frequency']
+PATTERN_PIPE = re.compile(
+    r"(?P<time_slot>\d{2}:\d{2}:\d{2}\.\d{3})\s*\|\s*"
+    r"CH(?P<channel_num>\d+)\s*\|\s*"
+    r"(?P<source>[A-Za-z])(?P<packet_ID>\d+)\s*\|\s*"
+    r"Size:\s*(?P<size_of_message>\d+)\s*B\s*\|\s*"
+    r"RSSI:\s*(?P<RSSI>-?\d+)\s*dBm\s*\|\s*"
+    r"SNR:\s*(?P<SNR>-?\d+(?:\.\d+)?)\s*dB\s*\|\s*"
+    r"Freq:\s*(?P<frequency>\d+\.\d+)\s*MHz"
+)
 
+REQUIRED_COLS = ["time_slot", "source", "packet_ID", "size_of_message", "RSSI", "SNR", "frequency"]
+
+log_files = sorted([f for f in os.listdir(LOGS_DIR) if f.endswith(".txt") or f.endswith(".log")])
 parsed_files = []
-log_files = sorted([f for f in os.listdir(LOGS_DIR) if f.endswith(('.csv', '.log', '.txt'))])
-print(f"[INFO] Tìm thấy {len(log_files)} file log trong logs/")
 
 for fname in log_files:
-    fpath = os.path.join(LOGS_DIR, fname)
-    stem = os.path.splitext(fname)[0]
-    out_csv = os.path.join(PARSED_DIR, f"{stem}.csv")
-
-    # 1. Nếu là file CSV
-    if fname.endswith('.csv'):
-        try:
-            df = pd.read_csv(fpath)
-            df.columns = [c.strip() for c in df.columns]
-            if all(c in df.columns for c in ['source', 'packet_ID', 'RSSI', 'SNR', 'frequency']):
-                if 'time_slot' not in df.columns:
-                    df['time_slot'] = '00:00:00.000'
-                df = df[REQUIRED_COLS]
-                df.to_csv(out_csv, index=False)
-                parsed_files.append(out_csv)
-                print(f"  [OK] {fname} -> {os.path.basename(out_csv)} ({len(df)} dòng)")
-                continue
-        except Exception:
-            pass
-
-    # 2. Parse text line-by-line
+    in_path = os.path.join(LOGS_DIR, fname)
+    out_csv = os.path.join(PARSED_DIR, f"{os.path.splitext(fname)[0]}.csv")
     data = []
-    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+
+    with open(in_path, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             line_str = line.strip()
             if not line_str or line_str.startswith("---") or line_str.startswith("===") or "Time" in line_str:
@@ -231,7 +211,7 @@ print(f"\n[SUCCESS] Đã chuyển đổi {len(parsed_files)} file log thành CSV
 add_markdown(r"""
 ## 3. Bước 2: Phát hiện gói mất & Bổ sung dữ liệu (`02_add_missed_packets`)
 Phát hiện các số thứ tự gói bị khuyết trong chuỗi truyền do va chạm hoặc suy hao tín hiệu.
-Các gói mất được gán giá trị đặc trưng: $RSSI = -1000, SNR = -1000$.
+Các gói mất được gán giá trị đặc trưng phạt: $RSSI = -1000, SNR = -1000$.
 """)
 
 add_code(r"""
@@ -290,7 +270,7 @@ print(f"\n[TỔNG HỢP] Tổng gói: {total} | Nhận thành công: {total - lo
 add_markdown(r"""
 ## 4. Bước 3: Phân chia tập dữ liệu Machine Learning (`03_generate_dataset`)
 Chuẩn hóa cấu trúc 2 tầng dữ liệu:
-- **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`), tách thành các file riêng biệt theo từng kênh tần số (ví dụ: `433_175_A.csv`, `433_375_A.csv`, `433_575_A.csv` hoặc theo từng file phiên đo) và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
+- **`data/MLData/`**: Lọc theo từng Node (`A/`, `B/`, `C/`), tách thành các file riêng biệt theo từng kênh tần số và bổ sung 3 cờ kênh $CH1, CH2, CH3$.
 - **`data/MLdataready/`**: Gom nhóm theo kênh tần số cho từng Node (`A/`, `B/`, `C/`) và toàn mạng (`ABC/`).
 - **`data/ready/dataset_ready.csv`**: Cửa sổ trượt chuỗi thời gian ($t_s = 10$ bước, 80 đặc trưng input, nhãn `target_channel`).
 """)
@@ -318,7 +298,6 @@ flags_df = imputed_df.apply(assign_ch_flags, axis=1)
 flagged_all = pd.concat([imputed_df, flags_df], axis=1)
 mldata_cols = ['packet_ID', 'source', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
 
-# 1a. Phân tách theo từng phiên đo và theo từng kênh tần số
 for pf in parsed_csv_files:
     in_p = os.path.join(IMPUTED_DIR, pf)
     if not os.path.exists(in_p):
@@ -336,7 +315,6 @@ for pf in parsed_csv_files:
                 fname_out = f"{stem_f}_{node}.csv" if ch_name in stem_f else f"{stem_f}_{ch_name}_{node}.csv"
                 ch_data[mldata_cols].to_csv(os.path.join(MLDATA_DIR, node, fname_out), index=False)
 
-# 1b. Đồng thời xuất file tổng hợp theo kênh tần số cho từng Node
 for node in ['A', 'B', 'C']:
     sub_node = flagged_all[flagged_all['source'] == node]
     if sub_node.empty:
@@ -397,29 +375,40 @@ ready_df.head(5)
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 6: Bước 4 - Huấn luyện FCNN Baseline
+# CELL 6: Bước 4 - Nạp Dữ liệu & Chuẩn bị Phân chia Tập Train/Val/Test
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 5. Bước 4: Huấn luyện FCNN Baseline (`04_train_model`)
-Phương pháp luận huấn luyện mô hình:
-- **Đầu vào:** Nạp trực tiếp từ `MLdataready/ABC/{channel}.csv`, trượt cửa sổ $t_s = 10$ mẫu, 8 đặc trưng = 80 chiều.
-- **Kiến trúc FCNN:** `Dense(10, relu)` $\rightarrow$ `Dense(10, relu, L1=1e-4)` $\rightarrow$ `Dense(NUM_CHANNELS, softmax)`
-- **Hàm mất mát:** Mean Squared Error (`loss='mse'`), metrics: `['mae', 'accuracy']`
-- **Huấn luyện:** `batch_size=1`, `epochs=500` đảm bảo mô hình hội tụ hoàn toàn
-- **Phân chia:** Train 60% / Test 20% / Val 20%
+## 5. Bước 4: Tổng hợp Huấn luyện Đa Thuật toán TinyML (`04_train_model`)
+
+Khảo sát và huấn luyện đối sánh **5 kiến trúc mạng nơ-ron** phù hợp cho việc nhúng lên vi điều khiển ESP32:
+1. **Baseline FCNN (MLP):** Mạng nơ-ron truyền thẳng đa tầng.
+2. **1D-CNN:** Tích chập 1D khai thác tương quan chuỗi thời gian của RSSI và SNR.
+3. **GRU (RNN):** Mạng nơ-ron hồi quy có cổng nhớ, bắt giữ động lực suy thoái kênh truyền dài hạn.
+4. **Depthwise Separable 1D-CNN:** Tích chập tách chiều tối ưu phần cứng (MobileNet-style).
+5. **ResNet-1D:** Mạng có đường kết nối tắt Residual Block chống suy giảm đạo hàm.
+
+---
+
+### 5.1. Chuẩn bị Dữ liệu Chuỗi Thời gian & Phân chia Tập Train/Val/Test
+Mỗi mẫu dữ liệu gồm cửa sổ trượt $T = 10$ mốc thời gian, mỗi mốc gồm $F = 8$ đặc trưng $\rightarrow$ Vector 80 chiều.
+Dữ liệu được chuẩn hóa `StandardScaler` và chia: **60% Train**, **20% Validation**, **20% Test**.
+Hỗ trợ cả 2 định dạng tensor:
+- `X_flat`: Mảng 2D `(N, 80)` cho kiến trúc FCNN truyền thẳng.
+- `X_seq`: Mảng 3D `(N, 10, 8)` cho các kiến trúc tích chập 1D và mạng hồi quy GRU.
 """)
 
 add_code(r"""
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 500
-BATCH_SIZE = 1
+EPOCHS = 100
+BATCH_SIZE = 8
 
-# 1. Tự động nhận dạng kênh từ MLdataready/ABC/
+# 1. Tự động nhận dạng cấu hình kênh từ MLdataready/ABC/
 abc_dir = os.path.join(MLDATAREADY_DIR, "ABC")
 channel_names = sorted([os.path.splitext(f)[0] for f in os.listdir(abc_dir) if f.endswith(".csv")]) if os.path.isdir(abc_dir) else []
 
-inputs, outputs = [], []
+raw_inputs, raw_outputs = [], []
 feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
+
 if channel_names:
     print(f"[DATA] Nạp trực tiếp từ MLdataready/ABC/ ({len(channel_names)} kênh: {channel_names})")
     NUM_CHANNELS = len(channel_names)
@@ -439,130 +428,465 @@ if channel_names:
         arr = df_ch[feature_cols].to_numpy(dtype=float)
         num_rec = int(len(arr) / SAMPLES_PER_CHANNEL)
         for i in range(num_rec):
-            tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].flatten().tolist()
-            inputs.append(tensor)
-            outputs.append(ONE_HOT[ch_idx])
-    X = np.array(inputs)
-    y_target = np.array(outputs)
+            tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].tolist()
+            raw_inputs.append(tensor)
+            raw_outputs.append(ONE_HOT[ch_idx])
 else:
     print("[DATA] Fallback sang data/ready/dataset_ready.csv...")
     feat_cols = [c for c in ready_df.columns if c.startswith("feat_")]
-    X = ready_df[feat_cols].values
-    y = ready_df['target_channel'].values
-    NUM_CHANNELS = len(np.unique(y))
-    y_target = tf.keras.utils.to_categorical(y, num_classes=NUM_CHANNELS)
+    X_raw = ready_df[feat_cols].values
+    y_raw = ready_df['target_channel'].values
+    NUM_CHANNELS = len(np.unique(y_raw))
+    raw_inputs = X_raw.reshape(-1, SAMPLES_PER_CHANNEL, 8).tolist()
+    raw_outputs = tf.keras.utils.to_categorical(y_raw, num_classes=NUM_CHANNELS).tolist()
 
-print(f"[DATA] Tổng: {len(X)} mẫu | Vector input: {X.shape[1]} chiều | Số kênh: {NUM_CHANNELS}")
+raw_inputs = np.array(raw_inputs)
+raw_outputs = np.array(raw_outputs)
+N, T, F = raw_inputs.shape
+print(f"[DATA] Tổng cộng {N} mẫu chuỗi ({T} bước x {F} đặc trưng = {T*F} chiều), {NUM_CHANNELS} kênh đầu ra.")
 
 # Chuẩn hóa StandardScaler
+flattened = raw_inputs.reshape(N * T, F)
 scaler = StandardScaler()
-X = scaler.fit_transform(X)
+flattened_scaled = scaler.fit_transform(flattened)
+X_seq = flattened_scaled.reshape(N, T, F)
+X_flat = X_seq.reshape(N, T * F)
 
-# Shuffle ngẫu nhiên
-rand_idx = np.arange(len(X))
-np.random.shuffle(rand_idx)
-X, y_target = X[rand_idx], y_target[rand_idx]
+# Chia tập: 60% Train / 20% Val / 20% Test cố định SEED
+idx_tr, idx_tmp = train_test_split(np.arange(N), test_size=0.4, random_state=SEED)
+idx_vl, idx_ts = train_test_split(idx_tmp, test_size=0.5, random_state=SEED)
 
-# Chia tập: 60% Train / 20% Test / 20% Val
-train_split = int(0.6 * len(X))
-test_split = int(0.2 * len(X) + train_split)
-X_train, X_test, X_val = np.split(X, [train_split, test_split])
-y_train, y_test, y_val = np.split(y_target, [train_split, test_split])
+y_tr, y_vl, y_ts = raw_outputs[idx_tr], raw_outputs[idx_vl], raw_outputs[idx_ts]
+print(f"[SPLIT] Train: {len(idx_tr)} (60%) | Val: {len(idx_vl)} (20%) | Test: {len(idx_ts)} (20%)")
 
-print(f"Train: {len(X_train)} (60%) | Test: {len(X_test)} (20%) | Val: {len(X_val)} (20%)")
-
-# Kiến trúc FCNN Baseline
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(10, activation='relu', input_shape=(X.shape[1],), name="dense_1"),
-    tf.keras.layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4), name="dense_2"),
-    tf.keras.layers.Dense(NUM_CHANNELS, activation='softmax', name="output")
-])
-
-model.compile(optimizer=tf.keras.optimizers.Adam(), loss='mse', metrics=['mae', 'accuracy'])
-model.summary()
-
-# Huấn luyện FCNN
-history = model.fit(X_train, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE,
-                    validation_data=(X_val, y_val), verbose=1)
-
-test_loss, test_mae, test_acc = model.evaluate(X_test, y_test, verbose=0)
-print(f"\n{'='*55}")
-print(f" TEST ACCURACY: {test_acc * 100:.2f}% | LOSS (MSE): {test_loss:.4f} | MAE: {test_mae:.4f}")
-print(f"{'='*55}")
+# Cấu trúc lưu trữ tổng hợp các mô hình
+benchmark_results = []
+trained_models = {}
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 7: Đường cong học tập
+# CELL 7: Thuật toán 1 - Baseline FCNN
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-### Trực quan hóa Đường cong học tập (Loss, MAE, Accuracy)
+### 5.2. Thuật toán 1: Mạng Fully-Connected Baseline (FCNN / MLP)
+- **Kiến trúc:** Gồm 2 lớp ẩn Fully-Connected (`Dense(10, relu)` $\rightarrow$ `Dense(10, relu, L1=1e-4)` $\rightarrow$ `Dense(NUM_CHANNELS, softmax)`).
+- **Đặc điểm phần cứng:** Cực kỳ nhẹ, bộ nhớ RAM/Flash tối thiểu, tốc độ tính toán tính bằng micro-giây, đóng vai trò mô hình đối chuẩn (Baseline).
 """)
 
 add_code(r"""
-plt.figure(figsize=(16, 5), dpi=150)
+def build_fcnn():
+    return tf.keras.Sequential([
+        layers.Input(shape=(T * F,), name="fcnn_input"),
+        layers.Dense(10, activation='relu', name="fcnn_dense1"),
+        layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4), name="fcnn_dense2"),
+        layers.Dense(NUM_CHANNELS, activation='softmax', name="fcnn_output")
+    ], name="Baseline_FCNN")
 
-plt.subplot(1, 3, 1)
-plt.plot(history.history['loss'], label='Training Loss (MSE)', color='#d62728', linewidth=2)
-plt.plot(history.history['val_loss'], label='Validation Loss (MSE)', color='#ff7f0e', linewidth=2)
-plt.title('Loss Trends (MSE)', fontsize=12, fontweight='bold')
-plt.xlabel('Epoch')
-plt.ylabel('Loss (MSE)')
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.6)
+fcnn_model = build_fcnn()
+fcnn_model.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
 
-plt.subplot(1, 3, 2)
-plt.plot(history.history['mae'], label='Training MAE', color='#9467bd', linewidth=2)
-plt.plot(history.history['val_mae'], label='Validation MAE', color='#8c564b', linewidth=2)
-plt.title('MAE Trends', fontsize=12, fontweight='bold')
-plt.xlabel('Epoch')
-plt.ylabel('MAE')
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.6)
+t0 = time.time()
+fcnn_hist = fcnn_model.fit(X_flat[idx_tr], y_tr, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                           validation_data=(X_flat[idx_vl], y_vl), verbose=0)
+fcnn_time = time.time() - t0
 
-plt.subplot(1, 3, 3)
-plt.plot(history.history['accuracy'], label='Training Accuracy', color='#2ca02c', linewidth=2)
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy', color='#1f77b4', linewidth=2)
-plt.title('Accuracy Trends', fontsize=12, fontweight='bold')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.6)
+fcnn_loss, fcnn_acc, fcnn_mae = fcnn_model.evaluate(X_flat[idx_ts], y_ts, verbose=0)
+trained_models["Baseline_FCNN"] = (fcnn_model, True)
 
+# Đo thời gian suy luận (Latency)
+sample_f = X_flat[idx_ts[:1]]
+for _ in range(10): _ = fcnn_model(sample_f, training=False)
+t_start = time.perf_counter()
+for _ in range(200): _ = fcnn_model(sample_f, training=False)
+fcnn_lat = ((time.perf_counter() - t_start) / 200) * 1e6
+
+benchmark_results.append({
+    'Model': 'Baseline_FCNN', 'Accuracy (%)': round(fcnn_acc * 100, 2),
+    'Loss': round(fcnn_loss, 4), 'MAE': round(fcnn_mae, 4),
+    'Params': fcnn_model.count_params(), 'Latency (us)': round(fcnn_lat, 1),
+    'Train Time (s)': round(fcnn_time, 1)
+})
+
+print(f"[Baseline_FCNN] Test Accuracy: {fcnn_acc * 100:.2f}% | Loss: {fcnn_loss:.4f} | Params: {fcnn_model.count_params():,} | Latency: {fcnn_lat:.1f} µs")
+
+# Vẽ đường cong học tập FCNN
+plt.figure(figsize=(10, 3.5), dpi=120)
+plt.subplot(1, 2, 1)
+plt.plot(fcnn_hist.history['accuracy'], label='Train Acc', color='#2ca02c')
+plt.plot(fcnn_hist.history['val_accuracy'], label='Val Acc', color='#1f77b4')
+plt.title('Baseline FCNN - Accuracy Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+
+plt.subplot(1, 2, 2)
+plt.plot(fcnn_hist.history['loss'], label='Train Loss', color='#d62728')
+plt.plot(fcnn_hist.history['val_loss'], label='Val Loss', color='#ff7f0e')
+plt.title('Baseline FCNN - Loss Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
-plt.savefig(os.path.join(FIGURES_DIR, "training_trends.png"), dpi=300, bbox_inches='tight')
 plt.show()
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 8: Xuất TFLite & model.h
+# CELL 8: Thuật toán 2 - 1D-CNN
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 6. Chuyển đổi TFLite & Xuất `model.h` nhúng cho ESP32
+### 5.3. Thuật toán 2: Mạng Tích chập 1 Chiều (1D-CNN)
+- **Kiến trúc:** Dùng các bộ lọc tích chập trượt trên trục thời gian (`Conv1D(16, 3)` $\rightarrow$ `BatchNorm` $\rightarrow$ `MaxPool1D` $\rightarrow$ `Conv1D(32, 3)` $\rightarrow$ `GlobalAveragePooling1D` $\rightarrow$ `Dense(16)` $\rightarrow$ `Softmax`).
+- **Đặc điểm:** Tự động trích xuất các đặc trưng biến thiên cục bộ theo thời gian (ví dụ: xu hướng RSSI giảm dần, xung nhiễu SNR đột biến do va chạm).
 """)
 
 add_code(r"""
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
+def build_cnn1d():
+    return tf.keras.Sequential([
+        layers.Input(shape=(T, F), name="cnn_input"),
+        layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', name="conv1"),
+        layers.BatchNormalization(name="bn1"),
+        layers.MaxPooling1D(pool_size=2, name="pool1"),
+        layers.Conv1D(32, kernel_size=3, padding='same', activation='relu', name="conv2"),
+        layers.GlobalAveragePooling1D(name="gap"),
+        layers.Dense(16, activation='relu', name="fc"),
+        layers.Dense(NUM_CHANNELS, activation='softmax', name="output")
+    ], name="1D_CNN")
+
+cnn_model = build_cnn1d()
+cnn_model.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
+
+t0 = time.time()
+cnn_hist = cnn_model.fit(X_seq[idx_tr], y_tr, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                         validation_data=(X_seq[idx_vl], y_vl), verbose=0)
+cnn_time = time.time() - t0
+
+cnn_loss, cnn_acc, cnn_mae = cnn_model.evaluate(X_seq[idx_ts], y_ts, verbose=0)
+trained_models["1D_CNN"] = (cnn_model, False)
+
+sample_c = X_seq[idx_ts[:1]]
+for _ in range(10): _ = cnn_model(sample_c, training=False)
+t_start = time.perf_counter()
+for _ in range(200): _ = cnn_model(sample_c, training=False)
+cnn_lat = ((time.perf_counter() - t_start) / 200) * 1e6
+
+benchmark_results.append({
+    'Model': '1D_CNN', 'Accuracy (%)': round(cnn_acc * 100, 2),
+    'Loss': round(cnn_loss, 4), 'MAE': round(cnn_mae, 4),
+    'Params': cnn_model.count_params(), 'Latency (us)': round(cnn_lat, 1),
+    'Train Time (s)': round(cnn_time, 1)
+})
+
+print(f"[1D_CNN] Test Accuracy: {cnn_acc * 100:.2f}% | Loss: {cnn_loss:.4f} | Params: {cnn_model.count_params():,} | Latency: {cnn_lat:.1f} µs")
+
+plt.figure(figsize=(10, 3.5), dpi=120)
+plt.subplot(1, 2, 1)
+plt.plot(cnn_hist.history['accuracy'], label='Train Acc', color='#2ca02c')
+plt.plot(cnn_hist.history['val_accuracy'], label='Val Acc', color='#1f77b4')
+plt.title('1D-CNN - Accuracy Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+
+plt.subplot(1, 2, 2)
+plt.plot(cnn_hist.history['loss'], label='Train Loss', color='#d62728')
+plt.plot(cnn_hist.history['val_loss'], label='Val Loss', color='#ff7f0e')
+plt.title('1D-CNN - Loss Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
+""")
+
+# ══════════════════════════════════════════════════════════════════════
+# CELL 9: Thuật toán 3 - GRU
+# ══════════════════════════════════════════════════════════════════════
+add_markdown(r"""
+### 5.4. Thuật toán 3: Mạng Nơ-ron Hồi quy (GRU - Gated Recurrent Unit)
+- **Kiến trúc:** Mạng RNN cải tiến với 16 GRU Units (`GRU(16, return_sequences=False)` $\rightarrow$ `Dense(16, relu)` $\rightarrow$ `Dense(NUM_CHANNELS, softmax)`).
+- **Đặc điểm:** Cơ chế cổng cập nhật (Update Gate) và cổng xóa (Reset Gate) giúp duy trì bộ nhớ chuỗi gói tin dài hạn, thích ứng với kênh truyền fading biến động.
+""")
+
+add_code(r"""
+def build_gru():
+    return tf.keras.Sequential([
+        layers.Input(shape=(T, F), name="gru_input"),
+        layers.GRU(16, return_sequences=False, name="gru_cell"),
+        layers.Dense(16, activation='relu', name="gru_dense"),
+        layers.Dense(NUM_CHANNELS, activation='softmax', name="output")
+    ], name="GRU_RNN")
+
+gru_model = build_gru()
+gru_model.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
+
+t0 = time.time()
+gru_hist = gru_model.fit(X_seq[idx_tr], y_tr, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                         validation_data=(X_seq[idx_vl], y_vl), verbose=0)
+gru_time = time.time() - t0
+
+gru_loss, gru_acc, gru_mae = gru_model.evaluate(X_seq[idx_ts], y_ts, verbose=0)
+trained_models["GRU_RNN"] = (gru_model, False)
+
+sample_g = X_seq[idx_ts[:1]]
+for _ in range(10): _ = gru_model(sample_g, training=False)
+t_start = time.perf_counter()
+for _ in range(200): _ = gru_model(sample_g, training=False)
+gru_lat = ((time.perf_counter() - t_start) / 200) * 1e6
+
+benchmark_results.append({
+    'Model': 'GRU_RNN', 'Accuracy (%)': round(gru_acc * 100, 2),
+    'Loss': round(gru_loss, 4), 'MAE': round(gru_mae, 4),
+    'Params': gru_model.count_params(), 'Latency (us)': round(gru_lat, 1),
+    'Train Time (s)': round(gru_time, 1)
+})
+
+print(f"[GRU_RNN] Test Accuracy: {gru_acc * 100:.2f}% | Loss: {gru_loss:.4f} | Params: {gru_model.count_params():,} | Latency: {gru_lat:.1f} µs")
+
+plt.figure(figsize=(10, 3.5), dpi=120)
+plt.subplot(1, 2, 1)
+plt.plot(gru_hist.history['accuracy'], label='Train Acc', color='#2ca02c')
+plt.plot(gru_hist.history['val_accuracy'], label='Val Acc', color='#1f77b4')
+plt.title('GRU RNN - Accuracy Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+
+plt.subplot(1, 2, 2)
+plt.plot(gru_hist.history['loss'], label='Train Loss', color='#d62728')
+plt.plot(gru_hist.history['val_loss'], label='Val Loss', color='#ff7f0e')
+plt.title('GRU RNN - Loss Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
+""")
+
+# ══════════════════════════════════════════════════════════════════════
+# CELL 10: Thuật toán 4 - Depthwise Separable 1D-CNN
+# ══════════════════════════════════════════════════════════════════════
+add_markdown(r"""
+### 5.5. Thuật toán 4: Mạng Tích chập Tách chiều (Depthwise Separable 1D-CNN)
+- **Kiến trúc:** MobileNet-style 1D (`SeparableConv1D(16, 3)` $\rightarrow$ `SeparableConv1D(32, 3)` $\rightarrow$ `GlobalAveragePooling1D` $\rightarrow$ `Softmax`).
+- **Đặc điểm tối ưu cho TinyML:** Tách thành phép tích chập theo kênh (Depthwise) và tích chập điểm (Pointwise). Giảm tới **70 - 80% số phép tính FLOPs** và trọng số so với tích chập chuẩn, tối ưu hoàn hảo cho vi điều khiển ESP32.
+""")
+
+add_code(r"""
+def build_separable_cnn():
+    return tf.keras.Sequential([
+        layers.Input(shape=(T, F), name="sep_input"),
+        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu', name="sep_conv1"),
+        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu', name="sep_conv2"),
+        layers.GlobalAveragePooling1D(name="gap"),
+        layers.Dense(NUM_CHANNELS, activation='softmax', name="output")
+    ], name="Separable_1D_CNN")
+
+sep_model = build_separable_cnn()
+sep_model.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
+
+t0 = time.time()
+sep_hist = sep_model.fit(X_seq[idx_tr], y_tr, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                         validation_data=(X_seq[idx_vl], y_vl), verbose=0)
+sep_time = time.time() - t0
+
+sep_loss, sep_acc, sep_mae = sep_model.evaluate(X_seq[idx_ts], y_ts, verbose=0)
+trained_models["Separable_1D_CNN"] = (sep_model, False)
+
+sample_s = X_seq[idx_ts[:1]]
+for _ in range(10): _ = sep_model(sample_s, training=False)
+t_start = time.perf_counter()
+for _ in range(200): _ = sep_model(sample_s, training=False)
+sep_lat = ((time.perf_counter() - t_start) / 200) * 1e6
+
+benchmark_results.append({
+    'Model': 'Separable_1D_CNN', 'Accuracy (%)': round(sep_acc * 100, 2),
+    'Loss': round(sep_loss, 4), 'MAE': round(sep_mae, 4),
+    'Params': sep_model.count_params(), 'Latency (us)': round(sep_lat, 1),
+    'Train Time (s)': round(sep_time, 1)
+})
+
+print(f"[Separable_1D_CNN] Test Accuracy: {sep_acc * 100:.2f}% | Loss: {sep_loss:.4f} | Params: {sep_model.count_params():,} | Latency: {sep_lat:.1f} µs")
+
+plt.figure(figsize=(10, 3.5), dpi=120)
+plt.subplot(1, 2, 1)
+plt.plot(sep_hist.history['accuracy'], label='Train Acc', color='#2ca02c')
+plt.plot(sep_hist.history['val_accuracy'], label='Val Acc', color='#1f77b4')
+plt.title('Separable 1D-CNN - Accuracy Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+
+plt.subplot(1, 2, 2)
+plt.plot(sep_hist.history['loss'], label='Train Loss', color='#d62728')
+plt.plot(sep_hist.history['val_loss'], label='Val Loss', color='#ff7f0e')
+plt.title('Separable 1D-CNN - Loss Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
+""")
+
+# ══════════════════════════════════════════════════════════════════════
+# CELL 11: Thuật toán 5 - ResNet-1D
+# ══════════════════════════════════════════════════════════════════════
+add_markdown(r"""
+### 5.6. Thuật toán 5: Mạng Nơ-ron Thặng dư (ResNet-1D với Skip Connection)
+- **Kiến trúc:** Khối Residual Block 1D tích hợp kết nối tắt trực tiếp ($x + \mathcal{F}(x)$).
+- **Đặc điểm:** Ngăn ngừa hiện tượng triệt tiêu đạo hàm (Vanishing Gradient), đảm bảo tín hiệu thông tin từ các gói tin trước không bị thất thoát qua các tầng mạng.
+""")
+
+add_code(r"""
+def build_resnet1d():
+    inputs = layers.Input(shape=(T, F), name="resnet_input")
+    x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(inputs)
+    res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(x)
+    res = layers.Conv1D(16, kernel_size=3, padding='same')(res)
+    x = layers.add([x, res])
+    x = layers.Activation('relu')(x)
+    x = layers.GlobalAveragePooling1D()(x)
+    x = layers.Dense(16, activation='relu')(x)
+    outputs = layers.Dense(NUM_CHANNELS, activation='softmax')(x)
+    return models.Model(inputs=inputs, outputs=outputs, name="ResNet_1D")
+
+resnet_model = build_resnet1d()
+resnet_model.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy', 'mae'])
+
+t0 = time.time()
+resnet_hist = resnet_model.fit(X_seq[idx_tr], y_tr, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                               validation_data=(X_seq[idx_vl], y_vl), verbose=0)
+resnet_time = time.time() - t0
+
+resnet_loss, resnet_acc, resnet_mae = resnet_model.evaluate(X_seq[idx_ts], y_ts, verbose=0)
+trained_models["ResNet_1D"] = (resnet_model, False)
+
+sample_r = X_seq[idx_ts[:1]]
+for _ in range(10): _ = resnet_model(sample_r, training=False)
+t_start = time.perf_counter()
+for _ in range(200): _ = resnet_model(sample_r, training=False)
+resnet_lat = ((time.perf_counter() - t_start) / 200) * 1e6
+
+benchmark_results.append({
+    'Model': 'ResNet_1D', 'Accuracy (%)': round(resnet_acc * 100, 2),
+    'Loss': round(resnet_loss, 4), 'MAE': round(resnet_mae, 4),
+    'Params': resnet_model.count_params(), 'Latency (us)': round(resnet_lat, 1),
+    'Train Time (s)': round(resnet_time, 1)
+})
+
+print(f"[ResNet_1D] Test Accuracy: {resnet_acc * 100:.2f}% | Loss: {resnet_loss:.4f} | Params: {resnet_model.count_params():,} | Latency: {resnet_lat:.1f} µs")
+
+plt.figure(figsize=(10, 3.5), dpi=120)
+plt.subplot(1, 2, 1)
+plt.plot(resnet_hist.history['accuracy'], label='Train Acc', color='#2ca02c')
+plt.plot(resnet_hist.history['val_accuracy'], label='Val Acc', color='#1f77b4')
+plt.title('ResNet-1D - Accuracy Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+
+plt.subplot(1, 2, 2)
+plt.plot(resnet_hist.history['loss'], label='Train Loss', color='#d62728')
+plt.plot(resnet_hist.history['val_loss'], label='Val Loss', color='#ff7f0e')
+plt.title('ResNet-1D - Loss Curve')
+plt.xlabel('Epoch'); plt.legend(); plt.grid(True, linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
+""")
+
+# ══════════════════════════════════════════════════════════════════════
+# CELL 12: Bảng Tổng hợp Đối sánh 5 Thuật toán
+# ══════════════════════════════════════════════════════════════════════
+add_markdown(r"""
+### 5.7. Bảng Tổng hợp Đối sánh 5 Thuật toán & Trực quan hóa Biểu đồ
+So sánh toàn diện cả 5 mô hình trên 5 tiêu chí cốt lõi:
+- **Test Accuracy (%):** Tỷ lệ chọn đúng kênh truyền tối ưu.
+- **Test Loss:** Độ tin cậy của hàm mất mát.
+- **Parameters:** Số lượng trọng số nơ-ron (phản ánh độ phức tạp).
+- **Latency (µs):** Thời gian thực thi suy luận tại biên trên vi điều khiển.
+- **Training Time (s):** Thời gian huấn luyện mô hình.
+""")
+
+add_code(r"""
+summary_df = pd.DataFrame(benchmark_results)
+print("=" * 72)
+print(" BẢNG TỔNG HỢP SO SÁNH 5 THUẬT TOÁN TINYML ĐÃ HUẤN LUYỆN")
+print("=" * 72)
+print(summary_df.to_string(index=False))
+
+# Lưu bảng so sánh
+summary_csv = os.path.join(MODELS_DIR, "models_benchmark_summary.csv")
+summary_df.to_csv(summary_csv, index=False)
+
+# Vẽ biểu đồ đối sánh 3 tiêu chí chính
+plt.figure(figsize=(16, 4.5), dpi=150)
+colors = ['#1f77b4', '#2ca02c', '#ff7f0e', '#d62728', '#9467bd']
+
+# 1. Test Accuracy
+plt.subplot(1, 3, 1)
+bars1 = plt.bar(summary_df['Model'], summary_df['Test Accuracy (%)'], color=colors)
+plt.title('(a) Test Accuracy (%)', fontweight='bold', fontsize=11)
+plt.ylabel('Accuracy (%)')
+plt.xticks(rotation=25, ha='right', fontsize=9)
+plt.ylim(0, 105)
+for b in bars1:
+    yval = b.get_height()
+    plt.text(b.get_x() + b.get_width()/2.0, yval + 1.2, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+
+# 2. Tham số mô hình
+plt.subplot(1, 3, 2)
+bars2 = plt.bar(summary_df['Model'], summary_df['Params'], color=colors)
+plt.title('(b) Số lượng Tham số (Weights)', fontweight='bold', fontsize=11)
+plt.ylabel('Parameters')
+plt.xticks(rotation=25, ha='right', fontsize=9)
+for b in bars2:
+    yval = b.get_height()
+    plt.text(b.get_x() + b.get_width()/2.0, yval + max(summary_df['Params'])*0.02, f"{int(yval):,}", ha='center', va='bottom', fontsize=8)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+
+# 3. Thời gian suy luận
+plt.subplot(1, 3, 3)
+bars3 = plt.bar(summary_df['Model'], summary_df['Latency (us)'], color=colors)
+plt.title('(c) Thời gian Suy luận (Inference Latency)', fontweight='bold', fontsize=11)
+plt.ylabel('Latency (µs)')
+plt.xticks(rotation=25, ha='right', fontsize=9)
+for b in bars3:
+    yval = b.get_height()
+    plt.text(b.get_x() + b.get_width()/2.0, yval + max(summary_df['Latency (us)'])*0.02, f"{yval:.1f}µs", ha='center', va='bottom', fontsize=8)
+plt.grid(axis='y', linestyle='--', alpha=0.5)
+
+plt.tight_layout()
+chart_bench_path = os.path.join(FIGURES_DIR, "multi_model_training_comparison.png")
+plt.savefig(chart_bench_path, dpi=300)
+plt.show()
+print(f"[OK] Đã lưu biểu đồ so sánh: {chart_bench_path}")
+""")
+
+# ══════════════════════════════════════════════════════════════════════
+# CELL 13: Lựa chọn Mô hình Tối ưu & Xuất TFLite / C Header model.h
+# ══════════════════════════════════════════════════════════════════════
+add_markdown(r"""
+### 5.8. Lựa chọn Mô hình Tối ưu & Xuất Mã nguồn C Header (`model.h`) cho ESP32
+Tự động chọn mô hình đạt độ chính xác cao nhất (hoặc Separable 1D-CNN để tối ưu tài nguyên), chuyển đổi sang định dạng **TensorFlow Lite FlatBuffer** và xuất mảng byte C trong file `model.h` sẵn sàng nạp cho firmware ESP32.
+""")
+
+add_code(r"""
+# Chọn mô hình có Test Accuracy cao nhất
+best_idx = summary_df['Test Accuracy (%)'].idxmax()
+best_name = summary_df.loc[best_idx, 'Model']
+best_acc = summary_df.loc[best_idx, 'Test Accuracy (%)']
+best_mdl, best_flat = trained_models[best_name]
+
+print(f"\n[SELECTION] Mô hình tối ưu được chọn: {best_name} (Accuracy: {best_acc}%)")
+
+# Chuyển đổi sang TensorFlow Lite
+converter = tf.lite.TFLiteConverter.from_keras_model(best_mdl)
+tflite_bytes = converter.convert()
 
 tflite_path = os.path.join(MODELS_DIR, "channel_model.tflite")
 with open(tflite_path, "wb") as f:
-    f.write(tflite_model)
-print(f"[OK] TFLite Model: {tflite_path} ({len(tflite_model)} bytes ~ {len(tflite_model)/1024:.2f} KB)")
+    f.write(tflite_bytes)
+print(f"[OK] Đã lưu mô hình TFLite: {tflite_path} ({len(tflite_bytes)} bytes ~ {len(tflite_bytes)/1024:.2f} KB)")
 
+# Xuất file C Header model.h
 header_path = os.path.join(MODELS_DIR, "model.h")
 with open(header_path, "w", encoding="utf-8") as f:
     f.write("// Tự động sinh từ mô hình TinyML LoRa Channel Hopping\n")
-    f.write(f"// Dung lượng FlatBuffer: {len(tflite_model)} bytes (~{len(tflite_model)/1024:.2f} KB)\n\n")
+    f.write(f"// Thuật toán: {best_name} (Test Accuracy: {best_acc}%)\n")
+    f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n\n")
     f.write("const unsigned char model[] = {\n  ")
-    for i, b in enumerate(tflite_model):
+    for i, b in enumerate(tflite_bytes):
         f.write(f"0x{b:02x}, ")
         if (i + 1) % 12 == 0:
             f.write("\n  ")
     f.write("\n};\n\n")
-    f.write(f"const unsigned int model_len = {len(tflite_model)};\n")
-print(f"[OK] C Header: {header_path}")
+    f.write(f"const unsigned int model_len = {len(tflite_bytes)};\n")
 
-# Đồng bộ trực tiếp sang MCU firmware
+print(f"[OK] Đã xuất mã C Header: {header_path}")
+
+# Đồng bộ trực tiếp sang firmware MCU ESP32
 mcu_src = os.path.join(BASE_DIR, "../MCUCode/LoRaEN_TinyMLHopping/src/model.h")
 if os.path.exists(os.path.dirname(mcu_src)):
     shutil.copyfile(header_path, mcu_src)
@@ -570,12 +894,12 @@ if os.path.exists(os.path.dirname(mcu_src)):
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 9: Bước 5 - Đánh giá so sánh hiệu năng
+# CELL 14: Bước 5 - Đánh giá so sánh hiệu năng
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 7. Bước 5: Đánh giá so sánh hiệu năng (`05_evaluate_comparison`)
-So sánh 3 cơ chế: **Fixed Channel** / **Random Hopping** / **TinyML Hopping**.
-Số liệu được tính toán 100% từ dữ liệu thực nghiệm đã thu thập.
+## 6. Bước 5: Đánh giá So sánh Hiệu năng Thực nghiệm (`05_evaluate_comparison`)
+So sánh trực tiếp 3 cơ chế vận hành: **Fixed Channel** / **Random Hopping** / **TinyML Hopping**.
+Số liệu được tính toán 100% từ dữ liệu thực tế đã thu thập trên bàn đo.
 """)
 
 add_code(r"""
@@ -687,171 +1011,78 @@ else:
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 10: Bước 6 - Benchmark kiến trúc mạng nơ-ron
+# CELL 15: Bước 6 - Phân tích Trade-off Phần cứng & Footprint
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 8. Bước 6: Benchmark kiến trúc mạng nơ-ron (`06_benchmark_models`)
-Khảo sát và đối sánh 5 kiến trúc:
-1. **Baseline FCNN (MLP):** Mạng fully-connected đa tầng chuẩn.
-2. **1D-CNN:** Tích chập 1D khai thác tương quan chuỗi thời gian.
-3. **GRU:** Mạng hồi quy nén cổng bộ nhớ Recurrent.
-4. **Separable 1D-CNN:** Tích chập tách chiều (Depthwise Separable), tối ưu cho vi điều khiển.
-5. **ResNet-1D:** Mạng có kết nối tắt Residual skip connection.
+## 7. Bước 6: Phân tích Chuyên sâu Trade-off Phần cứng (`06_benchmark_models`)
+Đánh giá mức độ phù hợp khi nhúng mô hình lên vi điều khiển ESP32:
+- Tỷ lệ Trade-off giữa độ chính xác (Accuracy) và số lượng tham số (Parameters).
+- Đánh giá khả năng đáp ứng thời gian thực (Inference Latency $< 2\text{ ms}$).
 """)
 
 add_code(r"""
-# Tự động nhận dạng cấu hình kênh
-ch_names_bench = sorted([os.path.splitext(f)[0] for f in os.listdir(os.path.join(MLDATAREADY_DIR, "ABC")) if f.endswith(".csv")]) if os.path.isdir(os.path.join(MLDATAREADY_DIR, "ABC")) else ["433_175", "433_375", "433_575"]
-NUM_CH_BENCH = len(ch_names_bench)
-ONE_HOT_BENCH = np.eye(NUM_CH_BENCH)
-ml_headers = ['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency']
-SAMPLES = 10
+# Phân tích tương quan Trade-off: Accuracy vs Latency vs Footprint
+plt.figure(figsize=(9, 6), dpi=150)
+scatter = plt.scatter(summary_df['Latency (us)'], summary_df['Test Accuracy (%)'],
+                      s=summary_df['Params'] * 0.8, c=range(len(summary_df)),
+                      cmap='viridis', alpha=0.85, edgecolors='black', linewidth=1.5)
 
-raw_in, raw_out = [], []
-for ci, ch in enumerate(ch_names_bench):
-    p = os.path.join(MLDATAREADY_DIR, "ABC", f"{ch}.csv")
-    if not os.path.exists(p):
-        p = os.path.join(MLDATAREADY_DIR, "A", f"{ch}.csv")
-    if not os.path.exists(p):
-        continue
-    df_ch = pd.read_csv(p)
-    if not all(c in df_ch.columns for c in feature_cols):
-        df_ch = pd.read_csv(p, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
-    df_ch = df_ch.reset_index(drop=True)
-    if not all(c in df_ch.columns for c in feature_cols):
-        continue
-    arr_b = df_ch[feature_cols].to_numpy(dtype=float)
-    n_rec = int(len(arr_b) / SAMPLES)
-    for i in range(n_rec):
-        t = arr_b[i * SAMPLES : (i + 1) * SAMPLES].tolist()
-        raw_in.append(t)
-        raw_out.append(ONE_HOT_BENCH[ci])
+for _, r in summary_df.iterrows():
+    plt.annotate(f"{r['Model']}\n({r['Params']:,} params)",
+                 (r['Latency (us)'], r['Test Accuracy (%)']),
+                 textcoords="offset points", xytext=(0, 12), ha='center', fontsize=9, fontweight='bold')
 
-if raw_in:
-    raw_in = np.array(raw_in)
-    raw_out = np.array(raw_out)
-    N_b, T_b, F_b = raw_in.shape
-    print(f"[DATA] Benchmark: {N_b} mẫu, chuỗi {T_b}x{F_b}, {NUM_CH_BENCH} kênh")
-
-    flat_b = raw_in.reshape(N_b * T_b, F_b)
-    scaler_b = StandardScaler()
-    X_seq_b = scaler_b.fit_transform(flat_b).reshape(N_b, T_b, F_b)
-    X_flat_b = X_seq_b.reshape(N_b, T_b * F_b)
-
-    idx_tr, idx_tmp = train_test_split(np.arange(N_b), test_size=0.4, random_state=SEED)
-    idx_vl, idx_ts = train_test_split(idx_tmp, test_size=0.5, random_state=SEED)
-    y_tr_b, y_vl_b, y_ts_b = raw_out[idx_tr], raw_out[idx_vl], raw_out[idx_ts]
-
-    def mk_fcnn():
-        return tf.keras.Sequential([layers.Input(shape=(T_b*F_b,)), layers.Dense(10, activation='relu'),
-            layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4)),
-            layers.Dense(NUM_CH_BENCH, activation='softmax')], name="Baseline_FCNN"), True
-
-    def mk_cnn1d():
-        return tf.keras.Sequential([layers.Input(shape=(T_b, F_b)),
-            layers.Conv1D(16, 3, padding='same', activation='relu'), layers.BatchNormalization(),
-            layers.MaxPooling1D(2), layers.Conv1D(32, 3, padding='same', activation='relu'),
-            layers.GlobalAveragePooling1D(), layers.Dense(16, activation='relu'),
-            layers.Dense(NUM_CH_BENCH, activation='softmax')], name="1D_CNN"), False
-
-    def mk_gru():
-        return tf.keras.Sequential([layers.Input(shape=(T_b, F_b)),
-            layers.GRU(16, return_sequences=False),
-            layers.Dense(NUM_CH_BENCH, activation='softmax')], name="GRU"), False
-
-    def mk_sep():
-        return tf.keras.Sequential([layers.Input(shape=(T_b, F_b)),
-            layers.SeparableConv1D(16, 3, padding='same', activation='relu'),
-            layers.SeparableConv1D(32, 3, padding='same', activation='relu'),
-            layers.GlobalAveragePooling1D(),
-            layers.Dense(NUM_CH_BENCH, activation='softmax')], name="Separable_1D_CNN"), False
-
-    bench_results = []
-    for factory in [mk_fcnn, mk_cnn1d, mk_gru, mk_sep]:
-        mdl, is_flat = factory()
-        mdl.compile(optimizer=tf.keras.optimizers.Adam(0.003), loss='categorical_crossentropy', metrics=['accuracy'])
-        xtr = X_flat_b[idx_tr] if is_flat else X_seq_b[idx_tr]
-        xvl = X_flat_b[idx_vl] if is_flat else X_seq_b[idx_vl]
-        xts = X_flat_b[idx_ts] if is_flat else X_seq_b[idx_ts]
-        mdl.fit(xtr, y_tr_b, epochs=100, batch_size=8, validation_data=(xvl, y_vl_b), verbose=0)
-        loss_b, acc_b = mdl.evaluate(xts, y_ts_b, verbose=0)
-        bench_results.append({'Model': mdl.name, 'Accuracy (%)': round(acc_b*100, 2), 'Loss': round(loss_b, 4), 'Params': mdl.count_params()})
-        print(f"  {mdl.name:<20} | Acc: {acc_b*100:.2f}% | Loss: {loss_b:.4f} | Params: {mdl.count_params()}")
-
-    bench_df = pd.DataFrame(bench_results)
-    print("\n[BẢNG TỔNG HỢP BENCHMARK]:")
-    print(bench_df.to_string(index=False))
+plt.title('Trade-off Phân Tích: Accuracy (%) vs Latency (µs) vs Model Size', fontsize=12, fontweight='bold')
+plt.xlabel('Thời gian suy luận (Latency µs)', fontsize=11)
+plt.ylabel('Độ chính xác Test Accuracy (%)', fontsize=11)
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.tight_layout()
+plt.savefig(os.path.join(FIGURES_DIR, "model_tradeoff_analysis.png"), dpi=300)
+plt.show()
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 11: Bước 7 - Đánh giá chuyên sâu mô hình tốt nhất
+# CELL 16: Bước 7 - Đánh giá chuyên sâu mô hình tốt nhất
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 9. Bước 7: Đánh giá Toàn diện Mô hình Tối ưu (`07_evaluate_best_model`)
-Đánh giá chuyên sâu mô hình **Separable 1D-CNN** và đối chứng với **FCNN Baseline**:
+## 8. Bước 7: Đánh giá Toàn diện Mô hình Tối ưu (`07_evaluate_best_model`)
+Đánh giá chuyên sâu mô hình được lựa chọn (`best_mdl`):
 - **Ma trận nhầm lẫn (Confusion Matrix)** và các chỉ số Precision, Recall, F1-Score.
-- **Hardware Metrics:** Thời gian suy luận (Inference Latency), Dung lượng TFLite.
-- **Mô phỏng mạng LoRa:** So sánh trực quan PDR, RSSI và SNR trên từng kích thước tải tin.
+- **Hardware Metrics:** Thời gian suy luận (Inference Latency), Dung lượng TFLite FlatBuffer.
 """)
 
 add_code(r"""
-OUT_DIR = os.path.join(MODELS_DIR, "comparison")
-os.makedirs(OUT_DIR, exist_ok=True)
+# Đánh giá phân loại trên tập Test
+X_eval = X_flat[idx_ts] if best_flat else X_seq[idx_ts]
+y_pred_prob = best_mdl.predict(X_eval, verbose=0)
+y_pred_cls = np.argmax(y_pred_prob, axis=1)
+y_true_cls = np.argmax(y_ts, axis=1)
+channel_labels = [f"CH {ch}" for ch in (channel_names if channel_names else [f"Kênh {i+1}" for i in range(NUM_CHANNELS)])]
 
-if raw_in is not None and len(raw_in) > 0:
-    # 1. Huấn luyện mô hình tối ưu Separable 1D-CNN
-    best_model = tf.keras.Sequential([
-        layers.Input(shape=(T_b, F_b)),
-        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu'),
-        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu'),
-        layers.GlobalAveragePooling1D(),
-        layers.Dense(NUM_CH_BENCH, activation='softmax')
-    ], name="Separable_1D_CNN")
-    best_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-                       loss='categorical_crossentropy', metrics=['accuracy'])
-    best_model.fit(X_seq_b[idx_tr], y_tr_b, epochs=120, batch_size=8,
-                   validation_data=(X_seq_b[idx_vl], y_vl_b), verbose=0)
+print("\n" + "=" * 60)
+print(f" CLASSIFICATION REPORT ({best_name}):")
+print("=" * 60)
+print(classification_report(y_true_cls, y_pred_cls, target_names=channel_labels))
 
-    # 2. Đánh giá phân loại
-    y_pred_prob = best_model.predict(X_seq_b[idx_ts], verbose=0)
-    y_pred_cls = np.argmax(y_pred_prob, axis=1)
-    y_true_cls = np.argmax(y_ts_b, axis=1)
-    channel_labels = [f"CH {ch}" for ch in ch_names_bench]
-
-    print("\n" + "="*60)
-    print(" CLASSIFICATION REPORT (Separable 1D-CNN):")
-    print("="*60)
-    print(classification_report(y_true_cls, y_pred_cls, target_names=channel_labels))
-
-    # Đo thời gian suy luận (Latency)
-    num_runs = 500
-    t0 = time.perf_counter()
-    for _ in range(num_runs):
-        _ = best_model(X_seq_b[idx_ts][:1], training=False)
-    t1 = time.perf_counter()
-    latency_us = ((t1 - t0) / num_runs) * 1e6
-    print(f"[HARDWARE] Inference Latency: {latency_us:.1f} µs ({latency_us/1000:.3f} ms)")
-    print(f"[HARDWARE] Tham số mô hình: {best_model.count_params():,}")
-
-    # Vẽ biểu đồ Confusion Matrix
-    plt.figure(figsize=(7, 6), dpi=150)
-    cm = confusion_matrix(y_true_cls, y_pred_cls)
-    cm_pct = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
-    sns.heatmap(cm_pct, annot=True, fmt='.1f', cmap='Blues',
-                xticklabels=channel_labels, yticklabels=channel_labels)
-    plt.title('Separable 1D-CNN Confusion Matrix (%)', fontsize=13, fontweight='bold')
-    plt.xlabel('Predicted Channel')
-    plt.ylabel('True Channel')
-    plt.tight_layout()
-    plt.savefig(os.path.join(FIGURES_DIR, "best_model_confusion_matrix.png"), dpi=300)
-    plt.show()
+# Vẽ biểu đồ Confusion Matrix
+plt.figure(figsize=(7, 6), dpi=150)
+cm = confusion_matrix(y_true_cls, y_pred_cls)
+cm_pct = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+sns.heatmap(cm_pct, annot=True, fmt='.1f', cmap='Blues',
+            xticklabels=channel_labels, yticklabels=channel_labels)
+plt.title(f'{best_name} Confusion Matrix (%)', fontsize=13, fontweight='bold')
+plt.xlabel('Kênh dự đoán (Predicted Channel)')
+plt.ylabel('Kênh thực tế (True Channel)')
+plt.tight_layout()
+plt.savefig(os.path.join(FIGURES_DIR, "best_model_confusion_matrix.png"), dpi=300)
+plt.show()
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 12: Bước 8 - Tính toán chi tiết PDR
+# CELL 17: Bước 8 - Tính toán chi tiết PDR
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 10. Bước 8: Thống kê chi tiết Tỉ lệ truyền thành công (PDR) (`08_pdr_calculation`)
+## 9. Bước 8: Thống kê chi tiết Tỉ lệ truyền thành công (PDR) (`08_pdr_calculation`)
 Thống kê số gói tin thành công, số gói mất do va chạm ($RSSI = -1000$), tỉ lệ $PDR = \frac{Received}{Total} \times 100\%$ và chất lượng kênh thu ($RSSI$, $SNR$) theo từng Node và mức kích thước tải.
 """)
 
@@ -894,10 +1125,10 @@ else:
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 13: Bước 9 - Trực quan hóa Biểu đồ So sánh đa chiều
+# CELL 18: Bước 9 - Trực quan hóa Biểu đồ So sánh đa chiều
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 11. Bước 9: Trực quan hóa Biểu đồ So sánh đa chiều (`09_plot_hopping_comparison`)
+## 10. Bước 9: Trực quan hóa Biểu đồ So sánh đa chiều (`09_plot_hopping_comparison`)
 So sánh trực tiếp giữa 3 cơ chế: **Fixed Channel**, **Random Hopping** và **TinyML Hopping** qua 3 chỉ số then chốt: **SNR**, **RSSI** và **PDR** trên 6 mức kích thước tải từ 30 đến 250 Bytes.
 """)
 
@@ -962,10 +1193,10 @@ print(f"[OK] Đã lưu biểu đồ tổng hợp tại: {sum_chart_path}")
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 14: Bước 10 - Phân tích Kích thước Bộ nhớ TinyML
+# CELL 19: Bước 10 - Phân tích Kích thước Bộ nhớ TinyML
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 12. Bước 10: Phân tích Kích thước Bộ nhớ TinyML trên MCU (`10_plot_model_sizes`)
+## 11. Bước 10: Phân tích Kích thước Bộ nhớ TinyML trên MCU (`10_plot_model_sizes`)
 Đánh giá tính khả thi khi nhúng mô hình lên vi điều khiển ESP32 / Cortex-M qua phân tích footprint bộ nhớ Flash / RAM giữa các định dạng (`model.h`, `.h5`, `.tflite`) khi mở rộng số lượng kênh truyền LoRa từ 2 đến 9 kênh.
 """)
 
@@ -1006,10 +1237,10 @@ print(f"[OK] Đã lưu biểu đồ tại: {footprint_path}")
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 15: Bước 11 - Xuất Bảng Thống kê LaTeX
+# CELL 20: Bước 11 - Xuất Bảng Thống kê LaTeX
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 13. Bước 11: Tự động Xuất Bảng Thống kê sang LaTeX (`11_export_latex_tables`)
+## 12. Bước 11: Tự động Xuất Bảng Thống kê sang LaTeX (`11_export_latex_tables`)
 Chuyển đổi toàn bộ kết quả phân tích số liệu thực nghiệm sang các bảng mã LaTeX chuẩn (`booktabs`), sẵn sàng đưa vào tài liệu Luận văn Tốt nghiệp.
 """)
 
@@ -1030,32 +1261,26 @@ def export_df_to_latex(df, out_path, caption, label):
 export_df_to_latex(comp_df, os.path.join(docs_tables_dir, "table_hopping_comparison.tex"),
                    "Đối sánh Hiệu năng giữa Fixed Channel, Random Hopping và TinyML Hopping", "tab:hopping_comp")
 
-# 2. Xuất bảng benchmark các kiến trúc mạng
-bench_export_df = pd.DataFrame(bench_results) if 'bench_results' in locals() and bench_results else pd.DataFrame({
-    'Model': ['Baseline_FCNN', '1D_CNN', 'GRU', 'Separable_1D_CNN'],
-    'Accuracy (%)': [94.2, 95.1, 93.8, 94.8],
-    'Loss': [0.124, 0.108, 0.145, 0.115],
-    'Params': [1023, 3455, 2125, 1287]
-})
-export_df_to_latex(bench_export_df, os.path.join(docs_tables_dir, "table_benchmark_models.tex"),
-                   "So sánh Hiệu năng và Số lượng Tham số giữa các Kiến trúc Mạng Nơ-ron", "tab:bench_models")
+# 2. Xuất bảng benchmark 5 kiến trúc mạng nơ-ron
+export_df_to_latex(summary_df, os.path.join(docs_tables_dir, "table_benchmark_models.tex"),
+                   "So sánh Hiệu năng, Độ phức tạp và Thời gian Suy luận giữa 5 Kiến trúc TinyML", "tab:bench_models")
 
 print(f"\n[HOÀN THÀNH] Toàn bộ file mã bảng LaTeX đã được lưu tại: {docs_tables_dir}")
 """)
 
 # ══════════════════════════════════════════════════════════════════════
-# CELL 16: Kết luận Toàn diện Đồ án
+# CELL 21: Kết luận Toàn diện Đồ án
 # ══════════════════════════════════════════════════════════════════════
 add_markdown(r"""
-## 14. Kết luận Toàn diện Đồ án
+## 13. Kết luận Toàn diện Đồ án
 
 Pipeline TinyML hoàn chỉnh đã được thực hiện và kiểm chứng qua 11 bước:
 1. **Thu thập dữ liệu thực nghiệm:** Log phân tán từ Gateway được trích xuất và chuẩn hóa theo từng phiên đo 1-to-1.
 2. **Gán nhãn và tiền xử lý:** Phát hiện va chạm/mất gói chính xác, xây dựng vector đặc trưng chuỗi thời gian bộ nhớ $t_s = 10$.
-3. **Huấn luyện & Tối ưu hóa:** Mô hình FCNN gọn nhẹ (~5.8 KB TFLite, ~1023 tham số) hội tụ ổn định và được xuất thành `model.h`.
+3. **Huấn luyện đa thuật toán:** Đã khảo sát và đối sánh 5 kiến trúc (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D). Mỗi kiến trúc được phân tích riêng biệt về độ chính xác và độ phức tạp phần cứng.
 4. **Hiệu năng vượt trội:** Cơ chế TinyML Predictive Hopping nâng cao PDR mạng lên ~92-96%, cải thiện RSSI ~12-15 dBm so với Random và Fixed Channel.
 5. **Khả năng nhúng thực tế:** Footprint mô hình chỉ chiếm < 0.2% dung lượng Flash ESP32, đảm bảo thời gian suy luận (Inference time) dưới 2 ms.
-6. **Sẵn sàng cho Báo cáo:** Tự động sinh biểu đồ phân giải cao và các bảng LaTeX phục vụ trực tiếp cho Đồ án Tốt nghiệp.
+6. **Sẵn sàng cho Báo cáo:** Tự động sinh biểu đồ phân giải cao và các bảng LaTeX phục vụ trực tiếp cho Luận văn Tốt nghiệp.
 """)
 
 # ══════════════════════════════════════════════════════════════════════
