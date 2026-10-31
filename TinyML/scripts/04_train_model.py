@@ -472,26 +472,28 @@ def main():
 
         # Vẽ đường cong học tập
         plt.subplot(2, 3, idx + 1)
-        plt.plot(history.history['accuracy'], label='Train Acc', color='#2ca02c')
-        plt.plot(history.history['val_accuracy'], label='Val Acc', color='#1f77b4')
-        plt.plot(history.history['loss'], label='Loss', color='#d62728', linestyle='--')
-        plt.title(f"{m_name} (Acc: {test_acc*100:.1f}%)", fontweight='bold', fontsize=10)
-        plt.xlabel('Epoch')
-        plt.legend(fontsize=8)
-        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.plot(history.history['accuracy'], label='Train Acc', color='#2ca02c', linewidth=1.5)
+        plt.plot(history.history['val_accuracy'], label='Val Acc', color='#1f77b4', linewidth=1.5)
+        plt.plot(history.history['loss'], label='Loss', color='#d62728', linestyle='--', linewidth=1.2)
+        plt.title(f"{m_name} ({test_acc*100:.1f}%)", fontweight='bold', fontsize=9.5)
+        plt.xlabel('Epoch', fontsize=8.5)
+        plt.ylabel('Score / Loss', fontsize=8.5)
+        plt.legend(loc='center right', fontsize=7.5, framealpha=0.9)
+        plt.grid(True, linestyle='--', alpha=0.4)
 
-    # Vẽ biểu đồ so sánh ở subplot thứ 6
+    # Biểu đồ so sánh Accuracy tổng hợp ở subplot thứ 6
     summary_df = pd.DataFrame(benchmark_summary)
     plt.subplot(2, 3, 6)
-    bars = plt.bar(summary_df['Model'], summary_df['Test Accuracy (%)'], color=['#1f77b4', '#2ca02c', '#ff7f0e', '#d62728', '#9467bd'])
-    plt.title('So sánh Accuracy giữa các Thuật toán', fontweight='bold', fontsize=10)
-    plt.ylabel('Test Accuracy (%)')
-    plt.xticks(rotation=30, ha='right', fontsize=8)
-    plt.ylim(0, 105)
+    bars = plt.bar(summary_df['Model'], summary_df['Test Accuracy (%)'], color=['#1f77b4', '#2ca02c', '#ff7f0e', '#d62728', '#9467bd'], width=0.55)
+    plt.title('Accuracy Comparison', fontweight='bold', fontsize=9.5)
+    plt.xlabel('Model', fontsize=8.5)
+    plt.ylabel('Accuracy (%)', fontsize=8.5)
+    plt.xticks(rotation=25, ha='right', fontsize=8)
+    plt.ylim(0, 108)
     for bar in bars:
         yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width()/2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8)
-    plt.grid(axis='y', linestyle='--', alpha=0.5)
+        plt.text(bar.get_x() + bar.get_width()/2.0, yval + 1.2, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8, fontweight='bold')
+    plt.grid(axis='y', linestyle='--', alpha=0.4)
 
     plt.tight_layout()
     chart_path = os.path.join(FIGURES_DIR, "multi_model_training_comparison.png")

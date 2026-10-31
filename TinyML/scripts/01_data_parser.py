@@ -34,11 +34,7 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-# ═════════════════════════════════════════════════════════════════════════════
-# 1. BIỂU THỨC CHÍNH QUY (REGEX) TRÍCH XUẤT CÁC ĐỊNH DẠNG LOG
-# ═════════════════════════════════════════════════════════════════════════════
-
-# Regex 1: Log text chuẩn Gateway txt file
+# Regex patterns for log formats
 # Cú pháp: "11:45:51.918 -> A0*... size_of_message 30 RSSI -88 SNR 10 Frequency 433.175"
 PATTERN_TEXT_LOG = re.compile(
     r"(?P<time_slot>\d{2}:\d{2}:\d{2}[.:]\d{3})\s*->\s*"

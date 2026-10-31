@@ -58,16 +58,28 @@ def detect_channels():
 
 def load_data():
     """
-    Nạp dữ liệu chuỗi thời gian (đọc từ MLdataready/ABC/).
-    Fallback sang dataset_ready.csv nếu chưa có dữ liệu MLdataready.
+    Nạp dữ liệu chuỗi thời gian (Phương án 1):
+    Ưu tiên đọc trực tiếp từ data/ready/dataset_ready.csv.
     """
-    channel_names = detect_channels()
+    if os.path.exists(READY_FILE):
+        try:
+            df_ready = pd.read_csv(READY_FILE)
+            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+                X_all = df_ready[feat_cols].values
+                y_all = df_ready['target_channel'].values
+                num_ch = len(np.unique(y_all))
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
+                return raw_inputs, raw_outputs
+        except Exception:
+            pass
 
+    channel_names = detect_channels()
     if channel_names:
         NUM_CHANNELS = len(channel_names)
         ONE_HOT = np.eye(NUM_CHANNELS)
-        raw_inputs = []
-        raw_outputs = []
+        raw_inputs, raw_outputs = [], []
 
         for ch_idx, ch_name in enumerate(channel_names):
             csv_path = os.path.join(MLDATA_READY_DIR, "ABC", f"{ch_name}.csv")
@@ -95,21 +107,6 @@ def load_data():
 
         if raw_inputs:
             return np.array(raw_inputs), np.array(raw_outputs)
-
-    # Fallback: Đọc từ dataset_ready.csv
-    if os.path.exists(READY_FILE):
-        try:
-            df_ready = pd.read_csv(READY_FILE)
-            feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
-                X_all = df_ready[feat_cols].values
-                y_all = df_ready['target_channel'].values
-                num_ch = len(np.unique(y_all))
-                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
-                raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
-                return raw_inputs, raw_outputs
-        except Exception:
-            pass
 
     print("[INFO] Chưa có dữ liệu huấn luyện. Hãy đặt file log vào data/logs/ và chạy các bước 01 → 03 trước.")
     return np.array([]), np.array([])
@@ -273,43 +270,50 @@ def main():
     print(df_res.to_string(index=False))
     df_res.to_csv(os.path.join(OUT_DIR, "comparison_summary.csv"), index=False)
 
-    # Vẽ biểu đồ
+    # Biểu đồ so sánh trực quan
     colors = ['#1f77b4', '#2ca02c', '#ff7f0e', '#d62728', '#9467bd']
-    plt.figure(figsize=(15, 5))
+    plt.figure(figsize=(14, 4.8), dpi=300)
 
     plt.subplot(1, 3, 1)
-    bars = plt.bar(df_res['Model'], df_res['Test_Accuracy'], color=colors)
-    plt.title('Test Accuracy (%)', fontsize=12)
-    plt.ylabel('Accuracy (%)')
-    plt.xticks(rotation=25, ha='right')
-    plt.ylim(min(df_res['Test_Accuracy']) - 5, 102)
+    bars = plt.bar(df_res['Model'], df_res['Test_Accuracy'], color=colors, width=0.55)
+    plt.title('Test Accuracy (%)', fontsize=11, fontweight='bold')
+    plt.xlabel('Model', fontsize=9.5)
+    plt.ylabel('Accuracy (%)', fontsize=9.5)
+    plt.xticks(rotation=25, ha='right', fontsize=8.5)
+    plt.ylim(0, 108)
     for bar in bars:
         yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.5,
-                 f"{yval:.1f}%", ha='center', va='bottom', fontsize=9, fontweight='bold')
-    plt.grid(axis='y', linestyle='--', alpha=0.6)
+        plt.text(bar.get_x() + bar.get_width() / 2, yval + 1.2,
+                 f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
 
     plt.subplot(1, 3, 2)
-    bars = plt.bar(df_res['Model'], df_res['Params'], color=colors)
-    plt.title('Parameters Count', fontsize=12)
-    plt.ylabel('Parameters')
-    plt.xticks(rotation=25, ha='right')
+    bars = plt.bar(df_res['Model'], df_res['Params'], color=colors, width=0.55)
+    plt.title('Parameter Count', fontsize=11, fontweight='bold')
+    plt.xlabel('Model', fontsize=9.5)
+    plt.ylabel('Parameters', fontsize=9.5)
+    plt.xticks(rotation=25, ha='right', fontsize=8.5)
+    max_p = max(df_res['Params']) if len(df_res['Params']) > 0 else 1000
+    plt.ylim(0, max_p * 1.15)
     for bar in bars:
         yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width() / 2, yval + 10,
-                 f"{yval}", ha='center', va='bottom', fontsize=9)
-    plt.grid(axis='y', linestyle='--', alpha=0.6)
+        plt.text(bar.get_x() + bar.get_width() / 2, yval + max_p * 0.02,
+                 f"{int(yval):,}", ha='center', va='bottom', fontsize=8.5)
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
 
     plt.subplot(1, 3, 3)
-    bars = plt.bar(df_res['Model'], df_res['TFLite_Size_KB'], color=colors)
-    plt.title('TFLite Size on MCU (KB)', fontsize=12)
-    plt.ylabel('Size (KB)')
-    plt.xticks(rotation=25, ha='right')
+    bars = plt.bar(df_res['Model'], df_res['TFLite_Size_KB'], color=colors, width=0.55)
+    plt.title('Flash Footprint (KB)', fontsize=11, fontweight='bold')
+    plt.xlabel('Model', fontsize=9.5)
+    plt.ylabel('Size (KB)', fontsize=9.5)
+    plt.xticks(rotation=25, ha='right', fontsize=8.5)
+    max_s = max(df_res['TFLite_Size_KB']) if len(df_res['TFLite_Size_KB']) > 0 else 50
+    plt.ylim(0, max_s * 1.18)
     for bar in bars:
         yval = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.1,
-                 f"{yval:.1f} KB", ha='center', va='bottom', fontsize=9, fontweight='bold')
-    plt.grid(axis='y', linestyle='--', alpha=0.6)
+        plt.text(bar.get_x() + bar.get_width() / 2, yval + max_s * 0.02,
+                 f"{yval:.1f} KB", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
 
     plt.tight_layout()
     fig_path = os.path.join(OUT_DIR, "architectures_comparison.png")

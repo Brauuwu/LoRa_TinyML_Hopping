@@ -64,25 +64,24 @@ def plot_charts(df):
     x = np.arange(len(sizes))
     width = 0.25
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # BIỂU ĐỒ 1: AVERAGE SNR (dB)
-    # ─────────────────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=300)
+    # 1. Average SNR (dB)
+    fig, ax = plt.subplots(figsize=(8, 4.8), dpi=300)
     b1 = ax.bar(x - width, df['snr_fixed'], width, label='Fixed Channel', color='#e74c3c', alpha=0.9)
     b2 = ax.bar(x, df['snr_random'], width, label='Random Hopping', color='#3498db', alpha=0.9)
     b3 = ax.bar(x + width, df['snr_tinyml'], width, label='TinyML Hopping', color='#2ecc71', alpha=0.9)
 
-    ax.set_xlabel('Payload Size (Bytes)', fontsize=13, fontweight='bold')
-    ax.set_ylabel('Average SNR (dB)', fontsize=13, fontweight='bold')
-    ax.set_title('Tỷ số Tín hiệu trên Nhiễu (SNR) theo Kích thước Gói tin', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Payload Size (Bytes)', fontsize=10.5)
+    ax.set_ylabel('SNR (dB)', fontsize=10.5)
+    ax.set_title('Average SNR vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
-    ax.set_xticklabels(sizes, fontsize=11)
-    ax.legend(fontsize=11, loc='upper right')
+    ax.set_xticklabels(sizes, fontsize=10)
+    ax.set_ylim(0, 13)
+    ax.legend(fontsize=9.5, loc='upper right', framealpha=0.9)
     ax.grid(True, linestyle='--', alpha=0.5)
 
     for bar in b3:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 0.15, f"{yval:.1f}", ha='center', va='bottom', fontsize=9, fontweight='bold')
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 0.15, f"{yval:.1f}", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     snr_path = os.path.join(FIGURES_DIR, "Average_SNR_Chart.png")
@@ -90,26 +89,24 @@ def plot_charts(df):
     plt.close()
     print(f" [OK] Đã lưu biểu đồ SNR : {snr_path}")
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # BIỂU ĐỒ 2: AVERAGE RSSI (dBm)
-    # ─────────────────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=300)
+    # 2. Average RSSI (dBm)
+    fig, ax = plt.subplots(figsize=(8, 4.8), dpi=300)
     b1 = ax.bar(x - width, df['rssi_fixed'], width, label='Fixed Channel', color='#e74c3c', alpha=0.9)
     b2 = ax.bar(x, df['rssi_random'], width, label='Random Hopping', color='#3498db', alpha=0.9)
     b3 = ax.bar(x + width, df['rssi_tinyml'], width, label='TinyML Hopping', color='#2ecc71', alpha=0.9)
 
-    ax.set_xlabel('Payload Size (Bytes)', fontsize=13, fontweight='bold')
-    ax.set_ylabel('Average RSSI (dBm)', fontsize=13, fontweight='bold')
-    ax.set_title('Cường độ Tín hiệu Thu (RSSI) theo Kích thước Gói tin', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Payload Size (Bytes)', fontsize=10.5)
+    ax.set_ylabel('RSSI (dBm)', fontsize=10.5)
+    ax.set_title('Average RSSI vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
-    ax.set_xticklabels(sizes, fontsize=11)
-    ax.set_ylim(-115, -60)
-    ax.legend(fontsize=11, loc='lower right')
+    ax.set_xticklabels(sizes, fontsize=10)
+    ax.set_ylim(-110, -55)
+    ax.legend(fontsize=9.5, loc='lower right', framealpha=0.9)
     ax.grid(True, linestyle='--', alpha=0.5)
 
     for bar in b3:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}", ha='center', va='bottom', fontsize=9, fontweight='bold')
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     rssi_path = os.path.join(FIGURES_DIR, "Average_RSSI_Chart.png")
@@ -117,26 +114,24 @@ def plot_charts(df):
     plt.close()
     print(f" [OK] Đã lưu biểu đồ RSSI: {rssi_path}")
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # BIỂU ĐỒ 3: PACKET DELIVERY RATIO (PDR %)
-    # ─────────────────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(9, 5.5), dpi=300)
+    # 3. Packet Delivery Ratio (PDR %)
+    fig, ax = plt.subplots(figsize=(8, 4.8), dpi=300)
     b1 = ax.bar(x - width, df['pdr_fixed'], width, label='Fixed Channel', color='#e74c3c', alpha=0.9)
     b2 = ax.bar(x, df['pdr_random'], width, label='Random Hopping', color='#3498db', alpha=0.9)
     b3 = ax.bar(x + width, df['pdr_tinyml'], width, label='TinyML Hopping', color='#2ecc71', alpha=0.9)
 
-    ax.set_xlabel('Payload Size (Bytes)', fontsize=13, fontweight='bold')
-    ax.set_ylabel('Packet Delivery Ratio - PDR (%)', fontsize=13, fontweight='bold')
-    ax.set_title('Tỉ lệ Truyền Thành công (PDR) theo Kích thước Gói tin', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Payload Size (Bytes)', fontsize=10.5)
+    ax.set_ylabel('PDR (%)', fontsize=10.5)
+    ax.set_title('Packet Delivery Ratio (PDR) vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
-    ax.set_xticklabels(sizes, fontsize=11)
-    ax.set_ylim(0, 110)
-    ax.legend(fontsize=11, loc='lower left')
+    ax.set_xticklabels(sizes, fontsize=10)
+    ax.set_ylim(0, 115)
+    ax.legend(fontsize=9.5, loc='lower left', framealpha=0.9)
     ax.grid(True, linestyle='--', alpha=0.5)
 
     for bar in b3:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=9, fontweight='bold')
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     pdr_path = os.path.join(FIGURES_DIR, "PDR_Chart.png")
@@ -144,47 +139,47 @@ def plot_charts(df):
     plt.close()
     print(f" [OK] Đã lưu biểu đồ PDR : {pdr_path}")
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # BIỂU ĐỒ 4: TỔNG HỢP 3 PANEL (SUBPLOTS)
-    # ─────────────────────────────────────────────────────────────────────────
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), dpi=300)
+    # 4. Multi-panel summary
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4.8), dpi=300)
+
 
     # Panel 1: SNR
     axes[0].bar(x - width, df['snr_fixed'], width, label='Fixed', color='#e74c3c')
     axes[0].bar(x, df['snr_random'], width, label='Random', color='#3498db')
     axes[0].bar(x + width, df['snr_tinyml'], width, label='TinyML', color='#2ecc71')
-    axes[0].set_title('(a) Average SNR (dB)', fontsize=13, fontweight='bold')
-    axes[0].set_xlabel('Payload Size (Bytes)', fontsize=11)
-    axes[0].set_ylabel('SNR (dB)', fontsize=11)
+    axes[0].set_title('(a) Average SNR (dB)', fontsize=11, fontweight='bold')
+    axes[0].set_xlabel('Payload Size (Bytes)', fontsize=10)
+    axes[0].set_ylabel('SNR (dB)', fontsize=10)
     axes[0].set_xticks(x)
-    axes[0].set_xticklabels(sizes)
-    axes[0].legend(fontsize=10)
+    axes[0].set_xticklabels(sizes, fontsize=9.5)
+    axes[0].set_ylim(0, 13)
+    axes[0].legend(fontsize=9, loc='upper right', framealpha=0.9)
     axes[0].grid(True, linestyle='--', alpha=0.5)
 
     # Panel 2: RSSI
     axes[1].bar(x - width, df['rssi_fixed'], width, label='Fixed', color='#e74c3c')
     axes[1].bar(x, df['rssi_random'], width, label='Random', color='#3498db')
     axes[1].bar(x + width, df['rssi_tinyml'], width, label='TinyML', color='#2ecc71')
-    axes[1].set_title('(b) Average RSSI (dBm)', fontsize=13, fontweight='bold')
-    axes[1].set_xlabel('Payload Size (Bytes)', fontsize=11)
-    axes[1].set_ylabel('RSSI (dBm)', fontsize=11)
+    axes[1].set_title('(b) Average RSSI (dBm)', fontsize=11, fontweight='bold')
+    axes[1].set_xlabel('Payload Size (Bytes)', fontsize=10)
+    axes[1].set_ylabel('RSSI (dBm)', fontsize=10)
     axes[1].set_xticks(x)
-    axes[1].set_xticklabels(sizes)
-    axes[1].set_ylim(-115, -60)
-    axes[1].legend(fontsize=10)
+    axes[1].set_xticklabels(sizes, fontsize=9.5)
+    axes[1].set_ylim(-110, -55)
+    axes[1].legend(fontsize=9, loc='lower right', framealpha=0.9)
     axes[1].grid(True, linestyle='--', alpha=0.5)
 
     # Panel 3: PDR
     axes[2].bar(x - width, df['pdr_fixed'], width, label='Fixed', color='#e74c3c')
     axes[2].bar(x, df['pdr_random'], width, label='Random', color='#3498db')
     axes[2].bar(x + width, df['pdr_tinyml'], width, label='TinyML', color='#2ecc71')
-    axes[2].set_title('(c) Packet Delivery Ratio (%)', fontsize=13, fontweight='bold')
-    axes[2].set_xlabel('Payload Size (Bytes)', fontsize=11)
-    axes[2].set_ylabel('PDR (%)', fontsize=11)
+    axes[2].set_title('(c) Packet Delivery Ratio (%)', fontsize=11, fontweight='bold')
+    axes[2].set_xlabel('Payload Size (Bytes)', fontsize=10)
+    axes[2].set_ylabel('PDR (%)', fontsize=10)
     axes[2].set_xticks(x)
-    axes[2].set_xticklabels(sizes)
-    axes[2].set_ylim(0, 110)
-    axes[2].legend(fontsize=10)
+    axes[2].set_xticklabels(sizes, fontsize=9.5)
+    axes[2].set_ylim(0, 115)
+    axes[2].legend(fontsize=9, loc='lower left', framealpha=0.9)
     axes[2].grid(True, linestyle='--', alpha=0.5)
 
     plt.tight_layout()

@@ -60,48 +60,9 @@ def detect_channels():
 
 
 def load_data():
-    """Nạp dữ liệu chuỗi thời gian từ MLdataready/ABC/."""
-    channel_names = detect_channels()
+    """Nạp dữ liệu chuỗi thời gian (Phương án 1: ưu tiên READY_FILE)."""
+    channel_names = ["433_175", "433_375", "433_575"]
 
-    if channel_names:
-        NUM_CHANNELS = len(channel_names)
-        ONE_HOT = np.eye(NUM_CHANNELS)
-        raw_inputs, raw_outputs, sample_meta = [], [], []
-
-        for ch_idx, ch_name in enumerate(channel_names):
-            csv_path = os.path.join(MLDATA_READY_DIR, "ABC", f"{ch_name}.csv")
-            if not os.path.exists(csv_path):
-                csv_path = os.path.join(MLDATA_READY_DIR, "A", f"{ch_name}.csv")
-            if not os.path.exists(csv_path):
-                continue
-
-            target = ONE_HOT[ch_idx]
-            df = pd.read_csv(csv_path)
-            feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
-            if not all(c in df.columns for c in feature_cols):
-                df = pd.read_csv(csv_path, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
-            df = df.reset_index(drop=True)
-            if not all(c in df.columns for c in feature_cols):
-                continue
-
-            arr = df[feature_cols].to_numpy(dtype=float)
-            num_rec = int(len(arr) / SAMPLES_PER_CHANNEL)
-
-            for i in range(num_rec):
-                tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].tolist()
-                raw_inputs.append(tensor)
-                raw_outputs.append(target)
-                last_idx = (i + 1) * SAMPLES_PER_CHANNEL - 1
-                sample_meta.append({
-                    'size': int(df['size_of_message'].iloc[last_idx]) if 'size_of_message' in df.columns else 30,
-                    'pkt_id': int(df['packet_ID'].iloc[last_idx]) if 'packet_ID' in df.columns else 0,
-                    'true_ch': ch_idx
-                })
-
-        if raw_inputs:
-            return np.array(raw_inputs), np.array(raw_outputs), sample_meta, channel_names
-
-    # Fallback: Đọc từ dataset_ready.csv
     if os.path.exists(READY_FILE):
         try:
             df_ready = pd.read_csv(READY_FILE)
@@ -109,23 +70,23 @@ def load_data():
             if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
                 X_all = df_ready[feat_cols].values
                 y_all = df_ready['target_channel'].values
-                num_ch = len(np.unique(y_all))
+                num_ch = 3
                 raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
                 raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
                 sample_meta = []
-                for _, row in df_ready.iterrows():
+                for _, r in df_ready.iterrows():
                     sample_meta.append({
-                        'size': int(row.get('size_of_message', 30)),
+                        'size': int(r['size_of_message']) if 'size_of_message' in r else 30,
                         'pkt_id': 0,
-                        'true_ch': int(row['target_channel'])
+                        'true_ch': int(r['target_channel'])
                     })
-                ch_names = [f"CH{i+1}" for i in range(num_ch)]
-                return raw_inputs, raw_outputs, sample_meta, ch_names
+                return raw_inputs, raw_outputs, sample_meta, channel_names
         except Exception:
             pass
 
     print("[INFO] Chưa có dữ liệu. Hãy chạy các bước 01 → 03 trước.")
     return np.array([]), np.array([]), [], []
+
 
 
 def main():
@@ -300,39 +261,41 @@ def main():
         axes[0, 1].plot(x, sim_df['PDR_Random'], 'r--o', label='Random', linewidth=2)
         axes[0, 1].plot(x, sim_df['PDR_FCNN'], 'b--s', label='Baseline FCNN', linewidth=2)
         axes[0, 1].plot(x, sim_df['PDR_SepCNN'], 'g-^', label='Separable 1D-CNN', linewidth=2.5)
-        axes[0, 1].set_title('(b) PDR theo Payload Size', fontsize=12, fontweight='bold')
-        axes[0, 1].set_xlabel('Payload Size (Bytes)')
-        axes[0, 1].set_ylabel('PDR')
+        axes[0, 1].set_title('(b) Packet Delivery Ratio (PDR)', fontsize=11, fontweight='bold')
+        axes[0, 1].set_xlabel('Payload Size (Bytes)', fontsize=10)
+        axes[0, 1].set_ylabel('PDR', fontsize=10)
         axes[0, 1].set_xticks(x)
-        axes[0, 1].set_xticklabels(sizes)
-        axes[0, 1].set_ylim(0.0, 1.05)
-        axes[0, 1].legend()
-        axes[0, 1].grid(True, linestyle='--', alpha=0.6)
+        axes[0, 1].set_xticklabels(sizes, fontsize=9.5)
+        axes[0, 1].set_ylim(0.0, 1.15)
+        axes[0, 1].legend(loc='lower left', fontsize=9.5, framealpha=0.9)
+        axes[0, 1].grid(True, linestyle='--', alpha=0.5)
 
         # (c) RSSI
         w = 0.25
         axes[1, 0].bar(x - w, sim_df['RSSI_Random'], w, label='Random', color='#d62728')
         axes[1, 0].bar(x, sim_df['RSSI_FCNN'], w, label='FCNN', color='#1f77b4')
         axes[1, 0].bar(x + w, sim_df['RSSI_SepCNN'], w, label='SepCNN', color='#2ca02c')
-        axes[1, 0].set_title('(c) Average RSSI (dBm)', fontsize=12, fontweight='bold')
-        axes[1, 0].set_xlabel('Payload Size (Bytes)')
-        axes[1, 0].set_ylabel('RSSI (dBm)')
+        axes[1, 0].set_title('(c) Average RSSI (dBm)', fontsize=11, fontweight='bold')
+        axes[1, 0].set_xlabel('Payload Size (Bytes)', fontsize=10)
+        axes[1, 0].set_ylabel('RSSI (dBm)', fontsize=10)
         axes[1, 0].set_xticks(x)
-        axes[1, 0].set_xticklabels(sizes)
-        axes[1, 0].legend()
-        axes[1, 0].grid(axis='y', linestyle='--', alpha=0.6)
+        axes[1, 0].set_xticklabels(sizes, fontsize=9.5)
+        axes[1, 0].set_ylim(-110, -10)
+        axes[1, 0].legend(loc='lower left', fontsize=9.5, framealpha=0.9)
+        axes[1, 0].grid(axis='y', linestyle='--', alpha=0.5)
 
         # (d) SNR
         axes[1, 1].bar(x - w, sim_df['SNR_Random'], w, label='Random', color='#d62728')
         axes[1, 1].bar(x, sim_df['SNR_FCNN'], w, label='FCNN', color='#1f77b4')
         axes[1, 1].bar(x + w, sim_df['SNR_SepCNN'], w, label='SepCNN', color='#2ca02c')
-        axes[1, 1].set_title('(d) Average SNR (dB)', fontsize=12, fontweight='bold')
-        axes[1, 1].set_xlabel('Payload Size (Bytes)')
-        axes[1, 1].set_ylabel('SNR (dB)')
+        axes[1, 1].set_title('(d) Average SNR (dB)', fontsize=11, fontweight='bold')
+        axes[1, 1].set_xlabel('Payload Size (Bytes)', fontsize=10)
+        axes[1, 1].set_ylabel('SNR (dB)', fontsize=10)
         axes[1, 1].set_xticks(x)
-        axes[1, 1].set_xticklabels(sizes)
-        axes[1, 1].legend()
-        axes[1, 1].grid(axis='y', linestyle='--', alpha=0.6)
+        axes[1, 1].set_xticklabels(sizes, fontsize=9.5)
+        axes[1, 1].set_ylim(0, 13)
+        axes[1, 1].legend(loc='upper right', fontsize=9.5, framealpha=0.9)
+        axes[1, 1].grid(axis='y', linestyle='--', alpha=0.5)
 
     plt.tight_layout()
     eval_fig = os.path.join(OUT_DIR, "best_model_evaluation.png")
