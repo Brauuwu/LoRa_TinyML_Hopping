@@ -28,6 +28,10 @@ def process_file(input_file, output_file):
     df = df.dropna(subset=['packet_ID'])
     df['packet_ID'] = df['packet_ID'].astype(int)
 
+    # Lọc bỏ các gói rác/nhiễu ngoại lai
+    valid_sizes = [30, 74, 118, 162, 206, 250]
+    df = df[(df['size_of_message'].isin(valid_sizes)) & (df['packet_ID'] >= 0) & (df['packet_ID'] < 100)]
+
     new_rows = []
 
     # Nhóm theo (source, size_of_message) để xác định gói mất
@@ -36,9 +40,7 @@ def process_file(input_file, output_file):
             continue
 
         freq = subset.iloc[0]['frequency']
-        min_id = int(subset['packet_ID'].min())
-        max_id = int(subset['packet_ID'].max())
-        all_ids = set(range(min_id, max_id + 1))
+        all_ids = set(range(0, 100))
         existing_ids = set(subset['packet_ID'])
         missing_ids = all_ids - existing_ids
 

@@ -76,16 +76,33 @@ def detect_channels():
 
 def load_dataset():
     """
-    Nạp dữ liệu chuỗi thời gian:
-    Trả về raw_inputs dạng (N, 10, 8) và raw_outputs dạng (N, NUM_CHANNELS).
+    Nạp dữ liệu chuỗi thời gian (Phương án 1):
+    Đọc trực tiếp từ data/ready/dataset_ready.csv (đã được lọc sạch rò rỉ nhãn).
+    Trả về raw_inputs dạng (N, 10, 8) và raw_outputs dạng (N, 3).
     """
+    if os.path.exists(READY_FILE):
+        print(f"[DATA] Nạp dữ liệu chuẩn Phương án 1 từ: {READY_FILE}")
+        df_ready = pd.read_csv(READY_FILE)
+        feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
+        if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+            X_all = df_ready[feat_cols].values
+            y_all = df_ready['target_channel'].values
+            num_ch = 3
+            raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+            raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
+            channel_names = ["433_175", "433_375", "433_575"]
+            print(f"  ✓ Đã nạp thành công: {len(raw_inputs)} mẫu chuỗi thời gian (10 bước x 8 đặc trưng)")
+            print(f"  ✓ Phân bố nhãn mục tiêu: CH0={(y_all==0).sum()}, CH1={(y_all==1).sum()}, CH2={(y_all==2).sum()}")
+            return raw_inputs, raw_outputs, channel_names
+
+    # Fallback dự phòng nếu chưa có dataset_ready.csv
     channel_names = detect_channels()
     if channel_names:
         num_ch = len(channel_names)
         one_hot = np.eye(num_ch)
         raw_inputs, raw_outputs = [], []
 
-        print(f"[DATA] Đang nạp từ MLdataready/ABC/ ({num_ch} kênh: {channel_names})")
+        print(f"[DATA] Fallback nạp từ MLdataready/ABC/ ({num_ch} kênh: {channel_names})")
         for ch_idx, ch_name in enumerate(channel_names):
             csv_path = os.path.join(MLDATA_READY_DIR, "ABC", f"{ch_name}.csv")
             if not os.path.exists(csv_path):
@@ -111,20 +128,6 @@ def load_dataset():
 
         if raw_inputs:
             return np.array(raw_inputs), np.array(raw_outputs), channel_names
-
-    # Fallback sang dataset_ready.csv
-    if os.path.exists(READY_FILE):
-        print("[DATA] Fallback đọc từ data/ready/dataset_ready.csv...")
-        df_ready = pd.read_csv(READY_FILE)
-        feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-        if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
-            X_all = df_ready[feat_cols].values
-            y_all = df_ready['target_channel'].values
-            num_ch = len(np.unique(y_all))
-            raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
-            raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
-            channel_names = [f"CH_{i}" for i in range(num_ch)]
-            return raw_inputs, raw_outputs, channel_names
 
     return np.array([]), np.array([]), []
 

@@ -37,13 +37,24 @@ def convert_csv_to_latex(csv_path, output_tex_path, caption="Bảng kết quả 
     for col in df.select_dtypes(include=['float', 'float64']).columns:
         df[col] = df[col].round(2)
 
-    try:
-        # Sử dụng tabulate nếu có
-        from tabulate import tabulate
-        latex_body = tabulate(df, headers='keys', tablefmt='latex_booktabs', showindex=False)
-    except ImportError:
-        # Fallback sang pandas to_latex
-        latex_body = df.to_latex(index=False)
+    # Sinh bảng LaTeX dạng booktabs bằng thuần Python
+    cols = list(df.columns)
+    col_align = "l" + "c" * (len(cols) - 1)
+    header_str = " & ".join(str(c).replace("_", "\\_") for c in cols) + " \\\\"
+    
+    rows = []
+    for _, r in df.iterrows():
+        row_str = " & ".join(str(r[c]) for c in cols) + " \\\\"
+        rows.append(row_str)
+    
+    body_str = "\n".join(rows)
+    latex_body = f"""\\begin{{tabular}}{{{col_align}}}
+\\toprule
+{header_str}
+\\midrule
+{body_str}
+\\bottomrule
+\\end{{tabular}}"""
 
     full_latex = f"""% Bảng sinh tự động từ file: {os.path.basename(csv_path)}
 \\begin{{table}}[htbp]

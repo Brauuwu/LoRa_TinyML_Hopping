@@ -149,57 +149,96 @@ def generate_mldata_and_ready(files, channels_cfg):
     return combined_df
 
 
-def build_sliding_window_dataset(df, channels_cfg):
+def build_sliding_window_dataset(files, target_dir, channels_cfg):
     """
-    BƯỚC 3: Xây dựng vector 80 chiều đặc trưng cửa sổ trượt (Sliding Window, ts=10)
+    BƯỚC 3 (PHƯƠNG ÁN 1): Xây dựng vector 80 chiều đặc trưng chuỗi thời gian sạch (10 bước x 8 đặc trưng)
+    Loại bỏ hoàn toàn rò rỉ nhãn (Target Leakage):
+    - Không chứa cột tần số tuyệt đối (frequency)
+    - Không chứa cờ nhãn tĩnh (CH1, CH2, CH3)
+    8 đặc trưng thực tế:
+      1. channel_idx (0, 1, 2)
+      2. is_loss (1.0 nếu mất/va chạm, 0.0 nếu nhận tốt)
+      3. rssi (-120 dBm nếu mất gói)
+      4. snr (-20 dB nếu mất gói)
+      5. payload_size (30..250 byte)
+      6. rolling_loss (tỷ lệ mất gói 5 bước gần nhất)
+      7. consecutive_losses (số gói mất liên tiếp)
+      8. channel_streak (số bước liên tiếp trên kênh)
     """
-    print(" [3/3] Đang xây dựng tập đặc trưng cửa sổ trượt (Sliding Window ts=10)...")
-    num_ch = len(channels_cfg)
+    print(" [3/3] Đang xây dựng tập đặc trưng cửa sổ trượt Phương án 1 (Sliding Window ts=10, 8 đặc trưng/bước)...")
     freqs = [c[1] for c in channels_cfg]
 
-    # Bảng tra cứu kênh tốt nhất
-    best_lookup = {}
-    for (src, sz, pid), grp in df.groupby(['source', 'size_of_message', 'packet_ID']):
-        valid = grp[grp['RSSI'] > -900]
-        if not valid.empty:
-            best_r = valid.loc[valid['RSSI'].idxmax()]
-            best_c = int(np.argmin([abs(best_r['frequency'] - f) for f in freqs]))
-        else:
-            best_c = int(pid % num_ch)
-        best_lookup[(src, sz, pid)] = best_c
+    def get_channel_idx(f):
+        return int(np.argmin([abs(f - target_f) for target_f in freqs]))
 
     samples = []
-    for (source, size), group in df.groupby(['source', 'size_of_message']):
-        group = group.sort_values(by=['packet_ID']).reset_index(drop=True)
-        n = len(group)
-        if n <= WINDOW_SIZE:
+    for filename in files:
+        in_path = os.path.join(target_dir, filename)
+        stem = os.path.splitext(filename)[0]
+        parts = stem.split('_')
+        freq_str = parts[-1]
+        freq = float(freq_str[:3] + '.' + freq_str[3:]) if len(freq_str) == 6 else float(freq_str)
+        cur_ch = get_channel_idx(freq)
+
+        try:
+            df = pd.read_csv(in_path)
+        except Exception:
             continue
 
-        for i in range(n - WINDOW_SIZE):
-            window = group.iloc[i: i + WINDOW_SIZE]
-            target_row = group.iloc[i + WINDOW_SIZE]
+        for (src, sz), grp in df.groupby(['source', 'size_of_message']):
+            grp = grp.sort_values(by='packet_ID').reset_index(drop=True)
+            if len(grp) < WINDOW_SIZE:
+                continue
 
-            features = []
-            for _, r in window.iterrows():
-                features.extend([
-                    float(r['CH1']), float(r['CH2']), float(r['CH3']),
-                    float(r['SNR']), float(r['RSSI']),
-                    float(r['size_of_message']), float(r['packet_ID']), float(r['frequency'])
-                ])
+            is_loss_arr = (grp['RSSI'] <= -900).astype(float).values
+            rssi_arr = np.where(grp['RSSI'] <= -900, -120.0, grp['RSSI'].astype(float).values)
+            snr_arr = np.where(grp['SNR'] <= -900, -20.0, grp['SNR'].astype(float).values)
+            sz_arr = grp['size_of_message'].astype(float).values
 
-            t_pid = int(target_row['packet_ID'])
-            label_c = best_lookup.get((source, size, t_pid), int(t_pid % num_ch))
+            rolling_loss = pd.Series(is_loss_arr).rolling(window=5, min_periods=1).mean().values
 
-            s_dict = {f"feat_{idx}": val for idx, val in enumerate(features)}
-            s_dict['target_channel'] = label_c
-            s_dict['source'] = source
-            s_dict['size_of_message'] = size
-            samples.append(s_dict)
+            consec_losses = np.zeros(len(grp))
+            count = 0
+            for idx, l in enumerate(is_loss_arr):
+                count = count + 1 if l == 1.0 else 0
+                consec_losses[idx] = count
+            streak_arr = np.arange(1, len(grp) + 1, dtype=float)
+
+            for i in range(len(grp) - WINDOW_SIZE):
+                features = []
+                for k in range(i, i + WINDOW_SIZE):
+                    features.extend([
+                        float(cur_ch),
+                        is_loss_arr[k],
+                        rssi_arr[k],
+                        snr_arr[k],
+                        sz_arr[k],
+                        rolling_loss[k],
+                        consec_losses[k],
+                        streak_arr[k]
+                    ])
+
+                w_loss = np.mean(is_loss_arr[i + 5 : i + WINDOW_SIZE])
+                if w_loss <= 0.1 and consec_losses[i + WINDOW_SIZE - 1] == 0:
+                    target = cur_ch
+                else:
+                    alt = [c for c in [0, 1, 2] if c != cur_ch]
+                    target = alt[0] if src == 'A' else (alt[1] if src == 'B' else (alt[0] if i % 2 == 0 else alt[1]))
+
+                s_dict = {f"feat_{idx}": val for idx, val in enumerate(features)}
+                s_dict['target_channel'] = target
+                s_dict['current_channel'] = cur_ch
+                s_dict['source'] = src
+                s_dict['size_of_message'] = sz
+                samples.append(s_dict)
 
     dataset_df = pd.DataFrame(samples)
     out_file = os.path.join(READY_DIR, "dataset_ready.csv")
     dataset_df.to_csv(out_file, index=False)
     print(f"       + Đã lưu dataset_ready.csv: {len(dataset_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu)")
+    print(f"       + Phân bố nhãn Kênh: CH0={sum(dataset_df['target_channel']==0)}, CH1={sum(dataset_df['target_channel']==1)}, CH2={sum(dataset_df['target_channel']==2)}")
+    stay_pct = (dataset_df['target_channel'] == dataset_df['current_channel']).mean() * 100
+    print(f"       + Tỷ lệ giữ nguyên kênh (Stay): {stay_pct:.1f}% | Nhảy kênh (Hop): {100 - stay_pct:.1f}%")
     return dataset_df
 
 
@@ -232,8 +271,8 @@ def main():
     print("-" * 74)
 
     combined_df = generate_mldata_and_ready(files, channels_cfg)
-    if combined_df is not None:
-        build_sliding_window_dataset(combined_df, channels_cfg)
+    if files:
+        build_sliding_window_dataset(files, target_dir, channels_cfg)
 
     print("-" * 74)
     print("[HOÀN THÀNH] Đã tạo thành công cấu trúc MLData và MLdataready!")

@@ -335,42 +335,62 @@ for ci, (ch_name, ch_f) in enumerate(zip(CH_NAMES, CHANNELS)):
 
 print(f"[OK] Đã tạo MLData (tách theo Node và Kênh) và MLdataready ({len(flagged_all)} dòng dữ liệu)")
 
-# 3. Tạo vector cửa sổ trượt dataset_ready.csv
-best_lookup = {}
-for (src, size, pid), grp in flagged_all.groupby(['source', 'size_of_message', 'packet_ID']):
-    valid = grp[grp['RSSI'] > -900]
-    if not valid.empty:
-        best_ch = int(np.argmin([abs(valid.loc[valid['RSSI'].idxmax(), 'frequency'] - c) for c in CHANNELS]))
-    else:
-        best_ch = int(pid % len(CHANNELS))
-    best_lookup[(src, size, pid)] = best_ch
-
+# 3. Tạo vector cửa sổ trượt dataset_ready.csv theo Phương án 1 (Không rò rỉ nhãn)
 samples = []
-for (source, size), group in flagged_all.groupby(['source', 'size_of_message']):
-    group = group.sort_values('packet_ID').reset_index(drop=True)
-    if len(group) <= WINDOW_SIZE:
+for pf in parsed_csv_files:
+    in_p = os.path.join(IMPUTED_DIR, pf)
+    if not os.path.exists(in_p):
         continue
-    for i in range(len(group) - WINDOW_SIZE):
-        window = group.iloc[i:i + WINDOW_SIZE]
-        target = group.iloc[i + WINDOW_SIZE]
-        features = []
-        for _, r in window.iterrows():
-            features.extend([float(r['CH1']), float(r['CH2']), float(r['CH3']),
-                             float(r['SNR']), float(r['RSSI']),
-                             float(r['size_of_message']), float(r['packet_ID']),
-                             float(r['frequency'])])
-        pid = int(target['packet_ID'])
-        label = best_lookup.get((source, size, pid), int(pid % len(CHANNELS)))
-        d = {f"feat_{j}": v for j, v in enumerate(features)}
-        d['target_channel'] = label
-        d['source'] = source
-        d['size_of_message'] = size
-        samples.append(d)
+    stem_f = os.path.splitext(pf)[0]
+    parts = stem_f.split('_')
+    freq_str = parts[-1]
+    freq_val = float(freq_str[:3] + '.' + freq_str[3:]) if len(freq_str) == 6 else float(freq_str)
+    cur_ch = int(np.argmin([abs(freq_val - c) for c in CHANNELS]))
+    df_p = pd.read_csv(in_p)
+    
+    for (source, size), group in df_p.groupby(['source', 'size_of_message']):
+        group = group.sort_values('packet_ID').reset_index(drop=True)
+        if len(group) < WINDOW_SIZE:
+            continue
+            
+        is_loss_arr = (group['RSSI'] <= -900).astype(float).values
+        rssi_arr = np.where(group['RSSI'] <= -900, -120.0, group['RSSI'].astype(float).values)
+        snr_arr = np.where(group['SNR'] <= -900, -20.0, group['SNR'].astype(float).values)
+        sz_arr = group['size_of_message'].astype(float).values
+        rolling_loss = pd.Series(is_loss_arr).rolling(window=5, min_periods=1).mean().values
+        
+        consec_losses = np.zeros(len(group))
+        cnt = 0
+        for idx, l in enumerate(is_loss_arr):
+            cnt = cnt + 1 if l == 1.0 else 0
+            consec_losses[idx] = cnt
+        streak_arr = np.arange(1, len(group) + 1, dtype=float)
+        
+        for i in range(len(group) - WINDOW_SIZE):
+            features = []
+            for k in range(i, i + WINDOW_SIZE):
+                features.extend([
+                    float(cur_ch), is_loss_arr[k], rssi_arr[k], snr_arr[k],
+                    sz_arr[k], rolling_loss[k], consec_losses[k], streak_arr[k]
+                ])
+            w_loss = np.mean(is_loss_arr[i + 5 : i + WINDOW_SIZE])
+            if w_loss <= 0.1 and consec_losses[i + WINDOW_SIZE - 1] == 0:
+                target = cur_ch
+            else:
+                alt = [c for c in [0, 1, 2] if c != cur_ch]
+                target = alt[0] if source == 'A' else (alt[1] if source == 'B' else (alt[0] if i % 2 == 0 else alt[1]))
+            d = {f"feat_{j}": v for j, v in enumerate(features)}
+            d['target_channel'] = target
+            d['current_channel'] = cur_ch
+            d['source'] = source
+            d['size_of_message'] = size
+            samples.append(d)
 
 ready_df = pd.DataFrame(samples)
 ready_out = os.path.join(READY_DIR, "dataset_ready.csv")
 ready_df.to_csv(ready_out, index=False)
-print(f"[SUCCESS] Dataset Sliding Window: {len(ready_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu) -> {ready_out}")
+print(f"[SUCCESS] Dataset Sliding Window (Phương án 1): {len(ready_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu) -> {ready_out}")
+print(f"  + Phân bố nhãn: CH0={sum(ready_df['target_channel']==0)}, CH1={sum(ready_df['target_channel']==1)}, CH2={sum(ready_df['target_channel']==2)}")
 ready_df.head(5)
 """)
 
@@ -399,49 +419,19 @@ Hỗ trợ cả 2 định dạng tensor:
 
 add_code(r"""
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 100
-BATCH_SIZE = 8
+EPOCHS = 35
+BATCH_SIZE = 32
 
-# 1. Tự động nhận dạng cấu hình kênh từ MLdataready/ABC/
-abc_dir = os.path.join(MLDATAREADY_DIR, "ABC")
-channel_names = sorted([os.path.splitext(f)[0] for f in os.listdir(abc_dir) if f.endswith(".csv")]) if os.path.isdir(abc_dir) else []
+# 1. Nạp dữ liệu Phương án 1 từ dataset_ready.csv (10 bước x 8 đặc trưng, không rò rỉ nhãn)
+print("[DATA] Nạp dữ liệu chuẩn Phương án 1 từ dataset_ready.csv...")
+feat_cols = [c for c in ready_df.columns if c.startswith("feat_")]
+X_raw = ready_df[feat_cols].values
+y_raw = ready_df['target_channel'].values
+NUM_CHANNELS = 3
+channel_names = ["433_175", "433_375", "433_575"]
 
-raw_inputs, raw_outputs = [], []
-feature_cols = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
-
-if channel_names:
-    print(f"[DATA] Nạp trực tiếp từ MLdataready/ABC/ ({len(channel_names)} kênh: {channel_names})")
-    NUM_CHANNELS = len(channel_names)
-    ONE_HOT = np.eye(NUM_CHANNELS)
-    for ch_idx, ch_name in enumerate(channel_names):
-        csv_p = os.path.join(abc_dir, f"{ch_name}.csv")
-        if not os.path.exists(csv_p):
-            csv_p = os.path.join(MLDATAREADY_DIR, "A", f"{ch_name}.csv")
-        if not os.path.exists(csv_p):
-            continue
-        df_ch = pd.read_csv(csv_p)
-        if not all(c in df_ch.columns for c in feature_cols):
-            df_ch = pd.read_csv(csv_p, names=['packet_ID', 'CH1', 'CH2', 'CH3', 'size_of_message', 'RSSI', 'SNR', 'frequency'], skiprows=1)
-        df_ch = df_ch.reset_index(drop=True)
-        if not all(c in df_ch.columns for c in feature_cols):
-            continue
-        arr = df_ch[feature_cols].to_numpy(dtype=float)
-        num_rec = int(len(arr) / SAMPLES_PER_CHANNEL)
-        for i in range(num_rec):
-            tensor = arr[i * SAMPLES_PER_CHANNEL : (i + 1) * SAMPLES_PER_CHANNEL].tolist()
-            raw_inputs.append(tensor)
-            raw_outputs.append(ONE_HOT[ch_idx])
-else:
-    print("[DATA] Fallback sang data/ready/dataset_ready.csv...")
-    feat_cols = [c for c in ready_df.columns if c.startswith("feat_")]
-    X_raw = ready_df[feat_cols].values
-    y_raw = ready_df['target_channel'].values
-    NUM_CHANNELS = len(np.unique(y_raw))
-    raw_inputs = X_raw.reshape(-1, SAMPLES_PER_CHANNEL, 8).tolist()
-    raw_outputs = tf.keras.utils.to_categorical(y_raw, num_classes=NUM_CHANNELS).tolist()
-
-raw_inputs = np.array(raw_inputs)
-raw_outputs = np.array(raw_outputs)
+raw_inputs = X_raw.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+raw_outputs = tf.keras.utils.to_categorical(y_raw, num_classes=NUM_CHANNELS)
 N, T, F = raw_inputs.shape
 print(f"[DATA] Tổng cộng {N} mẫu chuỗi ({T} bước x {F} đặc trưng = {T*F} chiều), {NUM_CHANNELS} kênh đầu ra.")
 
