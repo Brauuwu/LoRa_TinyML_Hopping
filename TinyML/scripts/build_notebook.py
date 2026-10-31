@@ -603,7 +603,7 @@ add_code(r"""
 def build_gru():
     return tf.keras.Sequential([
         layers.Input(shape=(T, F), name="gru_input"),
-        layers.GRU(16, return_sequences=False, name="gru_cell"),
+        layers.GRU(16, return_sequences=False, unroll=True, name="gru_cell"),
         layers.Dense(16, activation='relu', name="gru_dense"),
         layers.Dense(NUM_CHANNELS, activation='softmax', name="output")
     ], name="GRU_RNN")
@@ -870,21 +870,89 @@ with open(tflite_path, "wb") as f:
     f.write(tflite_bytes)
 print(f"[OK] Đã lưu mô hình TFLite: {tflite_path} ({len(tflite_bytes)} bytes ~ {len(tflite_bytes)/1024:.2f} KB)")
 
-# Xuất file C Header model.h
+# Xuất file C Header model.h hoàn chỉnh cho ESP32
 header_path = os.path.join(MODELS_DIR, "model.h")
 with open(header_path, "w", encoding="utf-8") as f:
-    f.write("// Tự động sinh từ mô hình TinyML LoRa Channel Hopping\n")
+    f.write("// ============================================================================\n")
+    f.write("// TỰ ĐỘNG SINH TỪ PIPELINE TINYML LORA CHANNEL HOPPING\n")
     f.write(f"// Thuật toán: {best_name} (Test Accuracy: {best_acc}%)\n")
-    f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n\n")
-    f.write("const unsigned char model[] = {\n  ")
+    f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n")
+    f.write("// Cấu trúc đầu vào: 10 bước x 8 đặc trưng = 80 giá trị float\n")
+    f.write("// ============================================================================\n\n")
+
+    f.write("#ifndef LORA_MODEL_H\n")
+    f.write("#define LORA_MODEL_H\n\n")
+    f.write("#include <stdint.h>\n")
+    f.write("#include <stddef.h>\n\n")
+
+    f.write("// ── ĐỊNH NGHĨA THÔNG SỐ MÔ HÌNH ──────────────────────────────────────────\n")
+    f.write(f'#define TINYML_MODEL_NAME          "{best_name}"\n')
+    f.write("#define TINYML_NUM_CHANNELS        3\n")
+    f.write("#define TINYML_WINDOW_STEPS        10\n")
+    f.write("#define TINYML_NUM_FEATURES        8\n")
+    f.write("#define TINYML_INPUT_DIM           (TINYML_WINDOW_STEPS * TINYML_NUM_FEATURES)\n")
+    f.write("#define TINYML_TENSOR_ARENA_SIZE   (10 * 1024) // 10 KB RAM\n\n")
+
+    f.write("// ── CĂN CHỈNH BỘ NHỚ 16 BYTES CHO TFLITE MICRO ─────────────────────────\n")
+    f.write("#if defined(__GNUC__) || defined(__clang__)\n")
+    f.write("  #define TFLM_ALIGNED __attribute__((aligned(16)))\n")
+    f.write("#elif defined(_MSC_VER)\n")
+    f.write("  #define TFLM_ALIGNED __declspec(align(16))\n")
+    f.write("#else\n")
+    f.write("  #define TFLM_ALIGNED alignas(16)\n")
+    f.write("#endif\n\n")
+
+    f.write("TFLM_ALIGNED const unsigned char model[] = {\n  ")
     for i, b in enumerate(tflite_bytes):
         f.write(f"0x{b:02x}, ")
         if (i + 1) % 12 == 0:
             f.write("\n  ")
     f.write("\n};\n\n")
-    f.write(f"const unsigned int model_len = {len(tflite_bytes)};\n")
+    f.write(f"const unsigned int model_len = {len(tflite_bytes)};\n\n")
 
-print(f"[OK] Đã xuất mã C Header: {header_path}")
+    # Hệ số chuẩn hóa StandardScaler
+    f.write("// ── THAM SỐ CHUẨN HÓA Z-SCORE (STANDARDSCALER) ──────────────────────────\n")
+    f.write("// Công thức: z = (x - mean) / scale\n")
+    f.write("// Thứ tự 8 đặc trưng: [0:CH1, 1:CH2, 2:CH3, 3:SNR, 4:RSSI, 5:size, 6:packet_ID, 7:frequency]\n")
+    if hasattr(scaler, 'mean_') and hasattr(scaler, 'scale_'):
+        mean_vals = scaler.mean_
+        scale_vals = scaler.scale_
+        f.write("const float SCALER_MEAN[8] = {\n  " + ", ".join([f"{v:.6f}f" for v in mean_vals]) + "\n};\n\n")
+        f.write("const float SCALER_SCALE[8] = {\n  " + ", ".join([f"{v:.6f}f" for v in scale_vals]) + "\n};\n\n")
+        f.write("// Mảng 80 giá trị lặp lại cho 10 bước trượt (Flat 80 Dimensions):\n")
+        f.write("const float SCALER_MEAN_80[80] = {\n")
+        for s in range(10):
+            f.write("  " + ", ".join([f"{v:.6f}f" for v in mean_vals]) + (",\n" if s < 9 else "\n"))
+        f.write("};\n\n")
+        f.write("const float SCALER_SCALE_80[80] = {\n")
+        for s in range(10):
+            f.write("  " + ", ".join([f"{v:.6f}f" for v in scale_vals]) + (",\n" if s < 9 else "\n"))
+        f.write("};\n\n")
+
+    # Helper Functions
+    f.write("// ── HÀM TIỆN ÍCH TIỀN XỬ LÝ & SUY LUẬN (C/C++ HELPER) ────────────────────\n")
+    f.write("#ifdef __cplusplus\n")
+    f.write("inline void normalizeSlidingWindow(const float raw_history[10][8], float out_normalized[80]) {\n")
+    f.write("  int idx = 0;\n")
+    f.write("  for (int step = 0; step < 10; step++) {\n")
+    f.write("    for (int feat = 0; feat < 8; feat++) {\n")
+    f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN[feat]) / SCALER_SCALE[feat];\n")
+    f.write("      idx++;\n")
+    f.write("    }\n")
+    f.write("  }\n")
+    f.write("}\n\n")
+    f.write("inline int argmaxChannel(const float probs[3]) {\n")
+    f.write("  int best = 0;\n")
+    f.write("  float max_val = probs[0];\n")
+    f.write("  for (int i = 1; i < 3; i++) {\n")
+    f.write("    if (probs[i] > max_val) { max_val = probs[i]; best = i; }\n")
+    f.write("  }\n")
+    f.write("  return best;\n")
+    f.write("}\n")
+    f.write("#endif // __cplusplus\n\n")
+    f.write("#endif // LORA_MODEL_H\n")
+
+print(f"[OK] Đã xuất mã C Header hoàn chỉnh: {header_path}")
 
 # Đồng bộ trực tiếp sang firmware MCU ESP32
 mcu_src = os.path.join(BASE_DIR, "../MCUCode/LoRaEN_TinyMLHopping/src/model.h")

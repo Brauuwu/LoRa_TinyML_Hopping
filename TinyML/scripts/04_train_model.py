@@ -56,8 +56,8 @@ np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 100
-BATCH_SIZE = 8
+EPOCHS = 35
+BATCH_SIZE = 32
 
 FEATURE_COLS = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
 
@@ -161,7 +161,7 @@ def build_gru(T, F, num_ch):
     """3. GRU (Gated Recurrent Unit RNN)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.GRU(16, return_sequences=False, name="gru_layer"),
+        layers.GRU(16, return_sequences=False, unroll=True, name="gru_layer"),
         layers.Dense(16, activation='relu', name="dense_gru"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="GRU_RNN")
@@ -199,25 +199,152 @@ def build_resnet1d(T, F, num_ch):
     return m, False
 
 
-def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_path, array_name="model"):
-    """Chuyển đổi sang TensorFlow Lite và xuất C header cho ESP32"""
-    converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
-    tflite_bytes = converter.convert()
+def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_path, array_name="model", scaler=None, is_flat=True, test_acc=None):
+    """
+    Chuyển đổi sang TensorFlow Lite và xuất C header hoàn chỉnh cho ESP32 bao gồm:
+    1. Căn chỉnh bộ nhớ 16-byte (alignas(16) / __attribute__((aligned(16))))
+    2. Độ dài mảng FlatBuffer (model_len)
+    3. Bộ tham số chuẩn hóa StandardScaler (SCALER_MEAN và SCALER_SCALE)
+    4. Cấu hình hằng số (TINYML_NUM_CHANNELS, TINYML_INPUT_DIM, TINYML_TENSOR_ARENA_SIZE)
+    5. Hàm helper tiền xử lý chuẩn hóa và tìm kênh argmax tối ưu
+    """
+    try:
+        converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
+        tflite_bytes = converter.convert()
+    except Exception:
+        converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
+        converter._experimental_lower_tensor_list_ops = False
+        tflite_bytes = converter.convert()
 
     with open(output_tflite_path, "wb") as f:
         f.write(tflite_bytes)
 
+    guard_name = f"LORA_{array_name.upper()}_H"
+    acc_str = f" (Test Accuracy: {test_acc:.2f}%)" if test_acc is not None else ""
+
     with open(output_header_path, "w", encoding="utf-8") as f:
-        f.write("// Tự động sinh từ mô hình TinyML LoRa Channel Hopping\n")
-        f.write(f"// Thuật toán: {keras_model.name}\n")
-        f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n\n")
-        f.write(f"const unsigned char {array_name}[] = {{\n  ")
+        f.write("// ============================================================================\n")
+        f.write("// TỰ ĐỘNG SINH TỪ PIPELINE TINYML LORA CHANNEL HOPPING\n")
+        f.write(f"// Thuật toán: {keras_model.name}{acc_str}\n")
+        f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n")
+        f.write("// Cấu trúc đầu vào: 10 bước x 8 đặc trưng = 80 giá trị float\n")
+        f.write("// ============================================================================\n\n")
+
+        f.write(f"#ifndef {guard_name}\n")
+        f.write(f"#define {guard_name}\n\n")
+        f.write("#include <stdint.h>\n")
+        f.write("#include <stddef.h>\n\n")
+
+        f.write("// ── ĐỊNH NGHĨA THÔNG SỐ MÔ HÌNH ──────────────────────────────────────────\n")
+        f.write(f'#define TINYML_MODEL_NAME          "{keras_model.name}"\n')
+        f.write("#define TINYML_NUM_CHANNELS        3\n")
+        f.write("#define TINYML_WINDOW_STEPS        10\n")
+        f.write("#define TINYML_NUM_FEATURES        8\n")
+        f.write("#define TINYML_INPUT_DIM           (TINYML_WINDOW_STEPS * TINYML_NUM_FEATURES)\n")
+        f.write("#define TINYML_TENSOR_ARENA_SIZE   (10 * 1024) // 10 KB RAM\n")
+        f.write(f"#define TINYML_IS_FLAT             {'1' if is_flat else '0'}\n\n")
+
+        f.write("// ── CĂN CHỈNH BỘ NHỚ 16 BYTES CHO TFLITE MICRO ─────────────────────────\n")
+        f.write("#if defined(__GNUC__) || defined(__clang__)\n")
+        f.write("  #define TFLM_ALIGNED __attribute__((aligned(16)))\n")
+        f.write("#elif defined(_MSC_VER)\n")
+        f.write("  #define TFLM_ALIGNED __declspec(align(16))\n")
+        f.write("#else\n")
+        f.write("  #define TFLM_ALIGNED alignas(16)\n")
+        f.write("#endif\n\n")
+
+        f.write(f"TFLM_ALIGNED const unsigned char {array_name}[] = {{\n  ")
         for i, b in enumerate(tflite_bytes):
             f.write(f"0x{b:02x}, ")
             if (i + 1) % 12 == 0:
                 f.write("\n  ")
         f.write("\n};\n\n")
-        f.write(f"const unsigned int {array_name}_len = {len(tflite_bytes)};\n")
+        f.write(f"const unsigned int {array_name}_len = {len(tflite_bytes)};\n\n")
+
+        # Hệ số chuẩn hóa StandardScaler
+        f.write("// ── THAM SỐ CHUẨN HÓA Z-SCORE (STANDARDSCALER) ──────────────────────────\n")
+        f.write("// Công thức: z = (x - mean) / scale\n")
+        f.write("// Thứ tự 8 đặc trưng: [0:CH1, 1:CH2, 2:CH3, 3:SNR, 4:RSSI, 5:size, 6:packet_ID, 7:frequency]\n")
+
+        if scaler is not None and hasattr(scaler, 'mean_') and hasattr(scaler, 'scale_'):
+            mean_vals = scaler.mean_
+            scale_vals = scaler.scale_
+            num_f = len(mean_vals)
+
+            if num_f == 8:
+                f.write("const float SCALER_MEAN[8] = {\n  ")
+                f.write(", ".join([f"{v:.6f}f" for v in mean_vals]))
+                f.write("\n};\n\n")
+
+                f.write("const float SCALER_SCALE[8] = {\n  ")
+                f.write(", ".join([f"{v:.6f}f" for v in scale_vals]))
+                f.write("\n};\n\n")
+
+                f.write("// Mảng 80 giá trị lặp lại cho 10 bước trượt (Flat 80 Dimensions):\n")
+                f.write("const float SCALER_MEAN_80[80] = {\n")
+                for s in range(10):
+                    f.write("  " + ", ".join([f"{v:.6f}f" for v in mean_vals]) + (",\n" if s < 9 else "\n"))
+                f.write("};\n\n")
+
+                f.write("const float SCALER_SCALE_80[80] = {\n")
+                for s in range(10):
+                    f.write("  " + ", ".join([f"{v:.6f}f" for v in scale_vals]) + (",\n" if s < 9 else "\n"))
+                f.write("};\n\n")
+            elif num_f == 80:
+                f.write("const float SCALER_MEAN_80[80] = {\n  ")
+                for i, v in enumerate(mean_vals):
+                    f.write(f"{v:.6f}f, ")
+                    if (i + 1) % 8 == 0:
+                        f.write("\n  ")
+                f.write("\n};\n\n")
+
+                f.write("const float SCALER_SCALE_80[80] = {\n  ")
+                for i, v in enumerate(scale_vals):
+                    f.write(f"{v:.6f}f, ")
+                    if (i + 1) % 8 == 0:
+                        f.write("\n  ")
+                f.write("\n};\n\n")
+        else:
+            f.write("const float SCALER_MEAN[8]  = {0.33f, 0.33f, 0.33f, 8.0f, -75.0f, 120.0f, 300.0f, 433.375f};\n")
+            f.write("const float SCALER_SCALE[8] = {0.47f, 0.47f, 0.47f, 2.5f,  20.0f,  80.0f, 180.0f,   0.200f};\n\n")
+
+        # C / C++ Helper Functions
+        f.write("// ── HÀM TIỆN ÍCH TIỀN XỬ LÝ & SUY LUẬN (C/C++ HELPER) ────────────────────\n")
+        f.write("#ifdef __cplusplus\n")
+        f.write("/**\n")
+        f.write(" * Chuẩn hóa bộ đệm trượt 10 bước (mỗi bước 8 đặc trưng) thành vector 80 chiều\n")
+        f.write(" */\n")
+        f.write("inline void normalizeSlidingWindow(const float raw_history[10][8], float out_normalized[80]) {\n")
+        f.write("  int idx = 0;\n")
+        f.write("  for (int step = 0; step < 10; step++) {\n")
+        f.write("    for (int feat = 0; feat < 8; feat++) {\n")
+        f.write("#if defined(SCALER_MEAN)\n")
+        f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN[feat]) / SCALER_SCALE[feat];\n")
+        f.write("#else\n")
+        f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN_80[idx]) / SCALER_SCALE_80[idx];\n")
+        f.write("#endif\n")
+        f.write("      idx++;\n")
+        f.write("    }\n")
+        f.write("  }\n")
+        f.write("}\n\n")
+
+        f.write("/**\n")
+        f.write(" * Tìm chỉ số kênh có xác suất lớn nhất (ArgMax)\n")
+        f.write(" */\n")
+        f.write("inline int argmaxChannel(const float probs[3]) {\n")
+        f.write("  int best = 0;\n")
+        f.write("  float max_val = probs[0];\n")
+        f.write("  for (int i = 1; i < 3; i++) {\n")
+        f.write("    if (probs[i] > max_val) {\n")
+        f.write("      max_val = probs[i];\n")
+        f.write("      best = i;\n")
+        f.write("    }\n")
+        f.write("  }\n")
+        f.write("  return best;\n")
+        f.write("}\n")
+        f.write("#endif // __cplusplus\n\n")
+
+        f.write(f"#endif // {guard_name}\n")
 
     return len(tflite_bytes)
 
@@ -296,11 +423,13 @@ def main():
         X_ts = X_flat[idx_test] if is_flat else X_seq[idx_test]
 
         t_start = time.time()
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=6, restore_best_weights=True)
         history = model.fit(
             X_tr, y_train,
             epochs=EPOCHS,
             batch_size=BATCH_SIZE,
             validation_data=(X_vl, y_val),
+            callbacks=[early_stop],
             verbose=0
         )
         train_time = time.time() - t_start
@@ -317,7 +446,11 @@ def main():
         # Xuất TFLite riêng biệt cho mô hình này
         tflite_f = os.path.join(MODELS_DIR, f"{m_name}.tflite")
         header_f = os.path.join(MODELS_DIR, f"model_{m_name.lower()}.h")
-        tflite_size_bytes = convert_to_tflite_and_header(model, tflite_f, header_f, array_name=f"model_{m_name.lower()}")
+        tflite_size_bytes = convert_to_tflite_and_header(
+            model, tflite_f, header_f,
+            array_name=f"model_{m_name.lower()}",
+            scaler=scaler, is_flat=is_flat, test_acc=test_acc * 100
+        )
         tflite_size_kb = round(tflite_size_bytes / 1024, 2)
 
         print(f"  ✓ Test Accuracy: {test_acc * 100:.2f}% | Loss: {test_loss:.4f} | MAE: {test_mae:.4f}")
@@ -385,7 +518,11 @@ def main():
     best_model, best_is_flat = trained_models[best_model_name]
     final_tflite_path = os.path.join(MODELS_DIR, "channel_model.tflite")
     final_header_path = os.path.join(MODELS_DIR, "model.h")
-    convert_to_tflite_and_header(best_model, final_tflite_path, final_header_path, array_name="model")
+    convert_to_tflite_and_header(
+        best_model, final_tflite_path, final_header_path,
+        array_name="model",
+        scaler=scaler, is_flat=best_is_flat, test_acc=best_row['Test Accuracy (%)']
+    )
 
     print(f" [OK] Đã xuất TFLite Model: {final_tflite_path}")
     print(f" [OK] Đã xuất C Header File: {final_header_path}")
