@@ -56,8 +56,8 @@ np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 100
-BATCH_SIZE = 32
+EPOCHS = 200
+BATCH_SIZE = 64
 
 FEATURE_COLS = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
 
@@ -138,8 +138,9 @@ def build_fcnn(T, F, num_ch):
     """1. Baseline FCNN (Multi-Layer Perceptron)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T * F,), name="input_flat"),
-        layers.Dense(10, activation='relu', name="dense_1"),
-        layers.Dense(10, activation='relu', kernel_regularizer=regularizers.L1(1e-4), name="dense_2"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_1"),
+        layers.Dropout(0.1, name="drop_1"),
+        layers.Dense(12, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_2"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="Baseline_FCNN")
     return m, True
@@ -149,12 +150,13 @@ def build_cnn1d(T, F, num_ch):
     """2. 1D-CNN (Temporal Convolutional Network)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', name="conv1d_1"),
+        layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="conv1d_1"),
         layers.BatchNormalization(name="bn_1"),
         layers.MaxPooling1D(pool_size=2, name="maxpool_1"),
-        layers.Conv1D(32, kernel_size=3, padding='same', activation='relu', name="conv1d_2"),
+        layers.Conv1D(32, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="conv1d_2"),
         layers.GlobalAveragePooling1D(name="gap"),
-        layers.Dense(16, activation='relu', name="dense_dense"),
+        layers.Dropout(0.1, name="drop_1"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_dense"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="1D_CNN")
     return m, False
@@ -164,8 +166,9 @@ def build_gru(T, F, num_ch):
     """3. GRU (Gated Recurrent Unit RNN)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.GRU(16, return_sequences=False, unroll=True, name="gru_layer"),
-        layers.Dense(16, activation='relu', name="dense_gru"),
+        layers.GRU(16, return_sequences=False, unroll=True, kernel_regularizer=regularizers.l2(1e-4), name="gru_layer"),
+        layers.Dropout(0.1, name="drop_1"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_gru"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="GRU_RNN")
     return m, False
@@ -175,9 +178,10 @@ def build_separable_cnn(T, F, num_ch):
     """4. Depthwise Separable 1D-CNN (MobileNet-style)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu', name="sep_conv1"),
-        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu', name="sep_conv2"),
+        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(1e-4), name="sep_conv1"),
+        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(1e-4), name="sep_conv2"),
         layers.GlobalAveragePooling1D(name="gap"),
+        layers.Dropout(0.1, name="drop_1"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="Separable_1D_CNN")
     return m, False
@@ -186,16 +190,17 @@ def build_separable_cnn(T, F, num_ch):
 def build_resnet1d(T, F, num_ch):
     """5. Residual 1D-CNN (ResNet-1D với Skip Connection)"""
     inputs = layers.Input(shape=(T, F), name="input_seq")
-    x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(inputs)
+    x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4))(inputs)
 
     # Residual block
-    res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu')(x)
-    res = layers.Conv1D(16, kernel_size=3, padding='same')(res)
+    res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4))(x)
+    res = layers.Conv1D(16, kernel_size=3, padding='same', kernel_regularizer=regularizers.l2(1e-4))(res)
     x = layers.add([x, res])
     x = layers.Activation('relu')(x)
 
     x = layers.GlobalAveragePooling1D()(x)
-    x = layers.Dense(16, activation='relu')(x)
+    x = layers.Dropout(0.1)(x)
+    x = layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4))(x)
     outputs = layers.Dense(num_ch, activation='softmax')(x)
 
     m = models.Model(inputs=inputs, outputs=outputs, name="ResNet_1D")
@@ -267,64 +272,66 @@ def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_
         # Hệ số chuẩn hóa StandardScaler
         f.write("// ── THAM SỐ CHUẨN HÓA Z-SCORE (STANDARDSCALER) ──────────────────────────\n")
         f.write("// Công thức: z = (x - mean) / scale\n")
-        f.write("// Thứ tự 8 đặc trưng: [0:CH1, 1:CH2, 2:CH3, 3:SNR, 4:RSSI, 5:size, 6:packet_ID, 7:frequency]\n")
+        f.write("// Thứ tự 9 đặc trưng: [0:CH1, 1:CH2, 2:CH3, 3:SNR, 4:RSSI, 5:size, 6:packet_ID, 7:frequency, 8:active_channel]\n")
 
         if scaler is not None and hasattr(scaler, 'mean_') and hasattr(scaler, 'scale_'):
             mean_vals = scaler.mean_
             scale_vals = scaler.scale_
             num_f = len(mean_vals)
 
-            if num_f == 8:
-                f.write("const float SCALER_MEAN[8] = {\n  ")
+            if num_f in (8, 9):
+                dim_total = num_f * 10
+                f.write(f"const float SCALER_MEAN[{num_f}] = {{\n  ")
                 f.write(", ".join([f"{v:.6f}f" for v in mean_vals]))
                 f.write("\n};\n\n")
 
-                f.write("const float SCALER_SCALE[8] = {\n  ")
+                f.write(f"const float SCALER_SCALE[{num_f}] = {{\n  ")
                 f.write(", ".join([f"{v:.6f}f" for v in scale_vals]))
                 f.write("\n};\n\n")
 
-                f.write("// Mảng 80 giá trị lặp lại cho 10 bước trượt (Flat 80 Dimensions):\n")
-                f.write("const float SCALER_MEAN_80[80] = {\n")
+                f.write(f"// Mảng {dim_total} giá trị lặp lại cho 10 bước trượt (Flat {dim_total} Dimensions):\n")
+                f.write(f"const float SCALER_MEAN_{dim_total}[{dim_total}] = {{\n")
                 for s in range(10):
                     f.write("  " + ", ".join([f"{v:.6f}f" for v in mean_vals]) + (",\n" if s < 9 else "\n"))
                 f.write("};\n\n")
 
-                f.write("const float SCALER_SCALE_80[80] = {\n")
+                f.write(f"const float SCALER_SCALE_{dim_total}[{dim_total}] = {{\n")
                 for s in range(10):
                     f.write("  " + ", ".join([f"{v:.6f}f" for v in scale_vals]) + (",\n" if s < 9 else "\n"))
                 f.write("};\n\n")
-            elif num_f == 80:
-                f.write("const float SCALER_MEAN_80[80] = {\n  ")
+            else:
+                dim_total = num_f
+                f.write(f"const float SCALER_MEAN_{dim_total}[{dim_total}] = {{\n  ")
                 for i, v in enumerate(mean_vals):
                     f.write(f"{v:.6f}f, ")
-                    if (i + 1) % 8 == 0:
+                    if (i + 1) % 9 == 0:
                         f.write("\n  ")
                 f.write("\n};\n\n")
 
-                f.write("const float SCALER_SCALE_80[80] = {\n  ")
+                f.write(f"const float SCALER_SCALE_{dim_total}[{dim_total}] = {{\n  ")
                 for i, v in enumerate(scale_vals):
                     f.write(f"{v:.6f}f, ")
-                    if (i + 1) % 8 == 0:
+                    if (i + 1) % 9 == 0:
                         f.write("\n  ")
                 f.write("\n};\n\n")
         else:
-            f.write("const float SCALER_MEAN[8]  = {0.33f, 0.33f, 0.33f, 8.0f, -75.0f, 120.0f, 300.0f, 433.375f};\n")
-            f.write("const float SCALER_SCALE[8] = {0.47f, 0.47f, 0.47f, 2.5f,  20.0f,  80.0f, 180.0f,   0.200f};\n\n")
+            f.write("const float SCALER_MEAN[9]  = {0.33f, 0.33f, 0.33f, 8.0f, -75.0f, 120.0f, 300.0f, 433.375f, 1.0f};\n")
+            f.write("const float SCALER_SCALE[9] = {0.47f, 0.47f, 0.47f, 2.5f,  20.0f,  80.0f, 180.0f,   0.200f, 0.8f};\n\n")
 
         # C / C++ Helper Functions
         f.write("// ── HÀM TIỆN ÍCH TIỀN XỬ LÝ & SUY LUẬN (C/C++ HELPER) ────────────────────\n")
         f.write("#ifdef __cplusplus\n")
         f.write("/**\n")
-        f.write(" * Chuẩn hóa bộ đệm trượt 10 bước (mỗi bước 8 đặc trưng) thành vector 80 chiều\n")
+        f.write(" * Chuẩn hóa bộ đệm trượt 10 bước (mỗi bước 9 đặc trưng) thành vector 90 chiều\n")
         f.write(" */\n")
-        f.write("inline void normalizeSlidingWindow(const float raw_history[10][8], float out_normalized[80]) {\n")
+        f.write("inline void normalizeSlidingWindow(const float raw_history[10][9], float out_normalized[90]) {\n")
         f.write("  int idx = 0;\n")
         f.write("  for (int step = 0; step < 10; step++) {\n")
-        f.write("    for (int feat = 0; feat < 8; feat++) {\n")
+        f.write("    for (int feat = 0; feat < 9; feat++) {\n")
         f.write("#if defined(SCALER_MEAN)\n")
         f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN[feat]) / SCALER_SCALE[feat];\n")
         f.write("#else\n")
-        f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN_80[idx]) / SCALER_SCALE_80[idx];\n")
+        f.write("      out_normalized[idx] = (raw_history[step][feat] - SCALER_MEAN_90[idx]) / SCALER_SCALE_90[idx];\n")
         f.write("#endif\n")
         f.write("      idx++;\n")
         f.write("    }\n")
@@ -416,8 +423,8 @@ def main():
 
         model, is_flat = factory(T, F, NUM_CHANNELS)
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-            loss='categorical_crossentropy',
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.02),
             metrics=['accuracy', 'mae']
         )
 
@@ -426,8 +433,8 @@ def main():
         X_ts = X_flat[idx_test] if is_flat else X_seq[idx_test]
 
         t_start = time.time()
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100, restore_best_weights=True)
-        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=8, min_lr=1e-5)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=200, restore_best_weights=True)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=12, min_lr=1e-5)
         history = model.fit(
             X_tr, y_train,
             epochs=EPOCHS,
@@ -473,9 +480,10 @@ def main():
 
         # Vẽ đường cong học tập
         plt.subplot(2, 3, idx + 1)
-        plt.plot(history.history['accuracy'], label='Train Acc', color='#2ca02c', linewidth=1.5)
-        plt.plot(history.history['val_accuracy'], label='Val Acc', color='#1f77b4', linewidth=1.5)
-        plt.plot(history.history['loss'], label='Loss', color='#d62728', linestyle='--', linewidth=1.2)
+        plt.plot(history.history['accuracy'], label='Train Acc', color='#2ca02c', linewidth=1.4)
+        plt.plot(history.history['val_accuracy'], label='Val Acc', color='#1f77b4', linewidth=1.4)
+        plt.plot(history.history['loss'], label='Train Loss', color='#d62728', linestyle='--', linewidth=1.2)
+        plt.plot(history.history['val_loss'], label='Val Loss', color='#ff7f0e', linestyle=':', linewidth=1.2)
         plt.title(f"{m_name} ({test_acc*100:.1f}%)", fontweight='bold', fontsize=9.5)
         plt.xlabel('Epoch', fontsize=8.5)
         plt.ylabel('Score / Loss', fontsize=8.5)
