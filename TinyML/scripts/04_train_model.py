@@ -417,7 +417,7 @@ def main():
         model, is_flat = factory(T, F, NUM_CHANNELS)
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
+            loss='categorical_crossentropy',
             metrics=['accuracy', 'mae']
         )
 

@@ -151,86 +151,108 @@ def generate_mldata_and_ready(files, channels_cfg):
 
 def build_sliding_window_dataset(files, target_dir, channels_cfg):
     """
-    BƯỚC 3 (PHƯƠNG ÁN 1): Xây dựng vector 80 chiều đặc trưng chuỗi thời gian sạch (10 bước x 8 đặc trưng)
-    Loại bỏ hoàn toàn rò rỉ nhãn (Target Leakage):
-    - Không chứa cột tần số tuyệt đối (frequency)
-    - Không chứa cờ nhãn tĩnh (CH1, CH2, CH3)
-    8 đặc trưng thực tế:
-      1. channel_idx (0, 1, 2)
-      2. is_loss (1.0 nếu mất/va chạm, 0.0 nếu nhận tốt)
-      3. rssi (-120 dBm nếu mất gói)
-      4. snr (-20 dB nếu mất gói)
-      5. payload_size (30..250 byte)
-      6. rolling_loss (tỷ lệ mất gói 5 bước gần nhất)
-      7. consecutive_losses (số gói mất liên tiếp)
-      8. channel_streak (số bước liên tiếp trên kênh)
+    BƯỚC 3: Xây dựng tập dữ liệu Chuỗi thời gian Ground-Truth Tối ưu Đa kênh (Cross-Channel Ground-Truth):
+    - Đồng bộ hoá theo (kịch bản, node phát, kích thước tải, packet_ID) trên cả 3 kênh.
+    - 8 đặc trưng động lực học vô tuyến thuần tuý (10 bước x 8 đặc trưng = 80 chiều):
+        1. is_loss (1.0 nếu mất gói/va chạm, 0.0 nếu nhận tốt)
+        2. rssi (cường độ tín hiệu, -120 dBm nếu mất gói)
+        3. snr (tỷ số tín hiệu trên nhiễu, -20 dB nếu mất gói)
+        4. payload_size (30..250 byte)
+        5. rolling_loss_5 (tỷ lệ mất gói 5 bước gần nhất)
+        6. consecutive_losses (số gói mất liên tiếp)
+        7. delta_rssi (độ biến thiên RSSI so với gói trước)
+        8. delta_snr (độ biến thiên SNR so với gói trước)
+    - Gán nhãn mục tiêu thực tế (Ground-Truth Target Label at t+1):
+        + Nếu kênh hiện tại truyền tốt: target = cur_ch (duy trì kênh, tối thiểu hóa phụ phí)
+        + Nếu kênh hiện tại bị va chạm/mất gói: target = argmax_{c != cur_ch} (RSSI_c + SNR_c)
+          (nhảy sang kênh thay thế có phẩm chất đo lường thực tế tốt nhất tại bước tiếp theo)
     """
-    print(" [3/3] Đang xây dựng tập đặc trưng cửa sổ trượt Phương án 1 (Sliding Window ts=10, 8 đặc trưng/bước)...")
-    freqs = [c[1] for c in channels_cfg]
+    print(" [3/3] Đang xây dựng tập đặc trưng cửa sổ trượt Ground-Truth Đa kênh (Cross-Channel Ground-Truth)...")
+    
+    # Nhận dạng các kịch bản đo từ danh sách file
+    scenarios_set = set()
+    for f in files:
+        parts = os.path.splitext(f)[0].split('_')
+        sc_name = "_".join(parts[:-1]) if len(parts) > 1 else parts[0]
+        scenarios_set.add(sc_name)
+    scenarios = sorted(list(scenarios_set))
 
-    def get_channel_idx(f):
-        return int(np.argmin([abs(f - target_f) for target_f in freqs]))
-
+    freq_tags = [c[0].replace("_", "") for c in channels_cfg]
     samples = []
-    for filename in files:
-        in_path = os.path.join(target_dir, filename)
-        stem = os.path.splitext(filename)[0]
-        parts = stem.split('_')
-        freq_str = parts[-1]
-        freq = float(freq_str[:3] + '.' + freq_str[3:]) if len(freq_str) == 6 else float(freq_str)
-        cur_ch = get_channel_idx(freq)
 
-        try:
-            df = pd.read_csv(in_path)
-        except Exception:
+    for sc in scenarios:
+        f_paths = [os.path.join(target_dir, f"{sc}_{ft}.csv") for ft in freq_tags]
+        if not all(os.path.exists(p) for p in f_paths):
             continue
 
-        for (src, sz), grp in df.groupby(['source', 'size_of_message']):
-            grp = grp.sort_values(by='packet_ID').reset_index(drop=True)
-            if len(grp) < WINDOW_SIZE:
+        dfs = [pd.read_csv(p) for p in f_paths]
+        df0 = dfs[0]
+
+        for (src, sz), grp0 in df0.groupby(['source', 'size_of_message']):
+            grp0 = grp0.sort_values('packet_ID').set_index('packet_ID')
+            grp1 = dfs[1][(dfs[1]['source'] == src) & (dfs[1]['size_of_message'] == sz)].sort_values('packet_ID').set_index('packet_ID')
+            grp2 = dfs[2][(dfs[2]['source'] == src) & (dfs[2]['size_of_message'] == sz)].sort_values('packet_ID').set_index('packet_ID')
+
+            common_pids = sorted(list(grp0.index.intersection(grp1.index).intersection(grp2.index)))
+            if len(common_pids) <= WINDOW_SIZE:
                 continue
 
-            is_loss_arr = (grp['RSSI'] <= -900).astype(float).values
-            rssi_arr = np.where(grp['RSSI'] <= -900, -120.0, grp['RSSI'].astype(float).values)
-            snr_arr = np.where(grp['SNR'] <= -900, -20.0, grp['SNR'].astype(float).values)
-            sz_arr = grp['size_of_message'].astype(float).values
+            dfs_ch = [grp0.loc[common_pids], grp1.loc[common_pids], grp2.loc[common_pids]]
 
-            rolling_loss = pd.Series(is_loss_arr).rolling(window=5, min_periods=1).mean().values
+            for cur_ch in range(3):
+                cur_df = dfs_ch[cur_ch]
+                is_loss_arr = (cur_df['RSSI'] <= -900).astype(float).values
+                rssi_arr = np.where(cur_df['RSSI'] <= -900, -120.0, cur_df['RSSI'].astype(float).values)
+                snr_arr = np.where(cur_df['SNR'] <= -900, -20.0, cur_df['SNR'].astype(float).values)
+                sz_arr = cur_df['size_of_message'].astype(float).values
 
-            consec_losses = np.zeros(len(grp))
-            count = 0
-            for idx, l in enumerate(is_loss_arr):
-                count = count + 1 if l == 1.0 else 0
-                consec_losses[idx] = count
-            streak_arr = np.arange(1, len(grp) + 1, dtype=float)
+                rolling_loss = pd.Series(is_loss_arr).rolling(window=5, min_periods=1).mean().values
+                consec_losses = np.zeros(len(common_pids))
+                count = 0
+                for idx, l in enumerate(is_loss_arr):
+                    count = count + 1 if l == 1.0 else 0
+                    consec_losses[idx] = count
 
-            for i in range(len(grp) - WINDOW_SIZE):
-                features = []
-                for k in range(i, i + WINDOW_SIZE):
-                    features.extend([
-                        float(cur_ch),
-                        is_loss_arr[k],
-                        rssi_arr[k],
-                        snr_arr[k],
-                        sz_arr[k],
-                        rolling_loss[k],
-                        consec_losses[k],
-                        streak_arr[k]
-                    ])
+                delta_rssi = np.diff(rssi_arr, prepend=rssi_arr[0])
+                delta_snr = np.diff(snr_arr, prepend=snr_arr[0])
 
-                w_loss = np.mean(is_loss_arr[i + 5 : i + WINDOW_SIZE])
-                if w_loss <= 0.1 and consec_losses[i + WINDOW_SIZE - 1] == 0:
-                    target = cur_ch
-                else:
-                    alt = [c for c in [0, 1, 2] if c != cur_ch]
-                    target = alt[0] if src == 'A' else (alt[1] if src == 'B' else (alt[0] if i % 2 == 0 else alt[1]))
+                for i in range(len(common_pids) - WINDOW_SIZE):
+                    features = []
+                    for k in range(i, i + WINDOW_SIZE):
+                        features.extend([
+                            is_loss_arr[k],
+                            rssi_arr[k],
+                            snr_arr[k],
+                            sz_arr[k],
+                            rolling_loss[k],
+                            consec_losses[k],
+                            delta_rssi[k],
+                            delta_snr[k]
+                        ])
 
-                s_dict = {f"feat_{idx}": val for idx, val in enumerate(features)}
-                s_dict['target_channel'] = target
-                s_dict['current_channel'] = cur_ch
-                s_dict['source'] = src
-                s_dict['size_of_message'] = sz
-                samples.append(s_dict)
+                    target_pid = common_pids[i + WINDOW_SIZE]
+                    cur_loss = (dfs_ch[cur_ch].loc[target_pid, 'RSSI'] <= -900)
+
+                    if not cur_loss:
+                        target = cur_ch
+                    else:
+                        alt_channels = [c for c in range(3) if c != cur_ch]
+                        scores = []
+                        for c in alt_channels:
+                            r_c = dfs_ch[c].loc[target_pid, 'RSSI']
+                            s_c = dfs_ch[c].loc[target_pid, 'SNR']
+                            score = -1000.0 if r_c <= -900 else (r_c + s_c)
+                            scores.append(score)
+
+                        best_alt_idx = int(np.argmax(scores))
+                        target = alt_channels[best_alt_idx]
+
+                    s_dict = {f"feat_{idx}": val for idx, val in enumerate(features)}
+                    s_dict['target_channel'] = target
+                    s_dict['current_channel'] = cur_ch
+                    s_dict['source'] = src
+                    s_dict['size_of_message'] = sz
+                    samples.append(s_dict)
 
     dataset_df = pd.DataFrame(samples)
     out_file = os.path.join(READY_DIR, "dataset_ready.csv")
@@ -238,7 +260,7 @@ def build_sliding_window_dataset(files, target_dir, channels_cfg):
     print(f"       + Đã lưu dataset_ready.csv: {len(dataset_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu)")
     print(f"       + Phân bố nhãn Kênh: CH0={sum(dataset_df['target_channel']==0)}, CH1={sum(dataset_df['target_channel']==1)}, CH2={sum(dataset_df['target_channel']==2)}")
     stay_pct = (dataset_df['target_channel'] == dataset_df['current_channel']).mean() * 100
-    print(f"       + Tỷ lệ giữ nguyên kênh (Stay): {stay_pct:.1f}% | Nhảy kênh (Hop): {100 - stay_pct:.1f}%")
+    print(f"       + Tỷ lệ giữ nguyên kênh (Stay): {stay_pct:.1f}% | Nhảy kênh tránh va chạm (Hop): {100 - stay_pct:.1f}%")
     return dataset_df
 
 
