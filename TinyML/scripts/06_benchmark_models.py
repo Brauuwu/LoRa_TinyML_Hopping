@@ -65,11 +65,11 @@ def load_data():
         try:
             df_ready = pd.read_csv(READY_FILE)
             feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-            if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+            if len(feat_cols) == 90 and 'target_channel' in df_ready.columns:
                 X_all = df_ready[feat_cols].values
                 y_all = df_ready['target_channel'].values
                 num_ch = len(np.unique(y_all))
-                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+                raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 9)
                 raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
                 return raw_inputs, raw_outputs
         except Exception:
@@ -229,12 +229,12 @@ def main():
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
+            loss='categorical_crossentropy',
             metrics=['accuracy']
         )
 
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
-        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100, restore_best_weights=True)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=8, min_lr=1e-5)
 
         model.fit(X_tr, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE,
                   validation_data=(X_v, y_val), callbacks=[early_stop, lr_sched], verbose=0)

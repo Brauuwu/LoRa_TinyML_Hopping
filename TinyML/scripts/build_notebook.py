@@ -536,7 +536,7 @@ add_markdown(r"""
 4. **Chiến lược Huấn luyện Sâu (Deep Training) & Đánh giá Khoa học Khách quan:**
    - **Số lượng Epochs:** Thiết lập $100\text{ Epochs}$ nhằm khảo sát trọn vẹn tiến trình hội tụ dài hạn của đường cong hàm mất mát (Loss Curve).
    - **Tối ưu Bối cảnh Kênh & Độ chính xác:** Nhúng trạng thái kênh phát đang hoạt động của Node cùng 8 đặc trưng động học vô tuyến (mất gói, RSSI, SNR, $\Delta$RSSI, $\Delta$SNR, rolling loss). Mô hình học được chính xác khi nào nên duy trì kênh và khi nào nên nhảy kênh tránh va chạm, đưa độ chính xác vào vùng khoa học lý tưởng ($\approx 89\% - 90\%$).
-   - **Lập lịch Tốc độ học (Learning Rate Scheduler):** Áp dụng `ReduceLROnPlateau(factor=0.5, patience=6, min_lr=1e-5)` để giảm tốc độ học khi loss chững lại, kết hợp `EarlyStopping(patience=15, restore_best_weights=True)` để lấy trọng số ở điểm cực tiểu của tập Validation.
+   - **Huấn luyện Trọn vẹn 100 Epochs:** Thực thi toàn bộ $100\text{ Epochs}$ không ngắt sớm nhằm khảo sát đầy đủ đường cong hội tụ dài hạn, kết hợp `ReduceLROnPlateau(factor=0.5, patience=8, min_lr=1e-5)` để giảm tốc độ học khi loss chững lại và `EarlyStopping(patience=100, restore_best_weights=True)` để khôi phục trọng số tối ưu nhất đạt được trong suốt 100 epochs.
 """)
 
 add_code(r"""
@@ -601,8 +601,8 @@ m_fcnn.compile(
     metrics=['accuracy', 'mae']
 )
 
-early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
-lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
+early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100, restore_best_weights=True)
+lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=8, min_lr=1e-5)
 
 t0 = time.time()
 hist_fcnn = m_fcnn.fit(

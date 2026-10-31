@@ -426,8 +426,8 @@ def main():
         X_ts = X_flat[idx_test] if is_flat else X_seq[idx_test]
 
         t_start = time.time()
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
-        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=100, restore_best_weights=True)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=8, min_lr=1e-5)
         history = model.fit(
             X_tr, y_train,
             epochs=EPOCHS,
