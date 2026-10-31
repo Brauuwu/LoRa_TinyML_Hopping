@@ -153,7 +153,7 @@ def build_sliding_window_dataset(files, target_dir, channels_cfg):
     """
     BƯỚC 3: Xây dựng tập dữ liệu Chuỗi thời gian Ground-Truth Tối ưu Đa kênh (Cross-Channel Ground-Truth):
     - Đồng bộ hoá theo (kịch bản, node phát, kích thước tải, packet_ID) trên cả 3 kênh.
-    - 8 đặc trưng động lực học vô tuyến thuần tuý (10 bước x 8 đặc trưng = 80 chiều):
+    - 9 đặc trưng chuỗi thời gian (10 bước x 9 đặc trưng = 90 chiều):
         1. is_loss (1.0 nếu mất gói/va chạm, 0.0 nếu nhận tốt)
         2. rssi (cường độ tín hiệu, -120 dBm nếu mất gói)
         3. snr (tỷ số tín hiệu trên nhiễu, -20 dB nếu mất gói)
@@ -162,6 +162,7 @@ def build_sliding_window_dataset(files, target_dir, channels_cfg):
         6. consecutive_losses (số gói mất liên tiếp)
         7. delta_rssi (độ biến thiên RSSI so với gói trước)
         8. delta_snr (độ biến thiên SNR so với gói trước)
+        9. current_channel (chỉ số kênh đang phát hiện tại của Node: 0, 1, 2)
     - Gán nhãn mục tiêu thực tế (Ground-Truth Target Label at t+1):
         + Nếu kênh hiện tại truyền tốt: target = cur_ch (duy trì kênh, tối thiểu hóa phụ phí)
         + Nếu kênh hiện tại bị va chạm/mất gói: target = argmax_{c != cur_ch} (RSSI_c + SNR_c)
@@ -227,7 +228,8 @@ def build_sliding_window_dataset(files, target_dir, channels_cfg):
                             rolling_loss[k],
                             consec_losses[k],
                             delta_rssi[k],
-                            delta_snr[k]
+                            delta_snr[k],
+                            float(cur_ch)
                         ])
 
                     target_pid = common_pids[i + WINDOW_SIZE]
@@ -257,7 +259,7 @@ def build_sliding_window_dataset(files, target_dir, channels_cfg):
     dataset_df = pd.DataFrame(samples)
     out_file = os.path.join(READY_DIR, "dataset_ready.csv")
     dataset_df.to_csv(out_file, index=False)
-    print(f"       + Đã lưu dataset_ready.csv: {len(dataset_df)} mẫu ({WINDOW_SIZE * 8} đặc trưng/mẫu)")
+    print(f"       + Đã lưu dataset_ready.csv: {len(dataset_df)} mẫu ({WINDOW_SIZE * 9} đặc trưng/mẫu: 10 bước x 9 đặc trưng)")
     print(f"       + Phân bố nhãn Kênh: CH0={sum(dataset_df['target_channel']==0)}, CH1={sum(dataset_df['target_channel']==1)}, CH2={sum(dataset_df['target_channel']==2)}")
     stay_pct = (dataset_df['target_channel'] == dataset_df['current_channel']).mean() * 100
     print(f"       + Tỷ lệ giữ nguyên kênh (Stay): {stay_pct:.1f}% | Nhảy kênh tránh va chạm (Hop): {100 - stay_pct:.1f}%")

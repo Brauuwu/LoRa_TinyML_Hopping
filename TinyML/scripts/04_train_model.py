@@ -84,14 +84,14 @@ def load_dataset():
         print(f"[DATA] Nạp dữ liệu chuẩn Phương án 1 từ: {READY_FILE}")
         df_ready = pd.read_csv(READY_FILE)
         feat_cols = [c for c in df_ready.columns if c.startswith("feat_")]
-        if len(feat_cols) == 80 and 'target_channel' in df_ready.columns:
+        if len(feat_cols) == 90 and 'target_channel' in df_ready.columns:
             X_all = df_ready[feat_cols].values
             y_all = df_ready['target_channel'].values
             num_ch = 3
-            raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 8)
+            raw_inputs = X_all.reshape(-1, SAMPLES_PER_CHANNEL, 9)
             raw_outputs = tf.keras.utils.to_categorical(y_all, num_classes=num_ch)
             channel_names = ["433_175", "433_375", "433_575"]
-            print(f"  ✓ Đã nạp thành công: {len(raw_inputs)} mẫu chuỗi thời gian (10 bước x 8 đặc trưng)")
+            print(f"  ✓ Đã nạp thành công: {len(raw_inputs)} mẫu chuỗi thời gian (10 bước x 9 đặc trưng)")
             print(f"  ✓ Phân bố nhãn mục tiêu: CH0={(y_all==0).sum()}, CH1={(y_all==1).sum()}, CH2={(y_all==2).sum()}")
             return raw_inputs, raw_outputs, channel_names
 
@@ -230,7 +230,7 @@ def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_
         f.write("// TỰ ĐỘNG SINH TỪ PIPELINE TINYML LORA CHANNEL HOPPING\n")
         f.write(f"// Thuật toán: {keras_model.name}{acc_str}\n")
         f.write(f"// Kích thước FlatBuffer: {len(tflite_bytes)} bytes (~{len(tflite_bytes)/1024:.2f} KB)\n")
-        f.write("// Cấu trúc đầu vào: 10 bước x 8 đặc trưng = 80 giá trị float\n")
+        f.write("// Cấu trúc đầu vào: 10 bước x 9 đặc trưng = 90 giá trị float\n")
         f.write("// ============================================================================\n\n")
 
         f.write(f"#ifndef {guard_name}\n")
@@ -242,7 +242,7 @@ def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_
         f.write(f'#define TINYML_MODEL_NAME          "{keras_model.name}"\n')
         f.write("#define TINYML_NUM_CHANNELS        3\n")
         f.write("#define TINYML_WINDOW_STEPS        10\n")
-        f.write("#define TINYML_NUM_FEATURES        8\n")
+        f.write("#define TINYML_NUM_FEATURES        9\n")
         f.write("#define TINYML_INPUT_DIM           (TINYML_WINDOW_STEPS * TINYML_NUM_FEATURES)\n")
         f.write("#define TINYML_TENSOR_ARENA_SIZE   (10 * 1024) // 10 KB RAM\n")
         f.write(f"#define TINYML_IS_FLAT             {'1' if is_flat else '0'}\n\n")
