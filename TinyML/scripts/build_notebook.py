@@ -25,7 +25,7 @@ notebook = {
         "kernelspec": {
             "display_name": "Python 3 (iot_ml)",
             "language": "python",
-            "name": "python3"
+            "name": "iot_ml"
         },
         "language_info": {
             "codemirror_mode": {"name": "ipython", "version": 3},
@@ -1072,6 +1072,10 @@ Các chỉ số đối sánh gồm:
 """)
 
 add_code(r"""
+if 'combined_df' not in locals() or combined_df is None or combined_df.empty:
+    dfs = [pd.read_csv(os.path.join(IMPUTED_DIR, f)) for f in os.listdir(IMPUTED_DIR) if f.endswith(".csv")]
+    combined_df = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+
 eval_df = combined_df.copy()
 payload_sizes = sorted(eval_df['size_of_message'].unique())
 comparison_results = []

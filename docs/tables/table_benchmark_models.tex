@@ -1,0 +1,17 @@
+% Bảng tự động xuất từ LoRa TinyML Pipeline
+\begin{table}[htbp]
+\centering
+\caption{So sánh Hiệu năng, Độ phức tạp và Thời gian Suy luận giữa 5 Kiến trúc TinyML}
+\label{tab:bench_models}
+\begin{tabular}{lccccc}
+\toprule
+Model & Test Accuracy (%) & Test Loss & Params & Latency (us) & Train Time (s) \\
+\midrule
+Baseline_FCNN & 94.55 & 0.09 & 953 & 5045.0 & 32.8 \\
+1D_CNN & 95.19 & 0.08 & 2611 & 12692.3 & 52.8 \\
+GRU_RNN & 94.44 & 0.08 & 1571 & 56890.9 & 62.1 \\
+Separable_1D_CNN & 93.98 & 0.11 & 859 & 9603.8 & 51.6 \\
+ResNet_1D & 94.24 & 0.09 & 2291 & 13595.1 & 52.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
