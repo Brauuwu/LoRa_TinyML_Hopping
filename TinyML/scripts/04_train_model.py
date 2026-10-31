@@ -56,7 +56,7 @@ np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 35
+EPOCHS = 100
 BATCH_SIZE = 32
 
 FEATURE_COLS = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
@@ -417,7 +417,7 @@ def main():
         model, is_flat = factory(T, F, NUM_CHANNELS)
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-            loss='categorical_crossentropy',
+            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
             metrics=['accuracy', 'mae']
         )
 
@@ -426,13 +426,14 @@ def main():
         X_ts = X_flat[idx_test] if is_flat else X_seq[idx_test]
 
         t_start = time.time()
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=6, restore_best_weights=True)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
         history = model.fit(
             X_tr, y_train,
             epochs=EPOCHS,
             batch_size=BATCH_SIZE,
             validation_data=(X_vl, y_val),
-            callbacks=[early_stop],
+            callbacks=[early_stop, lr_sched],
             verbose=0
         )
         train_time = time.time() - t_start

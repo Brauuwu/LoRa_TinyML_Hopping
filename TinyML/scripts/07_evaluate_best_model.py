@@ -126,10 +126,18 @@ def main():
         layers.Dense(NUM_CHANNELS, activation='softmax')
     ], name="Separable_1D_CNN")
 
-    best_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-                       loss='categorical_crossentropy', metrics=['accuracy'])
-    best_model.fit(X_seq[idx_train], y_train, epochs=150, batch_size=8,
-                   validation_data=(X_seq[idx_val], y_val), verbose=0)
+    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
+    lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
+
+    best_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
+        loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
+        metrics=['accuracy']
+    )
+    best_model.fit(
+        X_seq[idx_train], y_train, epochs=100, batch_size=32,
+        validation_data=(X_seq[idx_val], y_val), callbacks=[early_stop, lr_sched], verbose=0
+    )
 
     # 2. Huấn luyện FCNN Baseline để đối chứng
     print("[2/3] Huấn luyện Baseline FCNN...")
@@ -140,10 +148,15 @@ def main():
         layers.Dense(NUM_CHANNELS, activation='softmax')
     ], name="Baseline_FCNN")
 
-    fcnn_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-                       loss='categorical_crossentropy', metrics=['accuracy'])
-    fcnn_model.fit(X_flat[idx_train], y_train, epochs=150, batch_size=8,
-                   validation_data=(X_flat[idx_val], y_val), verbose=0)
+    fcnn_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
+        loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
+        metrics=['accuracy']
+    )
+    fcnn_model.fit(
+        X_flat[idx_train], y_train, epochs=100, batch_size=32,
+        validation_data=(X_flat[idx_val], y_val), callbacks=[early_stop, lr_sched], verbose=0
+    )
 
     # 3. Đánh giá Machine Learning
     print(f"\n{'='*80}")

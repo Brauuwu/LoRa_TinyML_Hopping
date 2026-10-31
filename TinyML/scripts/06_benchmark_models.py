@@ -213,8 +213,8 @@ def main():
 
     model_factories = [build_fcnn, build_cnn1d, build_gru, build_separable_cnn, build_resnet1d]
     results = []
-    EPOCHS = 150
-    BATCH_SIZE = 8
+    EPOCHS = 100
+    BATCH_SIZE = 32
 
     for factory in model_factories:
         model, is_flat = factory(T, F, NUM_CHANNELS)
@@ -229,12 +229,15 @@ def main():
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.003),
-            loss='categorical_crossentropy',
+            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.04),
             metrics=['accuracy']
         )
 
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=6, min_lr=1e-5)
+
         model.fit(X_tr, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE,
-                  validation_data=(X_v, y_val), verbose=0)
+                  validation_data=(X_v, y_val), callbacks=[early_stop, lr_sched], verbose=0)
 
         loss, acc = model.evaluate(X_te, y_test, verbose=0)
         params_count = model.count_params()
