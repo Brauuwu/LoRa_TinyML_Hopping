@@ -158,8 +158,8 @@ def plot_charts(df_models, df_scale):
     axes[0].set_ylabel('Size on Flash / Disk (KB)', fontsize=10, fontweight='bold')
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(df_models['Model'], rotation=20, ha='right', fontsize=9)
-    axes[0].set_ylim(0, max(df_models['C_Header_KB']) * 1.18)
-    axes[0].legend(fontsize=9, loc='upper left', framealpha=0.9)
+    axes[0].set_ylim(0, max(df_models['C_Header_KB']) * 1.25)
+    axes[0].legend(fontsize=9, loc='upper left', framealpha=0.95)
     axes[0].grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b1:
@@ -177,7 +177,7 @@ def plot_charts(df_models, df_scale):
     axes[1].set_ylabel('Parameters', fontsize=10, fontweight='bold')
     axes[1].set_xticks(range(len(df_models)))
     axes[1].set_xticklabels(df_models['Model'], rotation=20, ha='right', fontsize=9)
-    axes[1].set_ylim(0, max(df_models['Parameters']) * 1.18)
+    axes[1].set_ylim(0, max(df_models['Parameters']) * 1.22)
     axes[1].grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b3:
@@ -207,8 +207,8 @@ def plot_charts(df_models, df_scale):
     ax.set_ylabel('Size on Disk (KB)', fontsize=10, fontweight='bold')
     ax.set_xticks(x_ch)
     ax.set_xticklabels(df_scale['Channels'], fontsize=9.5)
-    ax.set_ylim(0, 68)
-    ax.legend(fontsize=8.5, loc='upper left', framealpha=0.9)
+    ax.set_ylim(0, 80)
+    ax.legend(fontsize=8.5, loc='upper left', framealpha=0.95)
     ax.grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b_sep_tfl:

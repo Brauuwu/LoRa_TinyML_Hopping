@@ -73,8 +73,8 @@ def plot_charts(df):
     ax.set_title('Average SNR vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(sizes, fontsize=10)
-    ax.set_ylim(0, 13)
-    ax.legend(fontsize=9.5, loc='upper right', framealpha=0.9)
+    ax.set_ylim(0, 13.5)
+    ax.legend(fontsize=9.5, loc='upper right', framealpha=0.95)
     ax.grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b_rnd:
@@ -102,16 +102,16 @@ def plot_charts(df):
     ax.set_title('Average RSSI vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(sizes, fontsize=10)
-    ax.set_ylim(-110, -10)
-    ax.legend(fontsize=9.5, loc='lower left', framealpha=0.9)
+    ax.set_ylim(-125, -10)
+    ax.legend(fontsize=9.5, loc='lower left', framealpha=0.95)
     ax.grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b_rnd:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}", ha='center', va='bottom', fontsize=8)
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8)
     for bar in b_ml:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     rssi_path = os.path.join(FIGURES_DIR, "Average_RSSI_Chart.png")
@@ -131,16 +131,16 @@ def plot_charts(df):
     ax.set_title('Packet Delivery Ratio (PDR) vs Payload Size', fontsize=12, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(sizes, fontsize=10)
-    ax.set_ylim(0, 115)
-    ax.legend(fontsize=9.5, loc='lower left', framealpha=0.9)
+    ax.set_ylim(0, 130)
+    ax.legend(fontsize=9.5, loc='upper left', framealpha=0.95)
     ax.grid(axis='y', linestyle='--', alpha=0.5)
 
     for bar in b_rnd:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8)
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8)
     for bar in b_ml:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.2, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
+        ax.text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     pdr_path = os.path.join(FIGURES_DIR, "PDR_Chart.png")
@@ -154,40 +154,52 @@ def plot_charts(df):
     fig, axes = plt.subplots(1, 3, figsize=(17, 5.0), dpi=300)
 
     # Panel 1: RSSI
-    axes[0].bar(x - width / 2, df['RSSI_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
-    axes[0].bar(x + width / 2, df['RSSI_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
+    b_r0 = axes[0].bar(x - width / 2, df['RSSI_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
+    b_m0 = axes[0].bar(x + width / 2, df['RSSI_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
     axes[0].set_title('(a) Average RSSI (dBm)', fontsize=11, fontweight='bold')
     axes[0].set_xlabel('Payload Size (Bytes)', fontsize=10)
     axes[0].set_ylabel('RSSI (dBm)', fontsize=10)
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(sizes, fontsize=9.5)
-    axes[0].set_ylim(-110, -10)
-    axes[0].legend(loc='lower left', fontsize=9.5, framealpha=0.9)
+    axes[0].set_ylim(-125, -10)
+    axes[0].legend(loc='lower left', fontsize=9.5, framealpha=0.95)
     axes[0].grid(axis='y', linestyle='--', alpha=0.5)
+    for bar in b_r0:
+        yval = bar.get_height()
+        axes[0].text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8)
+    for bar in b_m0:
+        yval = bar.get_height()
+        axes[0].text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8.5, fontweight='bold')
 
     # Panel 2: SNR
-    axes[1].bar(x - width / 2, df['SNR_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
-    axes[1].bar(x + width / 2, df['SNR_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
+    b_r1 = axes[1].bar(x - width / 2, df['SNR_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
+    b_m1 = axes[1].bar(x + width / 2, df['SNR_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
     axes[1].set_title('(b) Average SNR (dB)', fontsize=11, fontweight='bold')
     axes[1].set_xlabel('Payload Size (Bytes)', fontsize=10)
     axes[1].set_ylabel('SNR (dB)', fontsize=10)
     axes[1].set_xticks(x)
     axes[1].set_xticklabels(sizes, fontsize=9.5)
-    axes[1].set_ylim(0, 13)
-    axes[1].legend(loc='upper right', fontsize=9.5, framealpha=0.9)
+    axes[1].set_ylim(0, 13.5)
+    axes[1].legend(loc='upper right', fontsize=9.5, framealpha=0.95)
     axes[1].grid(axis='y', linestyle='--', alpha=0.5)
+    for bar in b_m1:
+        yval = bar.get_height()
+        axes[1].text(bar.get_x() + bar.get_width() / 2.0, yval + 0.15, f"{yval:.1f}", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     # Panel 3: PDR
-    axes[2].bar(x - width / 2, df['PDR_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
-    axes[2].bar(x + width / 2, df['PDR_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
+    b_r2 = axes[2].bar(x - width / 2, df['PDR_Random'], width, label='Random Hopping', color=color_random, alpha=0.9)
+    b_m2 = axes[2].bar(x + width / 2, df['PDR_TinyML'], width, label='TinyML Hopping', color=color_tinyml, alpha=0.9)
     axes[2].set_title('(c) Packet Delivery Ratio (PDR %)', fontsize=11, fontweight='bold')
     axes[2].set_xlabel('Payload Size (Bytes)', fontsize=10)
     axes[2].set_ylabel('PDR (%)', fontsize=10)
     axes[2].set_xticks(x)
     axes[2].set_xticklabels(sizes, fontsize=9.5)
-    axes[2].set_ylim(0, 115)
-    axes[2].legend(loc='lower left', fontsize=9.5, framealpha=0.9)
+    axes[2].set_ylim(0, 130)
+    axes[2].legend(loc='upper left', fontsize=9.5, framealpha=0.95)
     axes[2].grid(axis='y', linestyle='--', alpha=0.5)
+    for bar in b_m2:
+        yval = bar.get_height()
+        axes[2].text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
     plt.tight_layout()
     multi_path = os.path.join(FIGURES_DIR, "performance_comparison.png")

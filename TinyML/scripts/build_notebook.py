@@ -1219,40 +1219,52 @@ x_pos = np.arange(len(payload_sizes))
 bw = 0.35
 
 # (a) RSSI
-axes[0].bar(x_pos - bw/2, comp_df['RSSI_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
-axes[0].bar(x_pos + bw/2, comp_df['RSSI_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
+b0_r = axes[0].bar(x_pos - bw/2, comp_df['RSSI_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
+b0_m = axes[0].bar(x_pos + bw/2, comp_df['RSSI_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
 axes[0].set_title('(a) Average RSSI (dBm)', fontsize=11, fontweight='bold')
 axes[0].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[0].set_ylabel('RSSI (dBm)', fontsize=10)
 axes[0].set_xticks(x_pos)
 axes[0].set_xticklabels(payload_sizes, fontsize=9.5)
-axes[0].set_ylim(-110, -10)
-axes[0].legend(loc='lower left', fontsize=9, framealpha=0.9)
+axes[0].set_ylim(-125, -10)
+axes[0].legend(loc='lower left', fontsize=9.5, framealpha=0.95)
 axes[0].grid(axis='y', linestyle='--', alpha=0.5)
+for bar in b0_r:
+    yval = bar.get_height()
+    axes[0].text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8)
+for bar in b0_m:
+    yval = bar.get_height()
+    axes[0].text(bar.get_x() + bar.get_width() / 2.0, yval - 2.2, f"{yval:.1f}", ha='center', va='top', fontsize=8.5, fontweight='bold')
 
 # (b) SNR
-axes[1].bar(x_pos - bw/2, comp_df['SNR_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
-axes[1].bar(x_pos + bw/2, comp_df['SNR_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
+b1_r = axes[1].bar(x_pos - bw/2, comp_df['SNR_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
+b1_m = axes[1].bar(x_pos + bw/2, comp_df['SNR_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
 axes[1].set_title('(b) Average SNR (dB)', fontsize=11, fontweight='bold')
 axes[1].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[1].set_ylabel('SNR (dB)', fontsize=10)
 axes[1].set_xticks(x_pos)
 axes[1].set_xticklabels(payload_sizes, fontsize=9.5)
-axes[1].set_ylim(0, 13)
-axes[1].legend(loc='upper right', fontsize=9, framealpha=0.9)
+axes[1].set_ylim(0, 13.5)
+axes[1].legend(loc='upper right', fontsize=9.5, framealpha=0.95)
 axes[1].grid(axis='y', linestyle='--', alpha=0.5)
+for bar in b1_m:
+    yval = bar.get_height()
+    axes[1].text(bar.get_x() + bar.get_width() / 2.0, yval + 0.15, f"{yval:.1f}", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
 # (c) PDR
-axes[2].bar(x_pos - bw/2, comp_df['PDR_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
-axes[2].bar(x_pos + bw/2, comp_df['PDR_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
+b2_r = axes[2].bar(x_pos - bw/2, comp_df['PDR_Random'], bw, label='Random Hopping', color='#1f77b4', alpha=0.9)
+b2_m = axes[2].bar(x_pos + bw/2, comp_df['PDR_TinyML'], bw, label='TinyML Hopping', color='#2ca02c', alpha=0.9)
 axes[2].set_title('(c) Packet Delivery Ratio (PDR %)', fontsize=11, fontweight='bold')
 axes[2].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[2].set_ylabel('PDR (%)', fontsize=10)
 axes[2].set_xticks(x_pos)
 axes[2].set_xticklabels(payload_sizes, fontsize=9.5)
-axes[2].set_ylim(0, 115)
-axes[2].legend(loc='lower left', fontsize=9, framealpha=0.9)
+axes[2].set_ylim(0, 130)
+axes[2].legend(loc='upper left', fontsize=9.5, framealpha=0.95)
 axes[2].grid(axis='y', linestyle='--', alpha=0.5)
+for bar in b2_m:
+    yval = bar.get_height()
+    axes[2].text(bar.get_x() + bar.get_width() / 2.0, yval + 1.5, f"{yval:.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
 plt.tight_layout()
 out_perf_path = os.path.join(FIGURES_DIR, "performance_comparison.png")
@@ -1277,22 +1289,41 @@ Mô hình lý tưởng nằm ở góc trên bên trái (Độ chính xác cao nh
 """)
 
 add_code(r"""
-plt.figure(figsize=(8.5, 5), dpi=200)
+plt.figure(figsize=(9, 5.2), dpi=200)
 scatter = plt.scatter(
     summary_df['Latency (us)'], summary_df['Test Accuracy (%)'],
-    s=summary_df['Params'] * 0.7 + 100, c=range(len(summary_df)),
+    s=summary_df['Params'] * 0.25 + 70, c=range(len(summary_df)),
     cmap='viridis', alpha=0.85, edgecolors='black', linewidth=1.2
 )
 
+positions = {
+    'Baseline_FCNN': {'xytext': (-18, 20), 'ha': 'right', 'va': 'center', 'arrow': True},
+    'Separable_1D_CNN': {'xytext': (30, 25), 'ha': 'left', 'va': 'bottom', 'arrow': True},
+    '1D_CNN': {'xytext': (35, 12), 'ha': 'left', 'va': 'bottom', 'arrow': True},
+    'ResNet_1D': {'xytext': (35, -28), 'ha': 'left', 'va': 'top', 'arrow': True},
+    'GRU_RNN': {'xytext': (0, 25), 'ha': 'center', 'va': 'bottom', 'arrow': False}
+}
+
 for _, r in summary_df.iterrows():
+    m = r['Model']
+    cfg = positions.get(m, {'xytext': (0, 12), 'ha': 'center', 'va': 'bottom', 'arrow': False})
+    arrowprops = dict(arrowstyle='->', color='#555555', lw=0.8) if cfg['arrow'] else None
     plt.annotate(
-        f"{r['Model']}\n({r['Params']:,} params, {r['Latency (us)']}µs)",
+        f"{m}\n({int(r['Params']):,} params, {int(r['Latency (us)']):,}µs)",
         (r['Latency (us)'], r['Test Accuracy (%)']),
-        textcoords="offset points", xytext=(0, 10), ha='center',
-        fontsize=8.5, fontweight='bold'
+        textcoords="offset points",
+        xytext=cfg['xytext'],
+        ha=cfg['ha'],
+        va=cfg['va'],
+        fontsize=8.5,
+        fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='#cccccc', alpha=0.9),
+        arrowprops=arrowprops
     )
 
-plt.title('Trade-off Phân Tích: Accuracy (%) vs Latency (µs) vs Model Size', fontsize=11, fontweight='bold')
+plt.xlim(-14000, 65000)
+plt.ylim(89.95, 90.75)
+plt.title('Trade-off Phân Tích: Accuracy (%) vs Latency (µs) vs Model Size', fontsize=11, fontweight='bold', pad=18)
 plt.xlabel('Inference Latency (µs)', fontsize=10)
 plt.ylabel('Test Accuracy (%)', fontsize=10)
 plt.grid(True, linestyle='--', alpha=0.5)
@@ -1418,8 +1449,8 @@ axes[0].set_title('(a) Average SNR (dB)', fontsize=11, fontweight='bold')
 axes[0].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[0].set_ylabel('SNR (dB)', fontsize=10)
 axes[0].set_xticks(x_pos); axes[0].set_xticklabels(szs, fontsize=9.5)
-axes[0].set_ylim(0, 13)
-axes[0].legend(loc='upper right', fontsize=9, framealpha=0.9); axes[0].grid(True, linestyle='--', alpha=0.5)
+axes[0].set_ylim(0, 13.5)
+axes[0].legend(loc='upper right', fontsize=9.5, framealpha=0.95); axes[0].grid(True, linestyle='--', alpha=0.5)
 
 for b in b1_m:
     axes[0].text(b.get_x() + b.get_width()/2.0, b.get_height() + 0.15, f"{b.get_height():.1f}", ha='center', va='bottom', fontsize=8, fontweight='bold')
@@ -1431,11 +1462,13 @@ axes[1].set_title('(b) Average RSSI (dBm)', fontsize=11, fontweight='bold')
 axes[1].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[1].set_ylabel('RSSI (dBm)', fontsize=10)
 axes[1].set_xticks(x_pos); axes[1].set_xticklabels(szs, fontsize=9.5)
-axes[1].set_ylim(-110, -10)
-axes[1].legend(loc='lower left', fontsize=9, framealpha=0.9); axes[1].grid(True, linestyle='--', alpha=0.5)
+axes[1].set_ylim(-125, -10)
+axes[1].legend(loc='lower left', fontsize=9.5, framealpha=0.95); axes[1].grid(True, linestyle='--', alpha=0.5)
 
+for b in b2_r:
+    axes[1].text(b.get_x() + b.get_width()/2.0, b.get_height() - 2.2, f"{b.get_height():.1f}", ha='center', va='top', fontsize=8)
 for b in b2_m:
-    axes[1].text(b.get_x() + b.get_width()/2.0, b.get_height() + 1.2, f"{b.get_height():.1f}", ha='center', va='bottom', fontsize=8, fontweight='bold')
+    axes[1].text(b.get_x() + b.get_width()/2.0, b.get_height() - 2.2, f"{b.get_height():.1f}", ha='center', va='top', fontsize=8.5, fontweight='bold')
 
 # 3. PDR
 b3_r = axes[2].bar(x_pos - bw/2, comp_df['PDR_Random'], bw, label='Random Hopping', color=color_rnd, alpha=0.9)
@@ -1444,11 +1477,11 @@ axes[2].set_title('(c) Packet Delivery Ratio (PDR %)', fontsize=11, fontweight='
 axes[2].set_xlabel('Payload Size (Bytes)', fontsize=10)
 axes[2].set_ylabel('PDR (%)', fontsize=10)
 axes[2].set_xticks(x_pos); axes[2].set_xticklabels(szs, fontsize=9.5)
-axes[2].set_ylim(0, 115)
-axes[2].legend(loc='lower left', fontsize=9, framealpha=0.9); axes[2].grid(True, linestyle='--', alpha=0.5)
+axes[2].set_ylim(0, 130)
+axes[2].legend(loc='upper left', fontsize=9.5, framealpha=0.95); axes[2].grid(True, linestyle='--', alpha=0.5)
 
 for b in b3_m:
-    axes[2].text(b.get_x() + b.get_width()/2.0, b.get_height() + 1.2, f"{b.get_height():.1f}%", ha='center', va='bottom', fontsize=8, fontweight='bold')
+    axes[2].text(b.get_x() + b.get_width()/2.0, b.get_height() + 1.5, f"{b.get_height():.1f}%", ha='center', va='bottom', fontsize=8.5, fontweight='bold')
 
 plt.tight_layout()
 sum_chart_path = os.path.join(FIGURES_DIR, "performance_comparison.png")
@@ -1518,7 +1551,8 @@ axes[0].set_xlabel('Model Architecture', fontsize=10)
 axes[0].set_ylabel('Size (KB)', fontsize=10)
 axes[0].set_xticks(x_idx)
 axes[0].set_xticklabels(df_mem_models['Model'], rotation=20, ha='right', fontsize=9)
-axes[0].legend(loc='upper left', fontsize=9)
+axes[0].set_ylim(0, max(df_mem_models['C_Header_KB']) * 1.25)
+axes[0].legend(loc='upper left', fontsize=9.5, framealpha=0.95)
 axes[0].grid(axis='y', linestyle='--', alpha=0.5)
 
 # (b) Độ co giãn theo số kênh (2-9 channels)
@@ -1531,7 +1565,8 @@ axes[1].set_xlabel('Channels (Classes)', fontsize=10)
 axes[1].set_ylabel('TFLite Size (KB)', fontsize=10)
 axes[1].set_xticks(x_sc)
 axes[1].set_xticklabels(df_scalability['Channels'], fontsize=9)
-axes[1].legend(loc='upper left', fontsize=9)
+axes[1].set_ylim(0, 11.8)
+axes[1].legend(loc='upper left', fontsize=9.5, framealpha=0.95)
 axes[1].grid(axis='y', linestyle='--', alpha=0.5)
 
 plt.tight_layout()
