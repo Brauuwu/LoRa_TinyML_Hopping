@@ -30,3 +30,8 @@ bin/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Gateway runtime logs and csv
+GatewayCode/csv/
+GatewayCode/logs/
+

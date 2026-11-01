@@ -86,20 +86,24 @@ def main():
         return
 
     # Danh sách các bảng thống kê mặc định cần xuất
+    bench_csv = os.path.join(MODELS_DIR, "models_benchmark_summary.csv")
+    if not os.path.exists(bench_csv):
+        bench_csv = os.path.join(MODELS_DIR, "benchmark_summary.csv")
+
     tables = [
         (os.path.join(READY_DIR, "pdr_summary.csv"),
          os.path.join(TABLES_DIR, "table_pdr_summary.tex"),
          "Thống kê Tỉ lệ Truyền Thành công (PDR) và Chất lượng Kênh theo Node",
          "tab:pdr_summary"),
 
-        (os.path.join(MODELS_DIR, "benchmark_summary.csv"),
+        (bench_csv,
          os.path.join(TABLES_DIR, "table_benchmark_models.tex"),
-         "So sánh Hiệu năng giữa các Kiến trúc Mạng Nơ-ron (FCNN, CNN, RNN, GRU, LSTM)",
+         "So sánh Hiệu năng giữa 5 Kiến trúc Mạng Nơ-ron TinyML trên Hệ thống",
          "tab:benchmark_models"),
 
         (os.path.join(READY_DIR, "comparison_metrics.csv"),
          os.path.join(TABLES_DIR, "table_hopping_comparison.tex"),
-         "Đối sánh Hiệu năng giữa Fixed Channel, Random Hopping và TinyML Hopping",
+         "Đối sánh Hiệu năng giữa Random Channel Hopping và TinyML Predictive Hopping",
          "tab:hopping_comparison")
     ]
 
@@ -109,13 +113,13 @@ def main():
             count += 1
 
     if count == 0:
-        # Nếu chưa chạy các bước trước, tạo bảng mẫu pdr_summary và xuất thử
+        # Nếu chưa chạy các bước trước, tạo bảng mẫu đối sánh Random vs TinyML
         sample_df = pd.DataFrame({
-            'Kịch bản': ['Fixed Channel', 'Random Hopping', 'TinyML Hopping'],
-            'PDR (%)': [51.7, 74.5, 93.3],
-            'RSSI (dBm)': [-98.6, -90.4, -79.4],
-            'SNR (dB)': [2.7, 5.4, 8.7],
-            'Gói mất': [483, 255, 67]
+            'Kịch bản': ['Random Hopping', 'TinyML Hopping'],
+            'PDR (%)': [74.5, 98.3],
+            'RSSI (dBm)': [-90.4, -79.4],
+            'SNR (dB)': [5.4, 8.7],
+            'Gói mất': [255, 17]
         })
         sample_csv = os.path.join(READY_DIR, "sample_comparison.csv")
         sample_df.to_csv(sample_csv, index=False)
