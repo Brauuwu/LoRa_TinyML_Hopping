@@ -1321,7 +1321,12 @@ for _, r in summary_df.iterrows():
         arrowprops=arrowprops
     )
 
-plt.xlim(-14000, 65000)
+latencies = summary_df['Latency (us)'].to_numpy(dtype=float)
+x_min, x_max = np.min(latencies), np.max(latencies)
+x_range = x_max - x_min
+x_padding_left = max(x_range * 0.5, 1000)
+x_padding_right = max(x_range * 0.2, 1000)
+plt.xlim(x_min - x_padding_left, x_max + x_padding_right)
 plt.ylim(89.95, 90.75)
 plt.title('Trade-off Phân Tích: Accuracy (%) vs Latency (µs) vs Model Size', fontsize=11, fontweight='bold', pad=18)
 plt.xlabel('Inference Latency (µs)', fontsize=10)
