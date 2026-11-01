@@ -46,6 +46,17 @@ PATTERN_TEXT_LOG = re.compile(
     re.IGNORECASE
 )
 
+# Regex 1b: Fallback cho gói tin text có ký tự nhiễu ở packet_ID
+PATTERN_TEXT_LOG_FALLBACK = re.compile(
+    r"(?P<time_slot>\d{2}:\d{2}:\d{2}[.:]\d{3})\s*->\s*"
+    r"(?P<source>[A-Za-z])(?P<packet_ID>\d*).*?"
+    r"\s+size_of_message\s+(?P<size_of_message>\d+)\s+"
+    r"RSSI\s+(?P<RSSI>-?\d+)\s+"
+    r"SNR\s+(?P<SNR>-?\d+(?:\.\d+)?)\s+"
+    r"Frequency\s+(?P<frequency>\d+(?:\.\d+)?)",
+    re.IGNORECASE
+)
+
 # Regex 2: Log console Gateway dạng pipe (chuẩn main_gw.cpp)
 # " 12:00:00.123 |  433.175 |   A  |      0 |   30 |        -75 |     9.0"
 PATTERN_PIPE_GW = re.compile(
@@ -112,6 +123,8 @@ def parse_single_file(input_path: str, output_path: str) -> int:
 
             match = PATTERN_TEXT_LOG.search(line_str)
             if not match:
+                match = PATTERN_TEXT_LOG_FALLBACK.search(line_str)
+            if not match:
                 match = PATTERN_PIPE_GW.search(line_str)
             if not match:
                 match = PATTERN_PIPE_ALT.search(line_str)
@@ -120,7 +133,8 @@ def parse_single_file(input_path: str, output_path: str) -> int:
                 d = match.groupdict()
                 try:
                     d["source"] = d["source"].upper()
-                    d["packet_ID"] = int(d["packet_ID"])
+                    raw_pid = d.get("packet_ID", "")
+                    d["packet_ID"] = int(raw_pid) if raw_pid and str(raw_pid).isdigit() else 0
                     d["size_of_message"] = int(d["size_of_message"])
                     d["RSSI"] = int(d["RSSI"])
                     d["SNR"] = float(d["SNR"])

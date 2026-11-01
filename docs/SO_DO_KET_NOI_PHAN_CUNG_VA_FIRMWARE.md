@@ -151,7 +151,7 @@ graph LR
         MOSI_P[BCM GPIO 10 / Pin 19 - MOSI]
         MISO_P[BCM GPIO 9 / Pin 21 - MISO]
         SCLK_P[BCM GPIO 11 / Pin 23 - SCLK]
-      
+    
         CS1[BCM GPIO 8 / Pin 24 / wPi 10 - CE0]
         RST1[BCM GPIO 27 / Pin 13 / wPi 2]
         DIO1[BCM GPIO 22 / Pin 15 / wPi 3]
@@ -409,6 +409,7 @@ flowchart TD
 ```
 
 #### Cơ chế Phản hồi Kín & Thu nhận CSI Thời gian thực:
+
 - **Nguyên lý:** Mặc dù tập dữ liệu huấn luyện được ghi log tại Gateway, ESP32 vẫn tái tạo trọn vẹn không gian trạng thái kênh nhờ gói **ACK Downlink 4-byte** (`[0xAA, Seq, RSSI, SNR]`, Time-on-Air chỉ ~25ms).
 - **Xử lý mất gói / va chạm tại biên:** Khi xảy ra va chạm trên không, Gateway không nhận được gì nên không thể phản hồi. ESP32 phát hiện sự kiện này thông qua cơ chế **Timeout 1000ms**, từ đó tự động nạp hình phạt `RSSI = -1000` và `SNR = -1000` vào bộ đệm trượt theo đúng quy tắc tiền xử lý dữ liệu.
 - *Xem chi tiết kiến trúc đa nhân và mã nguồn FreeRTOS tại [KIEN_TRUC_FREERTOS_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md).*
