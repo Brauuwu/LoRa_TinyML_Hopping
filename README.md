@@ -4,6 +4,23 @@ Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML
 
 ---
 
+<a id="muc-luc"></a>
+## 📑 Mục lục
+- [1. Cấu trúc thư mục dự án](#sec-1)
+- [2. Sơ đồ đấu nối phần cứng](#sec-2)
+  - [2.1. 3 End-Nodes (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)](#sec-2-1)
+  - [2.2. Gateway (Raspberry Pi CM4 / Pi 4 + 3 Module Ra-02 433MHz)](#sec-2-2)
+- [3. Kiến trúc Đa nhiệm FreeRTOS trên ESP32](#sec-3)
+- [4. Quy trình Thực hiện Đồ án Từng bước](#sec-4)
+  - [Bước 1: Thu thập dữ liệu thực tế (Data Collection)](#sec-4-1)
+  - [Bước 2: Huấn luyện mô hình TinyML trên Python](#sec-4-2)
+  - [Bước 3: Đánh giá Đối sánh, Phân tích Bộ nhớ & Xuất Bảng LaTeX](#sec-4-3)
+  - [Bước 4: Triển khai Kiểm chứng Thời gian thực trên Node](#sec-4-4)
+- [5. Danh mục Tài liệu Kỹ thuật Chi tiết](#sec-5)
+
+---
+
+<a id="sec-1"></a>
 ## 1. Cấu trúc thư mục dự án
 
 ```text
@@ -64,10 +81,12 @@ LoRa_TinyML_Hopping/
 │   ├── models/                          # Chứa mô hình tflite, model.h và bảng so sánh benchmark
 │   └── figures/                         # Biểu đồ huấn luyện, ma trận nhầm lẫn, biểu đồ đối sánh PDR/RSSI/SNR
 ├── docs/                                # Tài liệu kỹ thuật, kịch bản thực nghiệm & kiến trúc hệ thống
+│   ├── PROJECT_KNOWLEDGE_BASE.md        # Tài liệu tri thức toàn diện (Single Source of Truth) cho Agent & Kỹ sư
 │   ├── KICH_BAN_THU_THAP_DU_LIEU.md     # Danh mục 21 kịch bản đo kiểm đa Node và phân bổ tần số
 │   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình tổng thể 6 giai đoạn của Đồ án Tốt nghiệp
 │   ├── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ đấu nối phần cứng & nguyên lý firmware
 │   ├── KIEN_TRUC_FREERTOS_FIRMWARE.md   # Thiết kế Đa nhiệm FreeRTOS trên ESP32 Dual-Core
+│   ├── LUACHON_THAMSO_HUANLUYEN_MOHINH.md # Cơ sở khoa học và hướng dẫn tối ưu siêu tham số
 │   └── tables/                          # Mã nguồn bảng LaTeX (.tex) tự động sinh sẵn sàng cho Báo cáo
 ├── img/                                 # Hình ảnh sơ đồ phần cứng thực tế (Fritzing Breadboard)
 │   ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32
@@ -75,10 +94,14 @@ LoRa_TinyML_Hopping/
 └── README.md
 ```
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-2"></a>
 ## 2. Sơ đồ đấu nối phần cứng
 
+<a id="sec-2-1"></a>
 ### A. 3 End-Nodes (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)
 
 <p align="center">
@@ -102,8 +125,11 @@ LoRa_TinyML_Hopping/
 | | `GND` | **GND** | Mass chung |
 | **Trạng thái LED** | `LED` | **GPIO 2** | Onboard LED báo truyền gói tin |
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-2-2"></a>
 ### B. Gateway (Raspberry Pi CM4 / Pi 4 + 3 Module Ra-02 433MHz)
 
 <p align="center">
@@ -133,8 +159,11 @@ LoRa_TinyML_Hopping/
 | | (Kênh 3) | **RST** | GPIO 24 | **5** | **Pin 18** |
 | | | **DIO0** | GPIO 23 | **4** | **Pin 16** |
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-3"></a>
 ## 3. Kiến trúc Đa nhiệm FreeRTOS trên ESP32
 
 Để đảm bảo tính thời gian thực cao và tận dụng tối đa vi xử lý 2 nhân của ESP32, toàn bộ firmware được tái cấu trúc theo mô hình **FreeRTOS SMP Dual-Core** (chi tiết xem tại [`docs/KIEN_TRUC_FREERTOS_FIRMWARE.md`](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md)):
@@ -160,10 +189,14 @@ graph TD
 - **Core 1 (APP_CPU):** Đảm nhận tính toán suy luận mạng nơ-ron và quét màn hình OLED qua I2C mà hoàn toàn không gây trễ hoặc nghẽn bus SPI của LoRa.
 - **Cơ chế Phản hồi Kín (Closed-Loop Feedback):** Mặc dù dữ liệu huấn luyện thu tại Gateway, ESP32 vẫn có đầy đủ thông tin thời gian thực nhờ gói **ACK 4-byte** (`[0xAA, Seq, RSSI, SNR]`, ToA ~25ms). Khi xảy ra va chạm/mất gói, cơ chế **Timeout 1000ms** tự động kích hoạt nạp điểm phạt `RSSI = -1000` và `SNR = -1000` vào bộ đệm trượt 80 chiều. Chi tiết xem tại [`docs/KIEN_TRUC_FREERTOS_FIRMWARE.md`](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md).
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-4"></a>
 ## 4. Quy trình Thực hiện Đồ án Từng bước
 
+<a id="sec-4-1"></a>
 ### Bước 1: Thu thập dữ liệu thực tế (Data Collection)
 1. **Nạp firmware cho các Node**:
    - Mở [`MCUCode/LoRaEN_DataCollection/src/main.cpp`](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_DataCollection/src/main.cpp).
@@ -180,8 +213,11 @@ graph TD
    - Chọn kịch bản phát: Đơn Node (A, B, C) hoặc Đa Node đồng thời (A+B, A+B+C).
    - Mỗi phiên đo tự động phát 6 mức kích thước payload: `30B -> 74B -> 118B -> 162B -> 206B -> 250B` $\times$ 100 gói/mức (= 600 gói/phiên).
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-4-2"></a>
 ### Bước 2: Huấn luyện mô hình TinyML trên Python
 1. **Cài đặt môi trường**:
    ```bash
@@ -211,8 +247,11 @@ graph TD
    - Mở file [`TinyML/LoRa_TinyML_Pipeline.ipynb`](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/LoRa_TinyML_Pipeline.ipynb).
    - Toàn bộ quá trình huấn luyện từng thuật toán được chia thành **các cặp plaintext + code độc lập**, giúp dễ dàng theo dõi và trực quan hóa từng mô hình.
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-4-3"></a>
 ### Bước 3: Đánh giá Đối sánh, Phân tích Bộ nhớ & Xuất Bảng LaTeX
 1. **Đánh giá so sánh 2 cơ chế nhảy kênh**:
    ```bash
@@ -239,16 +278,22 @@ graph TD
    ```
    - Tự động xuất toàn bộ bảng số liệu sang các file mã nguồn LaTeX Table (`.tex`) lưu tại `docs/tables/`, sẵn sàng đưa trực tiếp vào Luận văn Tốt nghiệp.
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
+<a id="sec-4-4"></a>
 ### Bước 4: Triển khai Kiểm chứng Thời gian thực trên Node
 1. Mở project [`MCUCode/LoRaEN_TinyMLHopping`](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_TinyMLHopping) trên PlatformIO.
 2. Kiểm tra file `src/model.h` (đã được sinh tự động từ Bước 2).
 3. Nạp firmware vào ESP32 để kích hoạt chế độ nhảy kênh thông minh TinyML thời gian thực và theo dõi kết quả PDR, số lần nhảy kênh (Hops), độ trễ suy luận AI ($\mu s$) trực tiếp trên màn hình OLED SSD1306.
 
+[🔝 Về mục lục](#muc-luc)
+
 ---
 
-## 📚 Danh Mục Tài Liệu Kỹ Thuật Chi Tiết
+<a id="sec-5"></a>
+## 5. Danh Mục Tài Liệu Kỹ Thuật Chi Tiết
 - [PROJECT_KNOWLEDGE_BASE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PROJECT_KNOWLEDGE_BASE.md): **Tài liệu tri thức toàn diện (Master Single Source of Truth)** dành riêng cho AI Agent và Kỹ sư, tổng hợp 100% kiến trúc phần cứng, firmware, data pipeline, mô hình học máy và kết quả thực nghiệm.
 - [LUACHON_THAMSO_HUANLUYEN_MOHINH.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/LUACHON_THAMSO_HUANLUYEN_MOHINH.md): Cơ sở khoa học và hướng dẫn tối ưu siêu tham số huấn luyện TinyML ($T=10$, 200 epochs, L2, Dropout, GAP).
 - [PIPELINE_THUC_HIEN_DU_AN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PIPELINE_THUC_HIEN_DU_AN.md): Toàn bộ quy trình từ thu thập dữ liệu, huấn luyện đến đánh giá đối chứng.
@@ -256,4 +301,4 @@ graph TD
 - [SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md): Sơ đồ chân nối phần cứng giữa Raspberry Pi, SX1278 và ESP32.
 - [KICH_BAN_THU_THAP_DU_LIEU.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KICH_BAN_THU_THAP_DU_LIEU.md): Kịch bản thực nghiệm đo đạc CSI theo 21 kịch bản đa node.
 
-
+[🔝 Về mục lục](#muc-luc)
