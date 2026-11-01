@@ -1,18 +1,18 @@
-% Bảng tự động xuất từ LoRa TinyML Pipeline
+% Bảng sinh tự động từ file: comparison_metrics.csv
 \begin{table}[htbp]
 \centering
-\caption{Đối sánh Hiệu năng giữa Random Hopping và TinyML Hopping}
-\label{tab:hopping_comp}
+\caption{Đối sánh Hiệu năng giữa Random Channel Hopping và TinyML Predictive Hopping}
+\label{tab:hopping_comparison}
 \begin{tabular}{lccccccc}
 \toprule
 size\_of\_message & RSSI\_Random & RSSI\_TinyML & SNR\_Random & SNR\_TinyML & PDR\_Random & PDR\_TinyML & PDR\_Gain\_Pct \\
 \midrule
-30.0 & -63.1 & -62.1 & 8.8 & 9.0 & 88.0 & 99.0 & 11.0 \\
-74.0 & -64.0 & -63.0 & 8.8 & 8.8 & 90.0 & 100.0 & 10.0 \\
-118.0 & -63.5 & -62.3 & 8.8 & 9.1 & 86.7 & 99.0 & 12.3 \\
-162.0 & -63.7 & -61.1 & 8.9 & 8.8 & 76.7 & 99.0 & 22.3 \\
-206.0 & -62.8 & -61.8 & 8.9 & 8.7 & 85.0 & 100.0 & 15.0 \\
-250.0 & -60.4 & -62.4 & 9.1 & 9.2 & 63.7 & 95.0 & 31.3 \\
+30.0 & -89.5 & -68.0 & 6.3 & 8.1 & 88.0 & 99.0 & 11.0 \\
+74.0 & -91.2 & -68.3 & 6.4 & 8.0 & 90.0 & 100.0 & 10.0 \\
+118.0 & -90.9 & -70.8 & 5.3 & 7.0 & 86.7 & 99.0 & 12.3 \\
+162.0 & -90.6 & -70.8 & 5.3 & 6.6 & 76.7 & 99.0 & 22.3 \\
+206.0 & -93.0 & -73.1 & 6.6 & 7.8 & 85.0 & 100.0 & 15.0 \\
+250.0 & -94.3 & -74.5 & 5.4 & 7.2 & 63.7 & 95.0 & 31.3 \\
 \bottomrule
 \end{tabular}
 \end{table}

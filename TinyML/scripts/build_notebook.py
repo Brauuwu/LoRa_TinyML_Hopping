@@ -1617,7 +1617,7 @@ add_markdown(r"""
    - **Mô hình tối ưu:** Depthwise Separable 1D-CNN mang lại sự cân bằng hoàn hảo giữa độ chính xác cao và số lượng tham số cực thấp (~1,400 tham số, độ trễ suy luận $\approx 9.6\text{ ms}$).
 4. **Vượt trội Hiệu năng Truyền Thông:**
    - Tỉ lệ nhận gói PDR của TinyML Hopping đạt **~95–100%** ngay cả ở tải cực đại ($250\text{ Bytes}$), vượt trội rõ rệt so với Random Hopping (~63–90%).
-   - Cải thiện chất lượng tín hiệu thu: RSSI tăng trung bình $\mathbf{12\text{ dBm}}$ và SNR tăng $\mathbf{3.5\text{ dB}}$.
+   - Cải thiện chất lượng tín hiệu thu: RSSI tăng trung bình $\mathbf{20.5\text{ dBm}}$ (từ $-91.9\text{ dBm}$ lên $-71.4\text{ dBm}$) và SNR tăng $\mathbf{1.7\text{ dB}}$.
 5. **Tính Khả thi Triển khai Nhúng:**
    - Mô hình FlatBuffer TFLite chỉ chiếm **$8.6\text{ KB}$ Flash** ($< 0.2\%$ dung lượng ESP32) và **$10\text{ KB}$ Tensor Arena RAM**.
    - Toàn bộ pipeline đã được đồng bộ hóa thành công sang file mã nguồn `model.h` và sẵn sàng nạp cho thiết bị phần cứng thực tế.
