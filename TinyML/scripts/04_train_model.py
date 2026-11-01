@@ -138,9 +138,9 @@ def build_fcnn(T, F, num_ch):
     """1. Baseline FCNN (Multi-Layer Perceptron)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T * F,), name="input_flat"),
-        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_1"),
-        layers.Dropout(0.1, name="drop_1"),
-        layers.Dense(12, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_2"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="dense_1"),
+        layers.Dropout(0.15, name="drop_1"),
+        layers.Dense(12, activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="dense_2"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="Baseline_FCNN")
     return m, True
@@ -150,13 +150,13 @@ def build_cnn1d(T, F, num_ch):
     """2. 1D-CNN (Temporal Convolutional Network)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="conv1d_1"),
+        layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="conv1d_1"),
         layers.BatchNormalization(name="bn_1"),
         layers.MaxPooling1D(pool_size=2, name="maxpool_1"),
-        layers.Conv1D(32, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="conv1d_2"),
+        layers.Conv1D(32, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="conv1d_2"),
         layers.GlobalAveragePooling1D(name="gap"),
-        layers.Dropout(0.1, name="drop_1"),
-        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_dense"),
+        layers.Dropout(0.15, name="drop_1"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="dense_dense"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="1D_CNN")
     return m, False
@@ -166,9 +166,9 @@ def build_gru(T, F, num_ch):
     """3. GRU (Gated Recurrent Unit RNN)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.GRU(16, return_sequences=False, unroll=True, kernel_regularizer=regularizers.l2(1e-4), name="gru_layer"),
-        layers.Dropout(0.1, name="drop_1"),
-        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4), name="dense_gru"),
+        layers.GRU(16, return_sequences=False, unroll=True, kernel_regularizer=regularizers.l2(2e-4), name="gru_layer"),
+        layers.Dropout(0.15, name="drop_1"),
+        layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(2e-4), name="dense_gru"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="GRU_RNN")
     return m, False
@@ -178,10 +178,10 @@ def build_separable_cnn(T, F, num_ch):
     """4. Depthwise Separable 1D-CNN (MobileNet-style)"""
     m = tf.keras.Sequential([
         layers.Input(shape=(T, F), name="input_seq"),
-        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(1e-4), name="sep_conv1"),
-        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(1e-4), name="sep_conv2"),
+        layers.SeparableConv1D(16, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(2e-4), name="sep_conv1"),
+        layers.SeparableConv1D(32, kernel_size=3, padding='same', activation='relu', pointwise_regularizer=regularizers.l2(2e-4), name="sep_conv2"),
         layers.GlobalAveragePooling1D(name="gap"),
-        layers.Dropout(0.1, name="drop_1"),
+        layers.Dropout(0.15, name="drop_1"),
         layers.Dense(num_ch, activation='softmax', name="output")
     ], name="Separable_1D_CNN")
     return m, False
@@ -190,17 +190,17 @@ def build_separable_cnn(T, F, num_ch):
 def build_resnet1d(T, F, num_ch):
     """5. Residual 1D-CNN (ResNet-1D với Skip Connection)"""
     inputs = layers.Input(shape=(T, F), name="input_seq")
-    x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4))(inputs)
+    x = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(2e-4))(inputs)
 
     # Residual block
-    res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(1e-4))(x)
-    res = layers.Conv1D(16, kernel_size=3, padding='same', kernel_regularizer=regularizers.l2(1e-4))(res)
+    res = layers.Conv1D(16, kernel_size=3, padding='same', activation='relu', kernel_regularizer=regularizers.l2(2e-4))(x)
+    res = layers.Conv1D(16, kernel_size=3, padding='same', kernel_regularizer=regularizers.l2(2e-4))(res)
     x = layers.add([x, res])
     x = layers.Activation('relu')(x)
 
     x = layers.GlobalAveragePooling1D()(x)
-    x = layers.Dropout(0.1)(x)
-    x = layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(1e-4))(x)
+    x = layers.Dropout(0.15)(x)
+    x = layers.Dense(16, activation='relu', kernel_regularizer=regularizers.l2(2e-4))(x)
     outputs = layers.Dense(num_ch, activation='softmax')(x)
 
     m = models.Model(inputs=inputs, outputs=outputs, name="ResNet_1D")
@@ -424,7 +424,7 @@ def main():
         model, is_flat = factory(T, F, NUM_CHANNELS)
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
-            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.02),
+            loss='categorical_crossentropy',
             metrics=['accuracy', 'mae']
         )
 
@@ -434,7 +434,7 @@ def main():
 
         t_start = time.time()
         early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=200, restore_best_weights=True)
-        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=12, min_lr=1e-5)
+        lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, min_lr=1e-5)
         history = model.fit(
             X_tr, y_train,
             epochs=EPOCHS,
