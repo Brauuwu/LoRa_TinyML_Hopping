@@ -245,3 +245,13 @@ graph TD
 1. Mở project [`MCUCode/LoRaEN_TinyMLHopping`](file:///e:/DATN/LoRa_TinyML_Hopping/MCUCode/LoRaEN_TinyMLHopping) trên PlatformIO.
 2. Kiểm tra file `src/model.h` (đã được sinh tự động từ Bước 2).
 3. Nạp firmware vào ESP32 để kích hoạt chế độ nhảy kênh thông minh TinyML thời gian thực và theo dõi kết quả PDR, số lần nhảy kênh (Hops), độ trễ suy luận AI ($\mu s$) trực tiếp trên màn hình OLED SSD1306.
+
+---
+
+## 📚 Danh Mục Tài Liệu Kỹ Thuật Chi Tiết
+- [LUACHON_THAMSO_HUANLUYEN_MOHINH.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/LUACHON_THAMSO_HUANLUYEN_MOHINH.md): Cơ sở khoa học và hướng dẫn tối ưu siêu tham số huấn luyện TinyML ($T=10$, 200 epochs, L2, Dropout, GAP).
+- [PIPELINE_THUC_HIEN_DU_AN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PIPELINE_THUC_HIEN_DU_AN.md): Toàn bộ quy trình từ thu thập dữ liệu, huấn luyện đến đánh giá đối chứng.
+- [KIEN_TRUC_FREERTOS_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md): Kiến trúc đa luồng FreeRTOS trên ESP32 Dual-Core cho truyền thông và suy luận AI.
+- [SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md): Sơ đồ chân nối phần cứng giữa Raspberry Pi, SX1278 và ESP32.
+- [KICH_BAN_THU_THAP_DU_LIEU.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KICH_BAN_THU_THAP_DU_LIEU.md): Kịch bản thực nghiệm đo đạc CSI theo 21 kịch bản đa node.
+
