@@ -1398,7 +1398,7 @@ Xuất các biểu đồ phân giải cao (300 DPI) đối sánh trực diện g
 - Tựa đề gọn gàng, súc tích bằng tiếng Anh học thuật.
 - Trục tung và trục hoành có đơn vị rõ ràng ($\text{dBm}$, $\text{dB}$, $\%$).
 - **Không sử dụng số liệu giả định:** Toàn bộ giá trị vẽ biểu đồ được nạp trực tiếp từ kết quả đo đạc thực nghiệm Bước 5 (`comp_df`).
-- **Loại bỏ cơ chế Fixed Channel:** Tập trung phản ánh ưu thế né tránh va chạm kênh truyền của TinyML so với chuẩn ngẫu nhiên (Random Hopping).
+- **Đối sánh trực diện:** Tập trung phản ánh ưu thế né tránh va chạm kênh truyền của TinyML so với chuẩn ngẫu nhiên (Random Hopping).
 """)
 
 add_code(r"""

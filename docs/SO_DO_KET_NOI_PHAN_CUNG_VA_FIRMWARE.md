@@ -378,7 +378,6 @@ flowchart TD
     WaitTxTimer -- Chưa --> YieldCPU[Nghỉ tiết kiệm năng lượng / Chờ timer] --> WaitTxTimer
     WaitTxTimer -- Đến giờ phát --> ModeSelect{Chế độ nhảy kênh HOPPING_MODE?}
   
-    ModeSelect -- 0: Fixed Channel --> KeepChannel[Giữ nguyên kênh cố định CH1]
     ModeSelect -- 1: Random Hopping --> RndChannel[Chọn ngẫu nhiên kênh: random 0..2]
     ModeSelect -- 2: TinyML Hopping --> ML_Inference[Chạy TinyML suy luận kênh tối ưu]
   

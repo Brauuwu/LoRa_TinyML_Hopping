@@ -48,19 +48,14 @@ for node in ['A', 'B', 'C']:
     os.makedirs(os.path.join(MLDATAREADY_DIR, node), exist_ok=True)
 os.makedirs(os.path.join(MLDATAREADY_DIR, "ABC"), exist_ok=True)
 
-# Cấu hình tần số các kênh (tự động nhận dạng 433 MHz hoặc 868 MHz)
+# Cấu hình tần số 3 kênh 433 MHz
 CHANNELS_433 = [("433_175", 433.175), ("433_375", 433.375), ("433_575", 433.575)]
-CHANNELS_868 = [("868", 868.0), ("869", 869.0), ("870", 870.0)]
 
 WINDOW_SIZE = 10
 
 
 def detect_channel_config(df):
-    freqs = df['frequency'].dropna().values
-    if len(freqs) == 0:
-        return CHANNELS_433
-    mean_f = np.mean(freqs)
-    return CHANNELS_868 if mean_f > 600.0 else CHANNELS_433
+    return CHANNELS_433
 
 
 def assign_channel_flags(df, channels_cfg):

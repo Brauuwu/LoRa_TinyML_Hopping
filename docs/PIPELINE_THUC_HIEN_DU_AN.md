@@ -244,8 +244,7 @@ graph LR
         C3["3. Tỷ số tín hiệu trên nhiễu SNR (dB)"]
     end
 
-    subgraph MECHANISMS [3 CƠ CHẾ SO SÁNH]
-        M_FIX["Fixed Channel: Kênh cố định (Dễ nghẽn)"]
+    subgraph MECHANISMS [2 CƠ CHẾ ĐỐI SÁNH]
         M_RND["Random Hopping: Nhảy ngẫu nhiên (Không thích nghi)"]
         M_TML["TinyML Hopping: Nhảy thông minh (Tối ưu nhất)"]
     end
@@ -253,7 +252,7 @@ graph LR
     MECHANISMS --> CRITERIA
 ```
 
-1. **PDR (Packet Delivery Ratio)**: Minh chứng TinyML duy trì tỷ lệ nhận gói cao ($95\% - 99\%$), khắc phục tình trạng sụt giảm nghiêm trọng của Kênh cố định khi có va chạm ($< 50\%$).
+1. **PDR (Packet Delivery Ratio)**: Minh chứng TinyML duy trì tỷ lệ nhận gói cao ($95\% - 100\%$), vượt trội rõ rệt so với Random Hopping khi xảy ra va chạm nhiều Node.
 2. **Average RSSI**: TinyML luôn hướng Node sang kênh có mức thu tín hiệu mạnh nhất.
 3. **Average SNR**: Đảm bảo đường truyền có biên độ chống nhiễu cao và ổn định.
 

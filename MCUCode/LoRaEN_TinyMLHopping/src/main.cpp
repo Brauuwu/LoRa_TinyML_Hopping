@@ -6,7 +6,6 @@
  * Chức năng:
  *   - Quản lý bộ đệm trượt (Sliding Window) lưu trạng thái lịch sử kênh
  *   - Lựa chọn kênh thông minh:
- *       + Mode 0: Kênh cố định (Fixed Channel)
  *       + Mode 1: Nhảy kênh ngẫu nhiên (Random Channel Hopping)
  *       + Mode 2: Nhảy kênh dựa trên suy luận TinyML (Predictive Hopping)
  *   - Đo lường và báo cáo PDR, RSSI, SNR, số lần nhảy kênh (Hopping count)
@@ -25,7 +24,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 #define NODE_ID              'A'       // 'A', 'B' hoặc 'C'
 
-// Chế độ: 0 = Fixed, 1 = Random Hopping, 2 = TinyML Hopping
+// Chế độ: 1 = Random Hopping, 2 = TinyML Predictive Hopping
 #define HOPPING_MODE         2
 
 // ── Định nghĩa chân kết nối phần cứng ESP32 ─────────────────────────────────

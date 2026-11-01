@@ -160,7 +160,7 @@ void loop() {
     if (now - lastTxTime < TX_INTERVAL_MS && lastTxTime != 0) return;
     lastTxTime = now;
 
-    // Xây dựng gói tin với payload ngẫu nhiên theo chuẩn bài báo
+    // Xây dựng gói tin với payload ngẫu nhiên chuẩn hóa
     uint8_t txBuffer[256];
     txBuffer[0] = 'T';
     txBuffer[1] = (uint8_t)NODE_ID;
@@ -168,7 +168,7 @@ void loop() {
     txBuffer[3] = (uint8_t)(packetId & 0xFF);
     txBuffer[4] = (uint8_t)TEST_PAYLOAD_SIZE;
     if (TEST_PAYLOAD_SIZE > 5) {
-        txBuffer[5] = '*'; // Dấu phân cách như trong bài báo
+        txBuffer[5] = '*'; // Dấu phân cách trường dữ liệu
         // Điền toàn bộ phần thân payload còn lại bằng chữ số ngẫu nhiên ('0'..'9')
         for (int i = 6; i < TEST_PAYLOAD_SIZE - 1; i++) {
             txBuffer[i] = (uint8_t)random(48, 58); // ASCII 48 ('0') -> 57 ('9')

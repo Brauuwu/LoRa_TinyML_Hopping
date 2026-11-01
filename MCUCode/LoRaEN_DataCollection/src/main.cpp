@@ -627,7 +627,7 @@ void loop() {
 
     int currentPayloadSize = PAYLOAD_SIZES[sizeIndex];
 
-    // Xây dựng gói tin ASCII theo đúng định dạng bài báo LoRaEdgeTinyML:
+    // Xây dựng gói tin ASCII định dạng thực nghiệm:
     // "<NODE_ID><packetCount>*<chuỗi chữ số ngẫu nhiên '0'..'9'>"
     char txBuffer[256];
     int headerLen = snprintf(txBuffer, sizeof(txBuffer), "%c%u*", NODE_ID, packetCount);

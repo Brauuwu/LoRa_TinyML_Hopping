@@ -431,7 +431,7 @@ void task_lora_rx(int channelId, SX1278_WiringPi* radio, SafeQueue<LoRaPacket>* 
                     g_nodes[nIdx].cfgConfirmed = true;
                 }
 
-                // Phân tích định dạng bài báo LoRaEdgeTinyML: "<Node><PktID>*<data>"
+                // Phân tích định dạng gói tin thực nghiệm: "<Node><PktID>*<data>"
                 if (sourceNode >= 'A' && sourceNode <= 'C') {
                     pkt.sourceNode = sourceNode;
                     const char* starPos = (const char*)memchr(rxBuffer, '*', len);
@@ -603,7 +603,7 @@ void task_logger(SafeQueue<LoRaPacket>* queue, std::string initialCsvPath, std::
                 fflush(csvFile);
             }
 
-            // 3. Ghi vào file TXT log chuẩn bài báo LoRaEdgeTinyML:
+            // 3. Ghi vào file TXT log chuẩn hệ thống:
             // "HH:MM:SS.mmm -> <Payload> size_of_message <Size> RSSI <RSSI> SNR <SNR> Frequency <Freq>"
             if (txtFile) {
                 int snrInt = (int)std::round(pkt.snr);

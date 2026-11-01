@@ -9,8 +9,7 @@ Huấn luyện và so sánh các kiến trúc mạng nơ-ron cho Channel Hopping
   4. Depthwise Separable 1D-CNN (MobileNet-style)
   5. Residual 1D-CNN (ResNet-1D)
 
-Đọc dữ liệu chuỗi thời gian từ data/MLdataready/ABC/,
-tự nhận dạng cấu hình kênh (433 MHz hoặc 868 MHz).
+Đọc dữ liệu chuỗi thời gian từ data/MLdataready/ABC/ (3 kênh 433 MHz).
 Huấn luyện đồng thời, so sánh Accuracy/Params/TFLite size.
 """
 

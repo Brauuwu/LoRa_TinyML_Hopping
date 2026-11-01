@@ -53,7 +53,7 @@ LoRa_TinyML_Hopping/
 │   │   ├── 02_add_missed_packets.py     # Phát hiện va chạm & điền nhãn phạt gói mất (RSSI/SNR = -1000)
 │   │   ├── 03_generate_dataset.py       # Tạo cấu trúc MLData, MLdataready và Sliding Window
 │   │   ├── 04_train_model.py            # Huấn luyện đa thuật toán (FCNN, 1D-CNN, GRU, SepCNN, ResNet)
-│   │   ├── 05_evaluate_comparison.py    # Đánh giá so sánh: Fixed vs Random vs TinyML Hopping
+│   │   ├── 05_evaluate_comparison.py    # Đánh giá so sánh: Random Hopping vs TinyML Predictive Hopping
 │   │   ├── 06_benchmark_models.py       # Phân tích chuyên sâu Trade-off phần cứng và tối ưu hóa vi điều khiển
 │   │   ├── 07_evaluate_best_model.py    # Đánh giá toàn diện mô hình tốt nhất (Confusion Matrix, Latency)
 │   │   ├── 08_pdr_calculation.py        # Thống kê chi tiết PDR và chất lượng kênh thu theo Node & Payload
@@ -214,14 +214,13 @@ graph TD
 ---
 
 ### Bước 3: Đánh giá Đối sánh, Phân tích Bộ nhớ & Xuất Bảng LaTeX
-1. **Đánh giá so sánh 3 cơ chế quản lý kênh**:
+1. **Đánh giá so sánh 2 cơ chế nhảy kênh**:
    ```bash
    python scripts/05_evaluate_comparison.py
    ```
    Tính toán và vẽ biểu đồ đối chứng qua 6 mức kích thước tải:
-   - **Fixed Channel (Kênh cố định):** Thấy rõ hiện tượng nghẽn mạng và sụt giảm PDR.
-   - **Random Hopping (Nhảy ngẫu nhiên):** Tỷ lệ nhận cải thiện vừa phải nhưng vẫn có xác suất trùng kênh.
-   - **TinyML Predictive Hopping:** Dự đoán né kênh nghẽn thành công, nâng PDR lên $> 90\%$.
+   - **Random Hopping (Nhảy ngẫu nhiên):** Tồn tại xác suất cao va chạm hoặc rơi vào kênh suy hao sâu, PDR giảm khi tải tăng.
+   - **TinyML Predictive Hopping:** Dự đoán và lựa chọn kênh tối ưu dựa trên chuỗi thời gian, PDR đạt $95\% - 100\%$, RSSI tăng $+20.5\text{ dBm}$.
 
 2. **Benchmark Trade-off phần cứng & Đánh giá chuyên sâu mô hình tốt nhất**:
    ```bash

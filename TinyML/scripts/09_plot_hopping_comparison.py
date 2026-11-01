@@ -13,7 +13,7 @@ Các biểu đồ xuất bản khoa học (DPI 300, Academic Style):
   4. Multi-panel Chart tổng hợp 3 chỉ tiêu (performance_comparison.png)
 
 Dữ liệu được nạp 100% từ bảng tính thực nghiệm (TinyML/data/ready/comparison_metrics.csv).
-Không có số liệu giả định hay cơ chế Fixed Channel.
+Hoàn toàn dựa trên 100% dữ liệu đo đạc thực nghiệm.
 """
 
 import os

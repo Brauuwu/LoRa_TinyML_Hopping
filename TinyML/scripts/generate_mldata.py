@@ -8,8 +8,7 @@ Chức năng:
   2. Tách dữ liệu theo từng Node (A, B, C), gắn cờ kênh CH1, CH2, CH3
      -> Lưu vào data/MLData/{A, B, C}/
   3. Gom nhóm toàn bộ dữ liệu theo từng kênh tần số
-     -> Lưu vào data/MLdataready/{A, B, C, ABC}/{433_175.csv, 433_375.csv, 433_575.csv}
-        (hoặc {868.csv, 869.csv, 870.csv} nếu sử dụng băng tần 868 MHz).
+     -> Lưu vào data/MLdataready/{A, B, C, ABC}/{433_175.csv, 433_375.csv, 433_575.csv}.
 
 Cách chạy:
   python generate_mldata.py
@@ -40,15 +39,10 @@ for node in ['A', 'B', 'C']:
 os.makedirs(os.path.join(MLDATAREADY_DIR, "ABC"), exist_ok=True)
 
 CHANNELS_433 = [("433_175", 433.175), ("433_375", 433.375), ("433_575", 433.575)]
-CHANNELS_868 = [("868", 868.0), ("869", 869.0), ("870", 870.0)]
 
 
 def detect_channel_config(df):
-    freqs = df['frequency'].dropna().values
-    if len(freqs) == 0:
-        return CHANNELS_433
-    mean_f = np.mean(freqs)
-    return CHANNELS_868 if mean_f > 600.0 else CHANNELS_433
+    return CHANNELS_433
 
 
 def assign_channel_flags(df, channels_cfg):
