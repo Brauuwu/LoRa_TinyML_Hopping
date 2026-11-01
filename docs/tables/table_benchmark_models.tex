@@ -1,17 +1,17 @@
-% Bảng sinh tự động từ file: models_benchmark_summary.csv
+% Bảng tự động xuất từ LoRa TinyML Pipeline
 \begin{table}[htbp]
 \centering
-\caption{So sánh Hiệu năng giữa 5 Kiến trúc Mạng Nơ-ron TinyML trên Hệ thống}
-\label{tab:benchmark_models}
+\caption{So sánh Hiệu năng, Độ phức tạp và Thời gian Suy luận giữa 5 Kiến trúc TinyML}
+\label{tab:bench_models}
 \begin{tabular}{lcccccc}
 \toprule
 Model & Test Accuracy (%) & Test Loss & Test MAE & Params & Latency (us) & Train Time (s) \\
 \midrule
-Baseline_FCNN & 90.41 & 0.29 & 0.1 & 1699 & 5165.2 & 107.9 \\
-1D_CNN & 90.3 & 0.3 & 0.09 & 2659 & 12476.8 & 169.4 \\
-GRU_RNN & 90.12 & 0.29 & 0.1 & 1619 & 57050.6 & 181.0 \\
-Separable_1D_CNN & 90.51 & 0.29 & 0.09 & 878 & 9317.5 & 159.5 \\
-ResNet_1D & 90.3 & 0.29 & 0.1 & 2339 & 12943.1 & 159.5 \\
+Baseline_FCNN & 90.41 & 0.29 & 0.1 & 1699 & 5194.1 & 105.8 \\
+1D_CNN & 90.3 & 0.3 & 0.09 & 2659 & 12240.3 & 171.0 \\
+GRU_RNN & 90.12 & 0.29 & 0.1 & 1619 & 56392.7 & 180.3 \\
+Separable_1D_CNN & 90.51 & 0.29 & 0.09 & 878 & 9043.4 & 157.8 \\
+ResNet_1D & 90.3 & 0.29 & 0.1 & 2339 & 12477.2 & 152.9 \\
 \bottomrule
 \end{tabular}
 \end{table}

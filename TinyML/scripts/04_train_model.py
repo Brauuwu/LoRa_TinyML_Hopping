@@ -478,15 +478,15 @@ def main():
             'Train Time (s)': round(train_time, 1)
         })
 
-        # Vẽ đường cong học tập
+        # Vẽ đường cong học tập kết hợp 3 đường chuẩn: Training accuracy, Training loss, Validation loss
         plt.subplot(2, 3, idx + 1)
-        plt.plot(history.history['accuracy'], label='Train Acc', color='#2ca02c', linewidth=1.4)
-        plt.plot(history.history['val_accuracy'], label='Val Acc', color='#1f77b4', linewidth=1.4)
-        plt.plot(history.history['loss'], label='Train Loss', color='#d62728', linestyle='--', linewidth=1.2)
-        plt.plot(history.history['val_loss'], label='Val Loss', color='#ff7f0e', linestyle=':', linewidth=1.2)
+        ep_range = range(1, len(history.history['loss']) + 1)
+        plt.plot(ep_range, history.history['accuracy'], 'g.', label='Training accuracy', markersize=2.5, alpha=0.85)
+        plt.plot(ep_range, history.history['loss'], 'r.', label='Training loss', markersize=2.5, alpha=0.85)
+        plt.plot(ep_range, history.history['val_loss'], 'b-', label='Validation loss', linewidth=1.5)
         plt.title(f"{m_name} ({test_acc*100:.1f}%)", fontweight='bold', fontsize=9.5)
-        plt.xlabel('Epoch', fontsize=8.5)
-        plt.ylabel('Score / Loss', fontsize=8.5)
+        plt.xlabel('Epochs', fontsize=8.5)
+        plt.ylabel('Metrics', fontsize=8.5)
         plt.legend(loc='center right', fontsize=7.5, framealpha=0.9)
         plt.grid(True, linestyle='--', alpha=0.4)
 
@@ -509,6 +509,25 @@ def main():
     plt.savefig(chart_path, dpi=300)
     plt.close()
     print(f"\n[OK] Đã lưu biểu đồ so sánh: {chart_path}")
+
+    # Xuất riêng 1 biểu đồ chuẩn 3 đường tích hợp cho mô hình tối ưu
+    best_hist = histories.get('Separable_1D_CNN') or histories.get('Baseline_FCNN')
+    if best_hist:
+        plt.figure(figsize=(8, 4.8), dpi=300)
+        ep_best = range(1, len(best_hist.history['loss']) + 1)
+        plt.plot(ep_best, best_hist.history['accuracy'], 'g.', label='Training accuracy', markersize=3.5, alpha=0.85)
+        plt.plot(ep_best, best_hist.history['loss'], 'r.', label='Training loss', markersize=3.5, alpha=0.85)
+        plt.plot(ep_best, best_hist.history['val_loss'], 'b-', label='Validation loss', linewidth=1.8)
+        plt.title('Training and Validation Metrics vs Epochs', fontsize=11, fontweight='bold')
+        plt.xlabel('Epochs', fontsize=10)
+        plt.ylabel('Metrics', fontsize=10)
+        plt.legend(loc='center right', fontsize=10, framealpha=0.95)
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.tight_layout()
+        single_fig_path = os.path.join(FIGURES_DIR, "training_validation_loss_acc.png")
+        plt.savefig(single_fig_path, dpi=300)
+        plt.close()
+        print(f"[OK] Đã lưu biểu đồ kết hợp 3 đường chuẩn: {single_fig_path}")
 
     # Bảng tổng hợp ra Terminal và CSV
     print("\n" + "=" * 72)
