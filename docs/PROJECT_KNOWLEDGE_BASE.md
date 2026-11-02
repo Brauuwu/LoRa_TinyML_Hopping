@@ -441,6 +441,8 @@ LoRa_TinyML_Hopping/
 │       └── execute_notebook.py          # Trình thực thi notebook không cần giao diện (headless)
 │
 └── docs/                                # Thư mục tài liệu kỹ thuật chuyên sâu
+    ├── PHAT_BIEU_BAI_TOAN.docx          # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (File Word)
+    ├── PHAT_BIEU_BAI_TOAN.md            # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (Markdown)
     ├── PROJECT_KNOWLEDGE_BASE.md        # File tài liệu tri thức này (Master SSOT)
     ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình 6 giai đoạn thực hiện đồ án
     ├── LUACHON_THAMSO_HUANLUYEN_MOHINH.md # Cơ sở khoa học lựa chọn siêu tham số

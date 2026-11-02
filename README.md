@@ -81,6 +81,8 @@ LoRa_TinyML_Hopping/
 │   ├── models/                          # Chứa mô hình tflite, model.h và bảng so sánh benchmark
 │   └── figures/                         # Biểu đồ huấn luyện, ma trận nhầm lẫn, biểu đồ đối sánh PDR/RSSI/SNR
 ├── docs/                                # Tài liệu kỹ thuật, kịch bản thực nghiệm & kiến trúc hệ thống
+│   ├── PHAT_BIEU_BAI_TOAN.docx          # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (File Word)
+│   ├── PHAT_BIEU_BAI_TOAN.md            # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (Markdown)
 │   ├── PROJECT_KNOWLEDGE_BASE.md        # Tài liệu tri thức toàn diện (Single Source of Truth) cho Agent & Kỹ sư
 │   ├── KICH_BAN_THU_THAP_DU_LIEU.md     # Danh mục 21 kịch bản đo kiểm đa Node và phân bổ tần số
 │   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình tổng thể 6 giai đoạn của Đồ án Tốt nghiệp
@@ -294,6 +296,7 @@ graph TD
 
 <a id="sec-5"></a>
 ## 5. Danh Mục Tài Liệu Kỹ Thuật Chi Tiết
+- [PHAT_BIEU_BAI_TOAN.docx](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PHAT_BIEU_BAI_TOAN.docx) & [PHAT_BIEU_BAI_TOAN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PHAT_BIEU_BAI_TOAN.md): **Báo cáo Phát biểu bài toán & Mô hình hóa toán học**, phân tích định lượng ToA, xung đột ALOHA, Capture effect, bài toán tối ưu đa tiêu chí và mô hình Separable 1D-CNN.
 - [PROJECT_KNOWLEDGE_BASE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PROJECT_KNOWLEDGE_BASE.md): **Tài liệu tri thức toàn diện (Master Single Source of Truth)** dành riêng cho AI Agent và Kỹ sư, tổng hợp 100% kiến trúc phần cứng, firmware, data pipeline, mô hình học máy và kết quả thực nghiệm.
 - [LUACHON_THAMSO_HUANLUYEN_MOHINH.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/LUACHON_THAMSO_HUANLUYEN_MOHINH.md): Cơ sở khoa học và hướng dẫn tối ưu siêu tham số huấn luyện TinyML ($T=10$, 200 epochs, L2, Dropout, GAP).
 - [PIPELINE_THUC_HIEN_DU_AN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PIPELINE_THUC_HIEN_DU_AN.md): Toàn bộ quy trình từ thu thập dữ liệu, huấn luyện đến đánh giá đối chứng.
