@@ -1,114 +1,95 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
-  <diagram id="diagram_page" name="5 Kiến Trúc TinyML">
-    <mxGraphModel dx="1100" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="600" background="#ffffff" math="0" shadow="0">
+  <diagram id="diagram_page" name="08_5_kien_truc_tinyml">
+    <mxGraphModel dx="1080" dy="520" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="520" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" value="ĐỐI SÁNH 5 KIẾN TRÚC MẠNG NƠ-RON TINYML CHO BÀI TOÁN LỰA CHỌN KÊNH" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="50" y="20" width="1000" height="40" as="geometry" />
+        <mxCell id="2" value="ĐỐI SÁNH 5 KIẾN TRÚC MẠNG NƠ-RON TINYML" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=14;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="20" width="1000" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="3" value="1. BASELINE FCNN
-(Multi-Layer Perceptron)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="55" y="80" width="185" height="45" as="geometry" />
+        <mxCell id="3" value="1. BASELINE FCNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="42" y="80" width="185" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="4" value="Kiến trúc:
-- Input Flat (90D)
-- Dense (16, ReLU)
-- Dropout (0.15)
-- Dense (12, ReLU)
-- Dense (3, Softmax)
+        <mxCell id="4" value="• Input Flat (90D)
+• Dense (16, ReLU)
+• Dropout (0.15)
+• Dense (12, ReLU)
+• Dense (3, Softmax)
 
 Tham số: 1,699
 Flash: 8.84 KB
-Độ trễ: 6.9 ms
-Accuracy: 90.46%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="55" y="135" width="185" height="380" as="geometry" />
+Latency: 5.5 ms
+Accuracy: 90.41%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="42" y="130" width="185" height="320" as="geometry" />
 </mxCell>
-        <mxCell id="5" value="2. 1D-CNN
-(Temporal ConvNet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="260" y="80" width="185" height="45" as="geometry" />
+        <mxCell id="5" value="2. 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="245" y="80" width="185" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="6" value="Kiến trúc:
-- Input Seq (10, 9)
-- Conv1D (16, k=3)
-- BatchNorm
-- MaxPool1D (2)
-- Conv1D (32, k=3)
-- GlobalAvgPool1D
-- Dense (16, ReLU)
-- Dense (3, Softmax)
+        <mxCell id="6" value="• Input Seq (10, 9)
+• Conv1D (16, k=3)
+• BatchNorm + Pool
+• Conv1D (32, k=3)
+• GlobalAvgPool1D
+• Dense (16, ReLU)
+• Dense (3, Softmax)
 
 Tham số: 2,659
 Flash: 16.34 KB
-Độ trễ: 14.2 ms
-Accuracy: 90.25%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="260" y="135" width="185" height="380" as="geometry" />
+Latency: 12.7 ms
+Accuracy: 90.30%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="245" y="130" width="185" height="320" as="geometry" />
 </mxCell>
-        <mxCell id="7" value="3. GRU RNN
-(Gated Recurrent Unit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="465" y="80" width="185" height="45" as="geometry" />
+        <mxCell id="7" value="3. GRU RNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="448" y="80" width="185" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="8" value="Kiến trúc:
-- Input Seq (10, 9)
-- GRU (16, unroll)
-- Dropout (0.15)
-- Dense (16, ReLU)
-- Dense (3, Softmax)
-
-Đặc điểm:
-Nắm bắt ngữ cảnh dài
-hạn, nhưng chi phí
-tính toán tuần tự cao
+        <mxCell id="8" value="• Input Seq (10, 9)
+• GRU (16, unroll)
+• Dropout (0.15)
+• Dense (16, ReLU)
+• Dense (3, Softmax)
 
 Tham số: 1,619
 Flash: 42.32 KB
-Độ trễ: 61.6 ms
-Accuracy: 90.15%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="465" y="135" width="185" height="380" as="geometry" />
+Latency: 68.5 ms
+Accuracy: 90.12%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="448" y="130" width="185" height="320" as="geometry" />
 </mxCell>
-        <mxCell id="9" value="4. SEPARABLE 1D-CNN
-(MobileNet-style)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="670" y="80" width="185" height="45" as="geometry" />
+        <mxCell id="9" value="4. SEPARABLE 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="651" y="80" width="185" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="10" value="KIẾN TRÚC TỐI ƯU NHẤT:
-- Input Seq (10, 9)
-- SepConv1D (16, k=3)
-  (Depthwise+Pointwise)
-- SepConv1D (32, k=3)
-- GlobalAvgPool1D
-- Dropout (0.15)
-- Dense (3, Softmax)
+        <mxCell id="10" value="★ TỐI ƯU NHẤT ★
+• Input Seq (10, 9)
+• SepConv1D (16, k=3)
+• SepConv1D (32, k=3)
+• GlobalAvgPool1D
+• Dropout (0.15)
+• Dense (3, Softmax)
 
-Giảm 63% phép tính
 Tham số: 878 (Nhỏ nhất)
 Flash: 8.65 KB
-Độ trễ: 9.3 ms
+Latency: 10.6 ms
 Accuracy: 90.51%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="670" y="135" width="185" height="380" as="geometry" />
+  <mxGeometry x="651" y="130" width="185" height="320" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="5. RESNET-1D
-(Residual Network)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="875" y="80" width="185" height="45" as="geometry" />
+        <mxCell id="11" value="5. RESNET-1D" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="854" y="80" width="185" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="Kiến trúc:
-- Input Seq (10, 9)
-- Conv1D (16, k=3)
-- Residual Block:
-  [Conv1D + Conv1D]
+        <mxCell id="12" value="• Input Seq (10, 9)
+• Conv1D (16, k=3)
+• Residual Block
   Skip Connection (+x)
-- GlobalAvgPool1D
-- Dense (16, ReLU)
-- Dense (3, Softmax)
+• GlobalAvgPool1D
+• Dense (16, ReLU)
+• Dense (3, Softmax)
 
-Chống triệt tiêu gradient
 Tham số: 2,339
 Flash: 14.73 KB
-Độ trễ: 15.2 ms
-Accuracy: 90.56%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="875" y="135" width="185" height="380" as="geometry" />
+Latency: 16.3 ms
+Accuracy: 90.30%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="854" y="130" width="185" height="320" as="geometry" />
 </mxCell>
-        <mxCell id="13" value="KẾT LUẬN LỰA CHỌN: Depthwise Separable 1D-CNN được chọn để triển khai thực tế trên ESP32 nhờ cân bằng tối ưu tuyệt đối: dung lượng nhỏ nhất (8.65 KB), số tham số ít nhất (878), độ trễ dưới 10 ms và độ chính xác đạt 90.51%." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="55" y="530" width="990" height="45" as="geometry" />
+        <mxCell id="13" value="LỰA CHỌN TỐI ƯU CHO ESP32: Separable 1D-CNN đạt hiệu năng cao nhất (90.51% Acc), tham số ít nhất (878 params) và tiết kiệm 63% phép toán FLOPs." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="40" y="465" width="1000" height="35" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
