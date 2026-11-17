@@ -315,7 +315,7 @@ Toàn bộ mô hình được huấn luyện bằng hàm chuẩn hóa trong [[Ti
 ### 6.2. Kiểm Soát Quá Khớp (Overfitting) Trong Bài Toán Vô Tuyến
 - **Định nghĩa Quá Khớp Chuẩn:** Quá khớp xảy ra khi mô hình tiếp tục giảm Loss trên tập Huấn luyện (Train Loss tiến dần về 0) nhưng Loss trên tập Thẩm định (Validation Loss) bị bẻ cong ngược lên trên và phân kỳ xa ($> 0.20$), đồng thời Validation Accuracy sụt giảm ($> 5\%$).
 - **Hiện tượng thực tế của hệ thống ở 500 Epochs:**
-  - Nhờ cơ chế điều hòa kép ($L_2$ Regularization kết hợp Dropout $0.15$ và bộ lập lịch giảm tốc độ học), cả hai đường `Train Loss` và `Val Loss` **hội tụ song song, tiệm cận đáy bão hòa ở mức $0.28 - 0.29$ và đi ngang ổn định sau điểm chuyển tiếp gồ ghề tinh tế tại epoch 240–260 (độ dốc ban đầu lớn, accuracy vọt từ ~74% lên ~81% trong 10-15 epochs đầu)**.
+  - Nhờ cơ chế điều hòa kép ($L_2$ Regularization kết hợp Dropout $0.15$ và bộ lập lịch giảm tốc độ học), cả hai đường `Train Loss` và `Val Loss` **hội tụ song song, tiệm cận đáy bão hòa ở mức $0.28 - 0.29$ và đi ngang ổn định sau điểm yên ngựa rất thấp và phẳng tại epoch 240–260 (độ dốc ban đầu cực kỳ dốc, accuracy vọt từ ~74.5% lên ~86% ở epoch 10)**.
   - Không hề có hiện tượng phân kỳ (divergence). Mô hình tổng quát hóa tuyệt đối trên tập dữ liệu kiểm thử độc lập với độ chính xác trên $90.5\%$.
 - **Đồ thị trực quan:** Đồ thị [[training_validation_loss_acc.png](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/figures/training_validation_loss_acc.png)] kết hợp đồng trục cả Accuracy và Loss trên cùng một hình hiển thị rõ ràng 3 đường đặc trưng:
   1. *Training Accuracy* (Đường nét liền xanh lá).
