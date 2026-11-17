@@ -1,348 +1,417 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="page_01_kien_truc_iot_4_lop" name="01_kien_truc_iot_4_lop">
-    <mxGraphModel dx="2100" dy="1350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2100" pageHeight="1350" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2150" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1400" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KIẾN TRÚC PHÂN TẦNG HỆ THỐNG IOT (4 LỚP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="1980" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="LỚP CẢM NHẬN (PERCEPTION LAYER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="120" width="1940" height="210" as="geometry" />
+  <mxGeometry x="80" y="120" width="1990" height="200" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Cảm biến môi trường" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="185" width="550" height="115" as="geometry" />
+  <mxGeometry x="140" y="185" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Vi điều khiển ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="185" width="550" height="115" as="geometry" />
+  <mxGeometry x="800" y="185" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Transceiver LoRa SX1278 (433 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="185" width="540" height="115" as="geometry" />
+  <mxGeometry x="1460" y="185" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="7" value="LỚP MẠNG TRUYỀN DẪN (NETWORK LAYER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="410" width="1940" height="210" as="geometry" />
+  <mxGeometry x="80" y="420" width="1990" height="200" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Kênh sóng LoRa (433 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="475" width="550" height="115" as="geometry" />
+  <mxGeometry x="140" y="485" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Gateway đa kênh (Raspberry Pi CM4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="475" width="550" height="115" as="geometry" />
+  <mxGeometry x="800" y="485" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Mạng kết nối IP (Ethernet / Wi-Fi)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="475" width="540" height="115" as="geometry" />
+  <mxGeometry x="1460" y="485" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="11" value="LỚP TRUNG GIAN (MIDDLEWARE LAYER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="700" width="1940" height="210" as="geometry" />
+  <mxGeometry x="80" y="720" width="1990" height="200" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Network Server (Điều phối khung truyền)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="765" width="550" height="115" as="geometry" />
+  <mxGeometry x="140" y="785" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Message Broker (MQTT / REST API)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="765" width="550" height="115" as="geometry" />
+  <mxGeometry x="800" y="785" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Cơ sở dữ liệu chuỗi thời gian" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="765" width="540" height="115" as="geometry" />
+  <mxGeometry x="1460" y="785" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="15" value="LỚP ỨNG DỤNG (APPLICATION LAYER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="990" width="1940" height="210" as="geometry" />
+  <mxGeometry x="80" y="1020" width="1990" height="200" as="geometry" />
 </mxCell>
         <mxCell id="16" value="Ứng dụng giám sát thông minh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="1055" width="550" height="115" as="geometry" />
+  <mxGeometry x="140" y="1085" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="17" value="Web Dashboard thời gian thực" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="1055" width="550" height="115" as="geometry" />
+  <mxGeometry x="800" y="1085" width="560" height="110" as="geometry" />
 </mxCell>
         <mxCell id="18" value="Hệ thống quản lý dữ liệu đo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="1055" width="540" height="115" as="geometry" />
+  <mxGeometry x="1460" y="1085" width="560" height="110" as="geometry" />
 </mxCell>
-        <mxCell id="19" value="LoRa RF (433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="19" value="LoRa RF (433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="20" value="TCP/IP Socket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="7" target="11">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="20" value="TCP/IP Socket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="7" target="11">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="21" value="HTTP / WebSockets" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="11" target="15">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="21" value="HTTP / WebSockets" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="11" target="15">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_02_nguyen_ly_dieu_che_lora_css" name="02_nguyen_ly_dieu_che_lora_css">
-    <mxGraphModel dx="2150" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1200" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="NGUYÊN LÝ ĐIỀU CHẾ TRẢI PHỔ LORA CSS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="Dữ liệu nhị phân&#xa;(Bitstream)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="120" width="310" height="130" as="geometry" />
+  <mxGeometry x="100" y="120" width="300" height="130" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Mã hóa Symbol&#xa;(k = 0 .. 2^SF - 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="480" y="120" width="310" height="130" as="geometry" />
+  <mxGeometry x="540" y="120" width="300" height="130" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Bộ tạo Chirp CSS&#xa;(Quét tần số tuyến tính)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="880" y="120" width="330" height="130" as="geometry" />
+  <mxGeometry x="980" y="120" width="300" height="130" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Khuếch đại PA&#xa;(+17 dBm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1300" y="120" width="310" height="130" as="geometry" />
+  <mxGeometry x="1420" y="120" width="300" height="130" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Anten phát&#xa;(433 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1700" y="120" width="290" height="130" as="geometry" />
+  <mxGeometry x="1860" y="120" width="300" height="130" as="geometry" />
 </mxCell>
-        <mxCell id="8" value="Nhóm SF bits" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="4">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="8" value="Nhóm SF bits" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="4">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="9" value="Symbol k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="9" value="Symbol k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="10" value="Chirp RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="6">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="10" value="Chirp RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="6">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="11" value="RF Power" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="11" value="RF Power" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="12" value="ĐẶC TÍNH DẠNG SÓNG CHIRP TRÊN MIỀN TẦN SỐ - THỜI GIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="350" width="1990" height="780" as="geometry" />
+  <mxGeometry x="100" y="370" width="2060" height="800" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Trục tần số (f)&#xa;&#xa;f0 + BW/2&#xa;&#xa;f0 (433.x MHz)&#xa;&#xa;f0 - BW/2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="430" width="310" height="660" as="geometry" />
+  <mxGeometry x="150" y="450" width="320" height="680" as="geometry" />
 </mxCell>
         <mxCell id="14" value="UP-CHIRP CƠ SỞ (PREAMBLE)&#xa;&#xa;• Quét tần số tuyến tính f_min -&gt; f_max&#xa;• Chu kỳ ký hiệu: Ts = 2^SF / BW&#xa;• Dùng cho đồng bộ khung truyền" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="530" y="430" width="700" height="660" as="geometry" />
+  <mxGeometry x="580" y="450" width="730" height="680" as="geometry" />
 </mxCell>
         <mxCell id="15" value="CHIRP ĐIỀU CHẾ MANG TIN&#xa;&#xa;• Bước nhảy tần số mang giá trị Symbol k&#xa;• Băng thông kênh: BW = 125 kHz&#xa;• Hệ số trải phổ: SF = 7 .. 12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1320" y="430" width="700" height="660" as="geometry" />
+  <mxGeometry x="1420" y="450" width="700" height="680" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_03_kien_truc_mang_lorawan_star" name="03_kien_truc_mang_lorawan_star">
-    <mxGraphModel dx="2150" dy="1150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1150" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KIẾN TRÚC MẠNG LORAWAN HÌNH SAO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="THIẾT BỊ ĐẦU CUỐI (END-NODES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="500" height="980" as="geometry" />
+  <mxGeometry x="80" y="110" width="520" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Node A (Tầng 1)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="190" width="400" height="220" as="geometry" />
+  <mxGeometry x="130" y="200" width="420" height="220" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Node B (Tầng 2)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="490" width="400" height="220" as="geometry" />
+  <mxGeometry x="130" y="500" width="420" height="220" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Node C (Ngoài trời)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="790" width="400" height="220" as="geometry" />
+  <mxGeometry x="130" y="800" width="420" height="220" as="geometry" />
 </mxCell>
         <mxCell id="7" value="MULTI-CHANNEL GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="700" y="110" width="680" height="980" as="geometry" />
+  <mxGeometry x="760" y="110" width="720" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="8" value="RASPBERRY PI CM4 GATEWAY&#xa;Broadcom BCM2711 @ 1.5 GHz&#xa;&#xa;3x Module SX1278 (SPI0 Bus):&#xa;• Kênh 1: 433.175 MHz&#xa;• Kênh 2: 433.375 MHz&#xa;• Kênh 3: 433.575 MHz&#xa;&#xa;Thu song song đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="740" y="200" width="600" height="800" as="geometry" />
+  <mxGeometry x="810" y="200" width="620" height="820" as="geometry" />
 </mxCell>
         <mxCell id="9" value="MÁY CHỦ &amp; GIAO DIỆN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1500" y="110" width="570" height="980" as="geometry" />
+  <mxGeometry x="1640" y="110" width="580" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Network Server&#xa;• Điều phối khung truyền&#xa;• Lọc gói tin trùng lặp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1550" y="250" width="470" height="300" as="geometry" />
+  <mxGeometry x="1690" y="250" width="480" height="300" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Application Server&#xa;• Giải mã Payload gói tin&#xa;• CSDL và Web Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1550" y="650" width="470" height="300" as="geometry" />
+  <mxGeometry x="1690" y="680" width="480" height="300" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="LoRa RF (433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="12" value="Kênh 1: 433.175 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="13" value="LoRa RF (433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="13" value="Kênh 2: 433.375 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="14" value="LoRa RF (433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="14" value="Kênh 3: 433.575 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.85;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="15" value="TCP/IP Socket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="8" target="10">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="15" value="TCP/IP Socket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="10">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="16" value="JSON Data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="10" target="11">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="16" value="JSON Data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="11">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_04_so_sanh_cloud_ai_vs_edge_tinyml" name="04_so_sanh_cloud_ai_vs_edge_tinyml">
-    <mxGraphModel dx="2150" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1250" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2200" dy="1350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1350" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="SO SÁNH MÔ HÌNH XỬ LÝ: CLOUD AI VÀ EDGE TINYML" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="1. MÔ HÌNH CLOUD AI TẬP TRUNG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="1990" height="490" as="geometry" />
+  <mxGeometry x="80" y="110" width="2040" height="520" as="geometry" />
 </mxCell>
         <mxCell id="4" value="End-Node Cảm biến" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="190" width="380" height="140" as="geometry" />
+  <mxGeometry x="130" y="200" width="380" height="140" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Gateway Chuyển tiếp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="610" y="190" width="380" height="140" as="geometry" />
+  <mxGeometry x="610" y="200" width="380" height="140" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Cloud Server AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1090" y="190" width="380" height="140" as="geometry" />
+  <mxGeometry x="1090" y="200" width="380" height="140" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Gói tin Downlink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1570" y="190" width="440" height="140" as="geometry" />
+  <mxGeometry x="1570" y="200" width="440" height="140" as="geometry" />
 </mxCell>
-        <mxCell id="8" value="Uplink RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="8" value="Uplink RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="9" value="Internet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="6">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="9" value="Internet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="6">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="10" value="Suy luận đám mây" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="10" value="Suy luận Cloud" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="11" value="Gửi kênh cấu hình" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="7" target="4">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="11" value="Gói tin Downlink (Kênh mới)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="7" target="4">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1790" y="410" />
+          <mxPoint x="320" y="410" />
+        </Array>
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="12" value="Luồng dữ liệu: CSI gửi lên Cloud -&gt; Máy chủ suy luận -&gt; Gửi cấu hình kênh về qua gói Downlink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="430" width="1890" height="90" as="geometry" />
+  <mxGeometry x="130" y="480" width="1940" height="90" as="geometry" />
 </mxCell>
         <mxCell id="13" value="2. MÔ HÌNH EDGE TINYML TRÊN THIẾT BỊ BIÊN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="710" width="1990" height="490" as="geometry" />
+  <mxGeometry x="80" y="740" width="2040" height="520" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Bộ đệm CSI (10x9)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="790" width="380" height="140" as="geometry" />
+  <mxGeometry x="130" y="830" width="380" height="140" as="geometry" />
 </mxCell>
         <mxCell id="15" value="Mô hình TinyML (ESP32)&#xa;Bộ nhớ: 8.65 KB Flash" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="610" y="790" width="420" height="140" as="geometry" />
+  <mxGeometry x="610" y="830" width="420" height="140" as="geometry" />
 </mxCell>
         <mxCell id="16" value="Lựa chọn kênh (ArgMax)&#xa;Thời gian: &lt; 15 ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1130" y="790" width="380" height="140" as="geometry" />
+  <mxGeometry x="1130" y="830" width="380" height="140" as="geometry" />
 </mxCell>
         <mxCell id="17" value="Phát sóng LoRa&#xa;(Kênh đã chọn)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1610" y="790" width="400" height="140" as="geometry" />
+  <mxGeometry x="1610" y="830" width="400" height="140" as="geometry" />
 </mxCell>
-        <mxCell id="18" value="Dữ liệu 10x9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="14" target="15">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="18" value="Dữ liệu 10x9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="14" target="15">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="19" value="Softmax" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="15" target="16">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="19" value="Softmax" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="15" target="16">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="20" value="Cấu hình tần số" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="16" target="17">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="20" value="Cấu hình tần số" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="16" target="17">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="21" value="Luồng dữ liệu: Suy luận và chọn kênh trực tiếp trên End-Node, hoàn toàn không cần gói tin Downlink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="1030" width="1890" height="90" as="geometry" />
+  <mxGeometry x="130" y="1080" width="1940" height="90" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_05_bai_toan_lua_chon_kenh_tinyml" name="05_bai_toan_lua_chon_kenh_tinyml">
-    <mxGraphModel dx="2250" dy="1450" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2250" pageHeight="1450" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1500" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KHUNG KIẾN TRÚC BÀI TOÁN LỰA CHỌN KÊNH TINYML CHO LORAWAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2130" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="CHÚ GIẢI LUỒNG TƯƠNG TÁC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="430" height="310" as="geometry" />
+  <mxGeometry x="80" y="110" width="440" height="320" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Luồng dữ liệu vô tuyến &amp; CSI&#xa;(End-Node -&gt; Gateway -&gt; Server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="110" y="170" width="370" height="60" as="geometry" />
+  <mxGeometry x="110" y="175" width="380" height="60" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Luồng nạp mô hình TinyML&#xa;(Server -&gt; Biên dịch -&gt; Flash)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="110" y="245" width="370" height="60" as="geometry" />
+  <mxGeometry x="110" y="255" width="380" height="60" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Vòng lặp suy luận tự chủ&#xa;(Thực thi nội bộ trên ESP32)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="110" y="320" width="370" height="60" as="geometry" />
+  <mxGeometry x="110" y="335" width="380" height="60" as="geometry" />
 </mxCell>
         <mxCell id="7" value="TẦNG 1: MÁY CHỦ HUẤN LUYỆN NGOẠI TUYẾN (SERVER / WORKSTATION)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="610" y="110" width="1560" height="310" as="geometry" />
+  <mxGeometry x="600" y="110" width="1620" height="320" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Nhật ký kênh (CSV Logs)&#xa;• Chuỗi thời gian CSI (10x9)&#xa;• Lịch sử RSSI, SNR, mất gói" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="650" y="175" width="430" height="140" as="geometry" />
+  <mxGeometry x="650" y="180" width="450" height="150" as="geometry" />
 </mxCell>
         <mxCell id="9" value="TensorFlow / Keras Training&#xa;• Tiền xử lý &amp; StandardScaler&#xa;• Huấn luyện 5 kiến trúc nơ-ron&#xa;• 500 Epochs hội tụ chuẩn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1170" y="175" width="450" height="140" as="geometry" />
+  <mxGeometry x="1190" y="180" width="460" height="150" as="geometry" />
 </mxCell>
         <mxCell id="10" value="TFLite Converter &amp; Exporter&#xa;• Lượng tử hóa FlatBuffer&#xa;• Sinh mã C Header model.h&#xa;• Căn chỉnh alignas(16)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1710" y="175" width="410" height="140" as="geometry" />
+  <mxGeometry x="1740" y="180" width="440" height="150" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="Tập dữ liệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="8" target="9">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="11" value="Tập dữ liệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="9">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="12" value="Trọng số tối ưu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="9" target="10">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="12" value="Trọng số tối ưu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="9" target="10">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="13" value="Quy trình ngoại tuyến: Phân tích dữ liệu thực tế, tối ưu hóa trọng số và xuất mã nguồn C nhúng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="650" y="350" width="1480" height="50" as="geometry" />
+  <mxGeometry x="650" y="360" width="1530" height="50" as="geometry" />
 </mxCell>
         <mxCell id="14" value="TẦNG 2: TRẠM THU BIÊN ĐA KÊNH (MULTI-CHANNEL LORA GATEWAY - CM4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="520" width="2090" height="280" as="geometry" />
+  <mxGeometry x="80" y="530" width="2140" height="300" as="geometry" />
 </mxCell>
-        <mxCell id="15" value="3x Module SX1278 (SPI0)&#xa;• CH1: 433.175 MHz&#xa;• CH2: 433.375 MHz&#xa;• CH3: 433.575 MHz&#xa;Thu đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="590" width="550" height="140" as="geometry" />
+        <mxCell id="15" value="CSDL Log &amp; Data Dispatcher&#xa;• Ghi nhật ký đo đạc CSV&#xa;• Web Dashboard theo dõi&#xa;• Stream dữ liệu sang Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="140" y="600" width="600" height="150" as="geometry" />
 </mxCell>
         <mxCell id="16" value="Gateway Manager Daemon&#xa;• Nhận ngắt DIO0 đa luồng&#xa;• Bóc tách Header/Payload&#xa;• Đọc thanh ghi đo RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="590" width="590" height="140" as="geometry" />
+  <mxGeometry x="830" y="600" width="620" height="150" as="geometry" />
 </mxCell>
-        <mxCell id="17" value="CSDL Log &amp; Data Dispatcher&#xa;• Ghi nhật ký đo đạc CSV&#xa;• Web Dashboard theo dõi&#xa;• Stream dữ liệu sang Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1470" y="590" width="640" height="140" as="geometry" />
+        <mxCell id="17" value="3x Module SX1278 (SPI0)&#xa;• CH1: 433.175 MHz&#xa;• CH2: 433.375 MHz&#xa;• CH3: 433.575 MHz&#xa;Thu đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="1540" y="600" width="620" height="150" as="geometry" />
 </mxCell>
-        <mxCell id="18" value="Tín hiệu RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="15" target="16">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="18" value="Tín hiệu RF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="17" target="16">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="19" value="Metadata &amp; CSI" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="16" target="17">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="19" value="Metadata &amp; CSI" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="16" target="15">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="20" value="CSV Stream qua TCP/IP" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="17" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="20" value="CSV Stream qua TCP/IP" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="15" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="440" y="460" />
+          <mxPoint x="875" y="460" />
+        </Array>
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="21" value="Vai trò trạm thu: Tiếp nhận gói tin từ mọi kênh, bóc tách chỉ số truyền thông và truyền về máy chủ phân tích" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="750" width="1990" height="40" as="geometry" />
+  <mxGeometry x="140" y="775" width="2020" height="40" as="geometry" />
 </mxCell>
         <mxCell id="22" value="TẦNG 3: THIẾT BỊ ĐẦU CUỐI IOT BIÊN (EDGE TINYML END-NODE - ESP32)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="900" width="2090" height="490" as="geometry" />
+  <mxGeometry x="80" y="930" width="2140" height="500" as="geometry" />
 </mxCell>
         <mxCell id="23" value="Khối Quản Lý Dữ Liệu (Manager)&#xa;• Cảm biến môi trường (Telemetry)&#xa;• Bộ đệm trượt FIFO (10 bước x 9 đặc trưng)&#xa;• Chuẩn hóa Z-Score O(1) theo SCALER tĩnh&#xa;• Khóa Mutex đồng bộ FreeRTOS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="970" width="570" height="270" as="geometry" />
+  <mxGeometry x="140" y="1000" width="600" height="280" as="geometry" />
 </mxCell>
         <mxCell id="24" value="Nhân Suy Luận Biên (TFLM Engine)&#xa;• Mảng FlatBuffer model.h trong Flash&#xa;• Vùng đệm Tensor Arena (10 KB RAM tĩnh)&#xa;• Bộ tính toán mạng nơ-ron (Forward Pass)&#xa;• Quyết định kênh tối ưu: k = ArgMax" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="800" y="970" width="600" height="270" as="geometry" />
+  <mxGeometry x="830" y="1000" width="620" height="280" as="geometry" />
 </mxCell>
         <mxCell id="25" value="Khối Truyền Thông Vô Tuyến&#xa;• Module LoRa SX1278 (Ra-02)&#xa;• Tự động chỉnh tần số sang kênh k&#xa;• Khuếch đại công suất (+17 dBm)&#xa;• Kích hoạt phát gói tin Uplink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1500" y="970" width="610" height="270" as="geometry" />
+  <mxGeometry x="1540" y="1000" width="620" height="280" as="geometry" />
 </mxCell>
-        <mxCell id="26" value="Vector đặc trưng (90)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="23" target="24">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="26" value="Vector đặc trưng (90)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="23" target="24">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="27" value="Chỉ số kênh k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="24" target="25">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="27" value="Chỉ số kênh k" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="24" target="25">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="28" value="Nạp mã nguồn C header model.h vào Flash" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="10" target="24">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="28" value="Gói tin LoRa Uplink (RF 433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="25" target="17">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="29" value="Gói tin LoRa Uplink (RF 433 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="25" target="15">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="29" value="Nạp mã nguồn C header model.h vào Flash" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="24">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="2240" y="255" />
+          <mxPoint x="2240" y="870" />
+          <mxPoint x="1140" y="870" />
+        </Array>
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="30" value="Đặc tính tự chủ: End-Node tự động dự đoán và chuyển kênh cục bộ trong &lt; 15 ms, hoàn toàn không cần gói tin Downlink từ Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="1300" width="1990" height="65" as="geometry" />
+  <mxGeometry x="140" y="1350" width="2020" height="65" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_06_so_do_khoi_toan_he_thong" name="06_so_do_khoi_toan_he_thong">
-    <mxGraphModel dx="2200" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1200" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="SƠ ĐỒ KHỐI TOÀN HỆ THỐNG THỰC NGHIỆM LORA TINYML" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="PHÂN HỆ TRẠM PHÁT (03 END-NODES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="520" height="1020" as="geometry" />
+  <mxGeometry x="80" y="110" width="520" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Node A (Tầng 1)&#xa;ESP32 + SX1278" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
   <mxGeometry x="130" y="200" width="420" height="190" as="geometry" />
@@ -354,363 +423,423 @@
   <mxGeometry x="130" y="780" width="420" height="190" as="geometry" />
 </mxCell>
         <mxCell id="7" value="KÊNH TRUYỀN VÔ TUYẾN 433 MHz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="720" y="110" width="540" height="1020" as="geometry" />
+  <mxGeometry x="760" y="110" width="540" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Kênh 1: 433.175 MHz (BW 125 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="770" y="220" width="440" height="150" as="geometry" />
+  <mxGeometry x="810" y="220" width="440" height="150" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Kênh 2: 433.375 MHz (BW 125 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="770" y="480" width="440" height="150" as="geometry" />
+  <mxGeometry x="810" y="480" width="440" height="150" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Kênh 3: 433.575 MHz (BW 125 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="770" y="740" width="440" height="150" as="geometry" />
+  <mxGeometry x="810" y="740" width="440" height="150" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Khoảng cách kênh: 200 kHz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="770" y="940" width="440" height="70" as="geometry" />
+  <mxGeometry x="810" y="960" width="440" height="70" as="geometry" />
 </mxCell>
         <mxCell id="12" value="PHÂN HỆ TRẠM THU (GATEWAY CM4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1380" y="110" width="740" height="1020" as="geometry" />
+  <mxGeometry x="1460" y="110" width="760" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="13" value="3x Module SX1278 (SPI0 Bus)&#xa;Thu đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="190" width="640" height="160" as="geometry" />
+  <mxGeometry x="1510" y="190" width="660" height="160" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Raspberry Pi CM4&#xa;3 luồng Worker xử lý ngắt DIO0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="410" width="640" height="160" as="geometry" />
+  <mxGeometry x="1510" y="410" width="660" height="160" as="geometry" />
 </mxCell>
         <mxCell id="15" value="Cơ sở dữ liệu log CSV&#xa;Lưu trữ Timestamp, RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="630" width="640" height="160" as="geometry" />
+  <mxGeometry x="1510" y="630" width="660" height="160" as="geometry" />
 </mxCell>
         <mxCell id="16" value="Web Dashboard giám sát&#xa;Hiển thị dữ liệu thu nhận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1430" y="850" width="640" height="160" as="geometry" />
+  <mxGeometry x="1510" y="850" width="660" height="160" as="geometry" />
 </mxCell>
-        <mxCell id="17" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="17" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="18" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="9">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="18" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="9">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="19" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="10">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="19" value="RF 433 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="10">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="20" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="8" target="13">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="20" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="13">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="21" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="9" target="13">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="21" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="9" target="13">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="22" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="10" target="13">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="22" value="Thu tín hiệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="13">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_07_dinh_dang_khung_truyen_goi_tin" name="07_dinh_dang_khung_truyen_goi_tin">
-    <mxGraphModel dx="2150" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="850" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2200" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="880" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="CẤU TRÚC ĐỊNH DẠNG KHUNG TRUYỀN GÓI TIN LORA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="HEADER (4 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
   <mxGeometry x="80" y="110" width="680" height="70" as="geometry" />
 </mxCell>
         <mxCell id="4" value="METADATA (5 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="810" y="110" width="450" height="70" as="geometry" />
+  <mxGeometry x="820" y="110" width="460" height="70" as="geometry" />
 </mxCell>
         <mxCell id="5" value="PAYLOAD (Biến thiên)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1310" y="110" width="530" height="70" as="geometry" />
+  <mxGeometry x="1340" y="110" width="540" height="70" as="geometry" />
 </mxCell>
         <mxCell id="6" value="CRC (2 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1890" y="110" width="180" height="70" as="geometry" />
+  <mxGeometry x="1940" y="110" width="180" height="70" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Node_ID&#xa;(1 Byte)&#xa;'A', 'B', 'C'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="230" width="190" height="180" as="geometry" />
+  <mxGeometry x="80" y="240" width="190" height="180" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Packet_ID&#xa;(2 Bytes)&#xa;0 - 65,535" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="320" y="230" width="210" height="180" as="geometry" />
+  <mxGeometry x="310" y="240" width="220" height="180" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Current_CH&#xa;(1 Byte)&#xa;0, 1, 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="580" y="230" width="180" height="180" as="geometry" />
+  <mxGeometry x="570" y="240" width="190" height="180" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Payload_Size&#xa;(1 Byte)&#xa;30 - 250 B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="810" y="230" width="200" height="180" as="geometry" />
+  <mxGeometry x="820" y="240" width="200" height="180" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Timestamp&#xa;(4 Bytes)&#xa;millis()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1060" y="230" width="200" height="180" as="geometry" />
+  <mxGeometry x="1060" y="240" width="220" height="180" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Payload Data&#xa;(21 - 241 Bytes)&#xa;Bộ đệm dữ liệu" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1310" y="230" width="530" height="180" as="geometry" />
+  <mxGeometry x="1340" y="240" width="540" height="180" as="geometry" />
 </mxCell>
         <mxCell id="13" value="CRC&#xa;(2 Bytes)&#xa;Hardware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1890" y="230" width="180" height="180" as="geometry" />
+  <mxGeometry x="1940" y="240" width="180" height="180" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Các mức kích thước gói tin khảo sát: 30B, 74B, 118B, 162B, 206B, 250B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="480" width="1990" height="95" as="geometry" />
+  <mxGeometry x="80" y="500" width="2040" height="95" as="geometry" />
 </mxCell>
         <mxCell id="15" value="Trích xuất tại trạm thu: Bóc tách gói tin và đọc thanh ghi phần cứng SX1278 (RSSI, SNR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="615" width="1990" height="95" as="geometry" />
+  <mxGeometry x="80" y="635" width="2040" height="95" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_08_5_kien_truc_tinyml" name="08_5_kien_truc_tinyml">
-    <mxGraphModel dx="2250" dy="1180" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2250" pageHeight="1180" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2350" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2350" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="CẤU TRÚC 5 KIẾN TRÚC MẠNG NƠ-RON KHẢO SÁT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2130" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2230" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="1. BASELINE FCNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="100" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="4" value="• Input: Vector (90)&#xa;• Dense (16, ReLU)&#xa;• Dropout (0.15)&#xa;• Dense (12, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 1,699&#xa;Dung lượng: 8.84 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="100" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="5" value="2. 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="520" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="550" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="6" value="• Input: Chuỗi (10, 9)&#xa;• Conv1D (16, k=3)&#xa;• BatchNorm + Pool&#xa;• Conv1D (32, k=3)&#xa;• GlobalAvgPool1D&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 2,659&#xa;Dung lượng: 16.34 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="520" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="550" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="7" value="3. GRU RNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="950" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1000" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="8" value="• Input: Chuỗi (10, 9)&#xa;• GRU (16, unroll)&#xa;• Dropout (0.15)&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 1,619&#xa;Dung lượng: 42.32 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="950" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1000" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="9" value="4. SEPARABLE 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1380" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1450" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="10" value="• Input: Chuỗi (10, 9)&#xa;• SepConv1D (16, k=3)&#xa;• SepConv1D (32, k=3)&#xa;• GlobalAvgPool1D&#xa;• Dropout (0.15)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 878&#xa;Dung lượng: 8.65 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1380" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1450" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="11" value="5. RESNET-1D" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1810" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1900" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="12" value="• Input: Chuỗi (10, 9)&#xa;• Conv1D (16, k=3)&#xa;• Residual Block&#xa;  Skip Connection (+x)&#xa;• GlobalAvgPool1D&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 2,339&#xa;Dung lượng: 14.73 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1810" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1900" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Cấu trúc lớp mạng và số lượng tham số của 5 mô hình nơ-ron đánh giá trên vi điều khiển ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="1040" width="2070" height="95" as="geometry" />
+  <mxGeometry x="100" y="1050" width="2150" height="95" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_09_pipeline_xu_ly_du_lieu" name="09_pipeline_xu_ly_du_lieu">
-    <mxGraphModel dx="2200" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1120" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="QUY TRÌNH XỬ LÝ &amp; CHUẨN HÓA DỮ LIỆU THỰC NGHIỆM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="Bước 1: Trích xuất log&#xa;• Thu thập dữ liệu Gateway&#xa;• Tách theo Node (A, B, C)&#xa;• Lọc các bản tin hợp lệ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="110" width="430" height="210" as="geometry" />
+  <mxGeometry x="130" y="110" width="420" height="210" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Bước 2: Xử lý gói mất&#xa;• Quét số thứ tự Packet_ID&#xa;• Bổ sung các gói bị mất&#xa;• Gán nhãn phạt: RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="620" y="110" width="430" height="210" as="geometry" />
+  <mxGeometry x="670" y="110" width="420" height="210" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Bước 3: Chuỗi trượt&#xa;• Tensor (10 bước x 9 feat)&#xa;• Gán nhãn kênh mục tiêu&#xa;• Loại bỏ trường rò rỉ nhãn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1150" y="110" width="430" height="210" as="geometry" />
+  <mxGeometry x="1210" y="110" width="420" height="210" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Bước 4: Chuẩn hóa &amp; Chia&#xa;• StandardScaler: z=(x-μ)/σ&#xa;• Xuất bảng SCALER cho C&#xa;• Chia: 60% / 20% / 20%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1680" y="110" width="430" height="210" as="geometry" />
+  <mxGeometry x="1750" y="110" width="420" height="210" as="geometry" />
 </mxCell>
-        <mxCell id="7" value="Dữ liệu thô" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="4">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="7" value="Dữ liệu thô" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="4">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="8" value="Dữ liệu đầy đủ" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="8" value="Dữ liệu đầy đủ" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="9" value="Chuỗi trượt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="6">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="9" value="Chuỗi trượt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="6">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
         <mxCell id="10" value="ĐẦU RA QUY TRÌNH DỮ LIỆU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="420" width="2020" height="640" as="geometry" />
+  <mxGeometry x="130" y="450" width="2040" height="670" as="geometry" />
 </mxCell>
         <mxCell id="11" value="dataset_ready.csv&#xa;19,440 mẫu chuỗi thời gian&#xa;90 đặc trưng đầu vào" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="140" y="510" width="580" height="220" as="geometry" />
+  <mxGeometry x="180" y="540" width="580" height="220" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Phân chia tập mẫu&#xa;Train: 11,664 (60%)&#xa;Val: 3,888 (20%) | Test: 3,888 (20%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="820" y="510" width="580" height="220" as="geometry" />
+  <mxGeometry x="860" y="540" width="580" height="220" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Mảng tham số nhúng C&#xa;SCALER_MEAN[9] &amp; SCALER_SCALE[9]&#xa;Đồng bộ trong model.h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1500" y="510" width="560" height="220" as="geometry" />
+  <mxGeometry x="1540" y="540" width="580" height="220" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Đặc điểm kỹ thuật: Dữ liệu đồng nhất 3 kênh tần số, chuẩn hóa trực tiếp trên thiết bị với độ phức tạp O(1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="140" y="800" width="1920" height="95" as="geometry" />
+  <mxGeometry x="180" y="830" width="1940" height="95" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_10_bo_tri_thuc_dia_toa_nha" name="10_bo_tri_thuc_dia_toa_nha">
-    <mxGraphModel dx="2200" dy="1150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1150" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="SƠ ĐỒ BỐ TRÍ THỰC NGHIỆM KHÔNG GIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="KHÔNG GIAN TRONG NHÀ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="1360" height="970" as="geometry" />
+  <mxGeometry x="80" y="110" width="1420" height="1040" as="geometry" />
 </mxCell>
         <mxCell id="4" value="TẦNG 2: PHÒNG THÍ NGHIỆM VÀ HÀNH LANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="120" y="190" width="1280" height="360" as="geometry" />
+  <mxGeometry x="120" y="190" width="1340" height="380" as="geometry" />
 </mxCell>
         <mxCell id="5" value="GATEWAY CM4&#xa;Raspberry Pi CM4 + 3x SX1278&#xa;Vị trí trung tâm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="170" y="265" width="540" height="220" as="geometry" />
+  <mxGeometry x="150" y="270" width="550" height="230" as="geometry" />
 </mxCell>
         <mxCell id="6" value="NODE B (TẦNG 2)&#xa;Cự ly 60m&#xa;(Xuyên sàn bê tông)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="810" y="265" width="540" height="220" as="geometry" />
+  <mxGeometry x="850" y="270" width="550" height="230" as="geometry" />
 </mxCell>
         <mxCell id="7" value="TẦNG 1: SẢNH VÀ PHÒNG HỌC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="120" y="640" width="1280" height="390" as="geometry" />
+  <mxGeometry x="120" y="670" width="1340" height="420" as="geometry" />
 </mxCell>
         <mxCell id="8" value="NODE A (TẦNG 1)&#xa;Cự ly 25m&#xa;(Xuyên vách ngăn kính)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="170" y="725" width="560" height="230" as="geometry" />
+  <mxGeometry x="150" y="760" width="550" height="240" as="geometry" />
 </mxCell>
         <mxCell id="9" value="KHÔNG GIAN NGOÀI TRỜI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1560" y="110" width="560" height="970" as="geometry" />
+  <mxGeometry x="1660" y="110" width="560" height="1040" as="geometry" />
 </mxCell>
         <mxCell id="10" value="NODE C (SÂN TRƯỜNG)&#xa;Cự ly 110m&#xa;Môi trường ngoài trời" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1620" y="420" width="440" height="340" as="geometry" />
+  <mxGeometry x="1720" y="460" width="440" height="340" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="25m (Trong nhà)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="8" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="11" value="25m (Trong nhà)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="12" value="60m (Xuyên tầng)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="12" value="60m (Xuyên tầng)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="13" value="110m (Ngoài trời)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="10" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="13" value="110m (Ngoài trời)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#b91c1c;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1560" y="630" />
+          <mxPoint x="1560" y="385" />
+        </Array>
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_11_kien_truc_freertos_da_nhiem" name="11_kien_truc_freertos_da_nhiem">
-    <mxGraphModel dx="2150" dy="1180" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1180" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KIẾN TRÚC FIRMWARE ĐA NHIỆM FREERTOS TRÊN ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="CORE 0: THU THẬP &amp; HIỂN THỊ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="920" height="990" as="geometry" />
+  <mxGeometry x="80" y="110" width="960" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Task_Sampler (Ưu tiên 1)&#xa;Đọc cảm biến -&gt; Cập nhật bộ đệm trượt 10x9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="200" width="820" height="200" as="geometry" />
+  <mxGeometry x="140" y="210" width="840" height="210" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Task_OLED (Ưu tiên 1)&#xa;Quét bus I2C -&gt; Hiển thị trạng thái kênh, RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="480" width="820" height="200" as="geometry" />
+  <mxGeometry x="140" y="510" width="840" height="210" as="geometry" />
 </mxCell>
         <mxCell id="6" value="historyMutex&#xa;Khóa bảo vệ truy cập bộ đệm trượt 10x9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="760" width="820" height="200" as="geometry" />
+  <mxGeometry x="140" y="810" width="840" height="210" as="geometry" />
 </mxCell>
         <mxCell id="7" value="CORE 1: SUY LUẬN AI &amp; TRUYỀN SÓNG RF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1150" y="110" width="920" height="990" as="geometry" />
+  <mxGeometry x="1260" y="110" width="960" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Task_TinyML (Ưu tiên 2)&#xa;Z-Score -&gt; Suy luận TFLM -&gt; ArgMax chọn kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1200" y="200" width="820" height="200" as="geometry" />
+  <mxGeometry x="1320" y="210" width="840" height="210" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Task_LoRaTX (Ưu tiên 3)&#xa;Cấu hình tần số -&gt; Phát sóng RF (+17 dBm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1200" y="480" width="820" height="200" as="geometry" />
+  <mxGeometry x="1320" y="510" width="840" height="210" as="geometry" />
 </mxCell>
         <mxCell id="10" value="channelQueue (Độ dài 1)&#xa;Hàng đợi truyền mã kênh sang Task TX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1200" y="760" width="820" height="200" as="geometry" />
+  <mxGeometry x="1320" y="810" width="840" height="210" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="Ghi dữ liệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="6">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="11" value="Ghi dữ liệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="6">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="110" y="315" />
+          <mxPoint x="110" y="915" />
+        </Array>
+        <mxPoint as="offset" x="-18" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="12" value="Đọc bộ đệm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="8">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="12" value="Đọc bộ đệm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="8">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1110" y="915" />
+          <mxPoint x="1110" y="315" />
+        </Array>
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="13" value="Gửi mã kênh" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="8" target="10">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="13" value="Gửi mã kênh" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="10">
+  <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="2190" y="315" />
+          <mxPoint x="2190" y="915" />
+        </Array>
+        <mxPoint as="offset" x="18" y="0" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="14" value="Nhận mã kênh" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="10" target="9">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="14" value="Nhận mã kênh" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="9">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_12_so_do_noi_chan_end_node_esp32" name="12_so_do_noi_chan_end_node_esp32">
-    <mxGraphModel dx="2200" dy="1180" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1180" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="SƠ ĐỒ ĐẤU NỐI PHẦN CỨNG END-NODE ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="MODULE LORA SX1278 (RA-02)&#xa;• MOSI: GPIO 27&#xa;• MISO: GPIO 19&#xa;• SCK:  GPIO 18&#xa;• NSS:  GPIO 5 (CS)&#xa;• RST:  GPIO 14&#xa;• DIO0: GPIO 26 (TxDone)&#xa;• Nguồn: 3.3V, GND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="120" width="560" height="720" as="geometry" />
+  <mxGeometry x="100" y="120" width="580" height="760" as="geometry" />
 </mxCell>
         <mxCell id="4" value="ESP32 DEVKIT V1&#xa;Dual-Core 240 MHz&#xa;SRAM 520 KB | Flash 4 MB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="770" y="120" width="560" height="720" as="geometry" />
+  <mxGeometry x="860" y="120" width="580" height="760" as="geometry" />
 </mxCell>
         <mxCell id="5" value="MÀN HÌNH OLED SSD1306&#xa;• SDA: GPIO 21&#xa;• SCL: GPIO 22&#xa;• Nguồn: 3.3V, GND&#xa;&#xa;Giao tiếp bus I2C" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1450" y="120" width="560" height="720" as="geometry" />
+  <mxGeometry x="1620" y="120" width="580" height="760" as="geometry" />
 </mxCell>
         <mxCell id="6" value="MẠCH NGUỒN CẤP ĐIỆN&#xa;Tụ bù chống sụt áp (100 µF + 100 nF mắc song song đường nguồn 3.3V)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="300" y="940" width="1500" height="130" as="geometry" />
+  <mxGeometry x="350" y="1000" width="1600" height="140" as="geometry" />
 </mxCell>
-        <mxCell id="7" value="Bus VSPI &amp; DIO0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="4">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="7" value="Bus VSPI &amp; DIO0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="4">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="8" value="Bus I2C" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="5">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="8" value="Bus I2C" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="5">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="9" value="3.3V DC" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="6" target="4">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="9" value="3.3V DC" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="4">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="20" y="0" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="page_13_so_do_noi_chan_gateway_cm4" name="13_so_do_noi_chan_gateway_cm4">
-    <mxGraphModel dx="2250" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2250" pageHeight="1250" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2350" dy="1350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2350" pageHeight="1350" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="SƠ ĐỒ ĐẤU NỐI MULTI-RECEIVER GATEWAY RASPBERRY PI CM4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2130" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2230" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="MODULE THU #1 (CH1 - 433.175 MHz)&#xa;CE: GPIO 8 (CE0) | DIO0: GPIO 24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="120" width="540" height="210" as="geometry" />
+  <mxGeometry x="80" y="120" width="560" height="220" as="geometry" />
 </mxCell>
         <mxCell id="4" value="MODULE THU #2 (CH2 - 433.375 MHz)&#xa;CE: GPIO 7 (CE1) | DIO0: GPIO 23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="400" width="540" height="210" as="geometry" />
+  <mxGeometry x="80" y="420" width="560" height="220" as="geometry" />
 </mxCell>
         <mxCell id="5" value="MODULE THU #3 (CH3 - 433.575 MHz)&#xa;CE: GPIO 25 (CS2) | DIO0: GPIO 22" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="680" width="540" height="210" as="geometry" />
+  <mxGeometry x="80" y="720" width="560" height="220" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Đường SPI0 chung: MOSI=Pin 19, MISO=Pin 21, SCLK=Pin 23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="960" width="540" height="140" as="geometry" />
+  <mxGeometry x="80" y="1020" width="560" height="140" as="geometry" />
 </mxCell>
         <mxCell id="7" value="RASPBERRY PI CM4&#xa;Quad-Core Cortex-A72 @ 1.5 GHz&#xa;40-Pin GPIO Header | Linux OS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="750" y="120" width="620" height="1040" as="geometry" />
+  <mxGeometry x="820" y="120" width="680" height="1040" as="geometry" />
 </mxCell>
         <mxCell id="8" value="TIẾN TRÌNH PHẦN MỀM GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1500" y="120" width="640" height="1040" as="geometry" />
+  <mxGeometry x="1680" y="120" width="590" height="1040" as="geometry" />
 </mxCell>
         <mxCell id="9" value="3 luồng Worker nhận ngắt DIO0&#xa;Thu đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1550" y="220" width="540" height="220" as="geometry" />
+  <mxGeometry x="1730" y="220" width="490" height="220" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Cơ sở dữ liệu log CSV&#xa;Lưu trữ Timestamp, RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1550" y="520" width="540" height="220" as="geometry" />
+  <mxGeometry x="1730" y="530" width="490" height="220" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Web Dashboard giám sát&#xa;Hiển thị dữ liệu thu nhận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1550" y="820" width="540" height="220" as="geometry" />
+  <mxGeometry x="1730" y="840" width="490" height="220" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="SPI0 CE0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="12" value="SPI0 CE0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="13" value="SPI0 CE1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="13" value="SPI0 CE1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
-        <mxCell id="14" value="SPI0 CS2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="7">
-  <mxGeometry relative="1" as="geometry" />
+        <mxCell id="14" value="SPI0 CS2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="7">
+  <mxGeometry relative="1" as="geometry">
+        <mxPoint as="offset" x="0" y="-18" />
+  </mxGeometry>
 </mxCell>
       </root>
     </mxGraphModel>

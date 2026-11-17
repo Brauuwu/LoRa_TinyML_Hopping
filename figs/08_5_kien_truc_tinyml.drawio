@@ -1,44 +1,44 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="08_5_kien_truc_tinyml">
-    <mxGraphModel dx="2250" dy="1180" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2250" pageHeight="1180" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2350" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2350" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="CẤU TRÚC 5 KIẾN TRÚC MẠNG NƠ-RON KHẢO SÁT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2130" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2230" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="1. BASELINE FCNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="100" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="4" value="• Input: Vector (90)&#xa;• Dense (16, ReLU)&#xa;• Dropout (0.15)&#xa;• Dense (12, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 1,699&#xa;Dung lượng: 8.84 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="100" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="5" value="2. 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="520" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="550" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="6" value="• Input: Chuỗi (10, 9)&#xa;• Conv1D (16, k=3)&#xa;• BatchNorm + Pool&#xa;• Conv1D (32, k=3)&#xa;• GlobalAvgPool1D&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 2,659&#xa;Dung lượng: 16.34 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="520" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="550" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="7" value="3. GRU RNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="950" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1000" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="8" value="• Input: Chuỗi (10, 9)&#xa;• GRU (16, unroll)&#xa;• Dropout (0.15)&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 1,619&#xa;Dung lượng: 42.32 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="950" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1000" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="9" value="4. SEPARABLE 1D-CNN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1380" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1450" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="10" value="• Input: Chuỗi (10, 9)&#xa;• SepConv1D (16, k=3)&#xa;• SepConv1D (32, k=3)&#xa;• GlobalAvgPool1D&#xa;• Dropout (0.15)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 878&#xa;Dung lượng: 8.65 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1380" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1450" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="11" value="5. RESNET-1D" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1810" y="110" width="350" height="70" as="geometry" />
+  <mxGeometry x="1900" y="110" width="350" height="70" as="geometry" />
 </mxCell>
         <mxCell id="12" value="• Input: Chuỗi (10, 9)&#xa;• Conv1D (16, k=3)&#xa;• Residual Block&#xa;  Skip Connection (+x)&#xa;• GlobalAvgPool1D&#xa;• Dense (16, ReLU)&#xa;• Dense (3, Softmax)&#xa;&#xa;Tham số: 2,339&#xa;Dung lượng: 14.73 KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1810" y="210" width="350" height="770" as="geometry" />
+  <mxGeometry x="1900" y="210" width="350" height="770" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Cấu trúc lớp mạng và số lượng tham số của 5 mô hình nơ-ron đánh giá trên vi điều khiển ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="90" y="1040" width="2070" height="95" as="geometry" />
+  <mxGeometry x="100" y="1050" width="2150" height="95" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
