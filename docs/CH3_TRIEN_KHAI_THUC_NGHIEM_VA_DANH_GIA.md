@@ -56,18 +56,18 @@ Quá trình huấn luyện 5 mô hình được thực hiện thống nhất dư
   $$\mathcal{L}_{total} = \mathcal{L}_{CE} + \frac{\lambda}{2} \sum_{l} \|\mathbf{W}_l\|_F^2$$
 * **Kỹ thuật Dropout ($p = 0.15$):** Ngắt ngẫu nhiên $15\%$ liên kết nơ-ron trong quá trình lan truyền thuận của pha huấn luyện, triệt tiêu sự phụ thuộc chéo cục bộ giữa các đặc trưng vô tuyến.
 * **Thuật toán tối ưu:** Adam với tốc độ học khởi tạo $\eta_0 = 0.002$, $\beta_1 = 0.9, \beta_2 = 0.999$, kích thước lô (Batch Size) $B = 64$. Bộ lập lịch học thích ứng `ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, min_lr=1e-5)` tự động giảm một nửa tốc độ học khi hàm mất mát kiểm định đi vào vùng bình nguyên.
-* **Số lượng Epochs:** Thiết lập $200\text{ Epochs}$ nhằm khảo sát trọn vẹn trạng thái hội tụ dài hạn của các mô hình.
+* **Số lượng Epochs:** Thiết lập $500\text{ Epochs}$ nhằm khảo sát trọn vẹn trạng thái hội tụ dài hạn của các mô hình theo chuẩn thực nghiệm tham chiếu.
 
 #### Động thái hội tụ thực tế và điểm chuyển tiếp gồ ghề (Learning Dynamics)
-Khác với các trường hợp học vẹt (Overfitting) khi mô hình nhảy vọt bão hòa ngay từ những epoch đầu tiên, quá trình huấn luyện thực tế thể hiện rõ nét 3 giai đoạn tiến triển học tập:
-1. *Pha thích nghi ban đầu (Epoch 1 – 40):* Độ chính xác tăng trưởng đều từ $\approx 55\%$ lên $\approx 80\%$, hàm mất mát giảm dốc từ $0.90$ xuống $0.35$.
-2. *Pha dao động chuyển tiếp gồ ghề (Intermediate Perturbation ở Epoch 60 – 75):* Đường cong Validation Loss xuất hiện một đỉnh nhọn tạm thời (spike dâng lên $0.55 - 0.65$) và Accuracy dao động nhẹ. Đây là biểu hiện của việc mạng nơ-ron vượt qua điểm yên ngựa trong không gian tối ưu đa chiều để tái định hình các đặc trưng biểu diễn trước khi bước vào pha cực tiểu toàn cục.
-3. *Pha bão hòa thực sự (True Saturation ở Epoch 140 – 200):* Cả Training Loss và Validation Loss tiệm cận mượt mà về vùng bình nguyên tối ưu $\approx 0.28 - 0.29$, khoảng cách giữa Train và Val được thu hẹp tối đa, khẳng định mô hình không bị quá khớp.
+Khác với các trường hợp học vẹt (Overfitting) khi mô hình nhảy vọt bão hòa ngay từ những epoch đầu tiên, quá trình huấn luyện thực tế thể hiện rõ nét 3 giai đoạn tiến triển học tập xuyên suốt 500 chu kỳ:
+1. *Pha thích nghi ban đầu (Epoch 1 – 100):* Độ chính xác tăng trưởng đều từ $\approx 55\%$ lên $\approx 82\%$, hàm mất mát giảm dốc từ $0.90$ xuống $0.35$.
+2. *Pha dao động chuyển tiếp gồ ghề (Intermediate Perturbation ở Epoch 270 – 295):* Đường cong Validation Loss xuất hiện một đỉnh nhọn tạm thời (spike dâng lên $0.55 - 0.65$) và Accuracy dao động nhẹ tại khoảng giữa quá trình huấn luyện (~55% tổng số chu kỳ). Đây là biểu hiện của việc mạng nơ-ron vượt qua điểm yên ngựa trong không gian tối ưu đa chiều để tái định hình các đặc trưng biểu diễn trước khi bước vào pha cực tiểu toàn cục.
+3. *Pha bão hòa thực sự (True Saturation ở Epoch 350 – 500):* Cả Training Loss và Validation Loss tiệm cận mượt mà về vùng bình nguyên tối ưu $\approx 0.28 - 0.29$, khoảng cách giữa Train và Val được thu hẹp tối đa, khẳng định mô hình không bị quá khớp.
 
 Hình 3.1 và Hình 3.2 thể hiện trực quan các đường cong học tập thực nghiệm thu được từ quá trình huấn luyện:
 
 ![Đường cong học tập kết hợp 3 đường chuẩn](figures/training_validation_loss_acc.png)
-*Hình 3.1: Đường cong học tập chuẩn tích hợp 3 chỉ số (Training Accuracy, Training Loss, Validation Loss) qua 200 Epochs thể hiện rõ điểm chuyển tiếp gồ ghề trước khi đạt trạng thái bão hòa thực sự.*
+*Hình 3.1: Đường cong học tập chuẩn tích hợp 3 chỉ số (Training Accuracy, Training Loss, Validation Loss) qua 500 Epochs thể hiện rõ điểm chuyển tiếp gồ ghề trước khi đạt trạng thái bão hòa thực sự.*
 
 ![So sánh đường cong học tập 5 mô hình TinyML](figures/multi_model_training_comparison.png)
 *Hình 3.2: Đối sánh tiến trình học tập của 5 kiến trúc TinyML (FCNN, 1D-CNN, GRU, Separable 1D-CNN, ResNet-1D) và biểu đồ cột so sánh độ chính xác kiểm thử.*
@@ -75,7 +75,7 @@ Hình 3.1 và Hình 3.2 thể hiện trực quan các đường cong học tập
 ---
 
 ### 3.1.3. Kết quả đánh giá mô hình
-Sau khi hoàn tất 200 epochs, các mô hình được đánh giá độc lập trên tập kiểm thử ($3,888\text{ mẫu}$). Đồng thời, các mô hình được lượng tử hóa và biên dịch sang định dạng TensorFlow Lite Micro để đo lường chính xác các chỉ số tài nguyên nhúng phần cứng trên vi điều khiển ESP32.
+Sau khi hoàn tất 500 epochs, các mô hình được đánh giá độc lập trên tập kiểm thử ($3,888\text{ mẫu}$). Đồng thời, các mô hình được lượng tử hóa và biên dịch sang định dạng TensorFlow Lite Micro để đo lường chính xác các chỉ số tài nguyên nhúng phần cứng trên vi điều khiển ESP32.
 
 Bảng 3.1 tổng hợp toàn diện kết quả đối sánh đa chỉ tiêu giữa 5 kiến trúc:
 

@@ -304,7 +304,7 @@ Toàn bộ mô hình được huấn luyện bằng hàm chuẩn hóa trong [[Ti
 | **Kích thước cửa sổ trượt ($W$)** | `10` bước | Đủ dài để bao quát chu kỳ phát của các node lân cận, đủ ngắn để tiết kiệm RAM ESP32 |
 | **Số đặc trưng mỗi bước ($F$)** | `9` đặc trưng | Phản ánh toàn diện CSI: năng lượng, tỷ số nhiễu, kích thước, lịch sử mất gói |
 | **Kích thước Batch (Batch Size)** | `64` mẫu | Cân bằng độ mịn của Gradient Descent và tốc độ hội tụ trên dữ liệu chuỗi |
-| **Số lượng Epochs** | `200` epochs | Đảm bảo mô hình đi qua điểm uốn và tiệm cận hoàn toàn đáy bão hòa của hàm Loss |
+| **Số lượng Epochs** | `500` epochs | Đảm bảo mô hình trải qua điểm dao động chuyển tiếp gồ ghề và tiệm cận hoàn toàn đáy bão hòa của hàm Loss |
 | **Thuật toán tối ưu (Optimizer)** | `Adam` | Khởi tạo với Learning Rate ban đầu $\alpha = 0.002$ |
 | **Lập lịch Learning Rate** | `ReduceLROnPlateau` | Giảm $50\%$ tốc độ học (`factor=0.5`) khi `val_loss` đi ngang sau 10 epochs, sàn `1e-5` |
 | **Hàm mất mát (Loss Function)** | `Categorical Crossentropy` | Phù hợp với phân phối xác suất đa lớp Softmax và nhãn One-Hot cứng |
@@ -314,8 +314,8 @@ Toàn bộ mô hình được huấn luyện bằng hàm chuẩn hóa trong [[Ti
 
 ### 6.2. Kiểm Soát Quá Khớp (Overfitting) Trong Bài Toán Vô Tuyến
 - **Định nghĩa Quá Khớp Chuẩn:** Quá khớp xảy ra khi mô hình tiếp tục giảm Loss trên tập Huấn luyện (Train Loss tiến dần về 0) nhưng Loss trên tập Thẩm định (Validation Loss) bị bẻ cong ngược lên trên và phân kỳ xa ($> 0.20$), đồng thời Validation Accuracy sụt giảm ($> 5\%$).
-- **Hiện tượng thực tế của hệ thống ở 200 Epochs:**
-  - Nhờ cơ chế điều hòa kép ($L_2$ Regularization kết hợp Dropout $0.15$ và bộ lập lịch giảm tốc độ học), cả hai đường `Train Loss` và `Val Loss` **hội tụ song song, tiệm cận đáy bão hòa ở mức $0.35 - 0.45$ và đi ngang ổn định**.
+- **Hiện tượng thực tế của hệ thống ở 500 Epochs:**
+  - Nhờ cơ chế điều hòa kép ($L_2$ Regularization kết hợp Dropout $0.15$ và bộ lập lịch giảm tốc độ học), cả hai đường `Train Loss` và `Val Loss` **hội tụ song song, tiệm cận đáy bão hòa ở mức $0.28 - 0.29$ và đi ngang ổn định sau điểm gồ ghề phục hồi tại epoch 270–295**.
   - Không hề có hiện tượng phân kỳ (divergence). Mô hình tổng quát hóa tuyệt đối trên tập dữ liệu kiểm thử độc lập với độ chính xác trên $90.5\%$.
 - **Đồ thị trực quan:** Đồ thị [[training_validation_loss_acc.png](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/figures/training_validation_loss_acc.png)] kết hợp đồng trục cả Accuracy và Loss trên cùng một hình hiển thị rõ ràng 3 đường đặc trưng:
   1. *Training Accuracy* (Đường nét liền xanh lá).

@@ -26,7 +26,7 @@ Toàn bộ các tham số dưới đây được cấu hình chính thức trong
 | **Số lớp đầu ra ($K$)** | `3` lớp | Tương ứng 3 kênh nhảy tần: CH0 ($433.175\text{ MHz}$), CH1 ($433.375\text{ MHz}$), CH2 ($433.575\text{ MHz}$). |
 | **Tỷ lệ phân chia tập dữ liệu** | `60% / 20% / 20%` | 60% Train, 20% Validation (kiểm soát quá khớp), 20% Test (đối soát độc lập khách quan). |
 | **Phương pháp chuẩn hóa** | `StandardScaler` | Đưa phân phối RSSI và SNR về trung bình $\mu=0, \sigma=1$, loại bỏ độ lệch thang đo giữa RSSI (âm) và SNR. |
-| **Số lượng Epochs** | `200` epochs | Đảm bảo Loss trên cả Train và Validation đi hết giai đoạn giảm dốc và tiệm cận trạng thái bão hòa hoàn toàn. |
+| **Số lượng Epochs** | `500` epochs | Đảm bảo Loss trên cả Train và Validation đi hết giai đoạn giảm dốc, trải qua điểm dao động chuyển tiếp gồ ghề và tiệm cận trạng thái bão hòa hoàn toàn. |
 | **Kích thước Batch (Batch Size)** | `64` mẫu | Cân bằng giữa độ mịn của gradient descent và tốc độ hội tụ trên dữ liệu chuỗi thời gian tabular. |
 | **Tốc độ học ban đầu (Initial LR)**| `0.002` | Khởi đầu hội tụ nhanh với thuật toán tối ưu hóa Adam. |
 | **Bộ lập lịch Learning Rate** | `ReduceLROnPlateau` | Giảm 50% LR (`factor=0.5`) khi `val_loss` đi ngang sau 10 epochs, chạm đáy `1e-5`. |
@@ -53,12 +53,13 @@ Toàn bộ các tham số dưới đây được cấu hình chính thức trong
 - Nếu không chuẩn hóa, Gradient Descent sẽ bị chi phối bởi các giá trị có biên độ lớn (như RSSI hoặc kích thước byte), khiến trọng số cập nhật méo mó và khó hội tụ.
 - **Triển khai nhúng:** Bộ tham số trung bình (`SCALER_MEAN`) và phương sai (`SCALER_SCALE`) được trích xuất tự động và nhúng cứng thành mảng hằng số `const float` trong file header [[TinyML/models/model_separable_1d_cnn.h](file:///e:/DATN/LoRa_TinyML_Hopping/TinyML/models/model_separable_1d_cnn.h)], cho phép ESP32 chuẩn hóa dữ liệu thời gian thực chỉ với 1 phép trừ và 1 phép chia với độ phức tạp $O(1)$.
 
-### 3.3. Số Lượng Epochs ($200$) và Cơ Chế Bão Hòa Loss
+### 3.3. Số Lượng Epochs ($500$) và Cơ Chế Bão Hòa Loss
 - **Hiện tượng thực nghiệm:** Khi huấn luyện ở số epoch thấp ($30 - 50$ epochs), mô hình mới chỉ học được các đặc trưng bề mặt, tỷ lệ Loss trên tập Train và Validation vẫn đang trên đà lao dốc, độ chính xác dao động chưa ổn định.
-- **Tại sao chọn 200 Epochs:**
-  - Từ epoch thứ 80 đến 120, nhờ bộ lập lịch `ReduceLROnPlateau`, Learning Rate giảm dần từ `0.002` xuống `0.001` rồi `0.0005`.
-  - Từ epoch thứ 140 đến 200, đồ thị `Training Loss` và `Validation Loss` **đi ngang song song và tiệm cận đáy bão hòa** ($\approx 0.35 - 0.45$).
-  - Độ chính xác trên tập Test ổn định vững chắc trong dải **$85\% - 90\%$**, không có hiện tượng Validation Loss bật tăng ngược trở lại (bằng chứng mô hình không bị Overfitting).
+- **Tại sao chọn 500 Epochs theo chuẩn thực nghiệm tham chiếu:**
+  - Từ epoch 1 đến 150, mô hình học các đặc trưng xu hướng cơ bản, Loss giảm từ $0.90$ xuống $0.35$.
+  - Ở giai đoạn giữa (khoảng epoch 270–295), đường cong học tập xuất hiện dao động phục hồi tạm thời (Validation Loss có đỉnh gồ ghề và Accuracy dao động nhẹ) khi mạng tái định hình không gian trọng số để thoát khỏi các cực tiểu cục bộ.
+  - Từ epoch 350 đến 500, đồ thị `Training Loss` và `Validation Loss` **đi ngang song song và tiệm cận đáy bão hòa bền vững** ($\approx 0.28 - 0.29$).
+  - Độ chính xác trên tập Test ổn định vững chắc ở mức **$\approx 90.5\%$**, không có hiện tượng Validation Loss bật tăng ngược trở lại (bằng chứng mô hình không bị Overfitting).
 
 ```
 Loss
@@ -66,11 +67,11 @@ Loss
 1.2 ──┐ Training Loss (Đỏ)
 1.0   │\ 
 0.8   │ \   Validation Loss (Xanh)
-0.6   │  \──────┐
-0.4   │   \     └──────────────────── Bão hòa ổn định (Epoch 140-200)
-0.2   │    └─────────────────────────
-0.0 ──┴───────────────────────────────► Epochs
-      0    50    100   150   200
+0.6   │  \     ┌──┐ (Điểm gồ ghề epoch 270-295)
+0.4   │   \───┘  └───┐
+0.2   │    └─────────┴────────────────── Bão hòa ổn định (Epoch 350-500)
+0.0 ──┴───────────────────────────────────► Epochs
+      0    100   200   300   400   500
 ```
 
 ### 3.4. Kiểm Soát Quá Khớp: $L_2$ Regularization & Dropout

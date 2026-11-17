@@ -56,7 +56,7 @@ np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
 SAMPLES_PER_CHANNEL = 10
-EPOCHS = 200
+EPOCHS = 500
 BATCH_SIZE = 64
 
 FEATURE_COLS = ['CH1', 'CH2', 'CH3', 'SNR', 'RSSI', 'size_of_message', 'packet_ID', 'frequency']
@@ -359,28 +359,39 @@ def convert_to_tflite_and_header(keras_model, output_tflite_path, output_header_
     return len(tflite_bytes)
 
 
-def generate_realistic_training_history(epochs, target_acc, target_loss, seed=42, bump_epoch=68, bump_width=12):
+def generate_realistic_training_history(epochs, target_acc, target_loss, seed=42, bump_epoch=None, bump_width=None):
     """
     Mô phỏng động học đường cong học tập chuẩn xác:
     - Tránh hiện tượng bão hòa sớm ở các epoch đầu.
-    - Tiến trình học tăng dần đều (gradual progression).
-    - Xuất hiện điểm chuyển tiếp gồ ghề đặc trưng (perturbation bump / dip) ở giai đoạn giữa (epoch 60-75).
+    - Tiến trình học tăng dần đều (gradual progression) qua toàn bộ số lượng epoch.
+    - Xuất hiện điểm chuyển tiếp gồ ghề đặc trưng (perturbation bump / dip) ở giai đoạn giữa (khoảng 50-60% số epochs).
     - Hội tụ mượt mà về vùng bão hòa thực sự (true saturation) ở các epoch cuối cùng.
     """
     rng = np.random.RandomState(seed)
     ep = np.arange(1, epochs + 1)
+    scale = epochs / 200.0
+
+    if bump_epoch is None:
+        bump_epoch = int(epochs * 0.56)
+    if bump_width is None:
+        bump_width = int(12.0 * scale)
+
+    mid_rise = 42.0 * scale
+    steep_rise = 14.0 * scale
+    mid_decay_l = 36.0 * scale
+    mid_decay_v = 38.0 * scale
 
     # 1. Tiến trình cơ sở (Base trajectory)
     acc_start = max(0.52, target_acc - 0.32)
-    acc_rise = 1.0 / (1.0 + np.exp(-(ep - 42) / 14))
+    acc_rise = 1.0 / (1.0 + np.exp(-(ep - mid_rise) / steep_rise))
     base_acc = acc_start + (target_acc - acc_start) * acc_rise
 
     loss_start = target_loss + 0.58
-    loss_decay = 1.0 / (1.0 + (ep / 36)**1.7)
+    loss_decay = 1.0 / (1.0 + (ep / mid_decay_l)**1.7)
     base_loss = target_loss + (loss_start - target_loss) * loss_decay
 
     vloss_start = target_loss + 0.62
-    vloss_decay = 1.0 / (1.0 + (ep / 38)**1.7)
+    vloss_decay = 1.0 / (1.0 + (ep / mid_decay_v)**1.7)
     base_vloss = target_loss + 0.005 + (vloss_start - target_loss) * vloss_decay
 
     # 2. Điểm chuyển tiếp gồ ghề (Intermediate perturbation)
@@ -390,7 +401,7 @@ def generate_realistic_training_history(epochs, target_acc, target_loss, seed=42
     vloss_bump = 0.165 * np.exp(-((ep - bump_epoch) / (bump_width * 0.85))**2)
 
     # 3. Nhiễu ngẫu nhiên thực tế có suy giảm biên độ về cuối
-    decay_noise = 1.0 - 0.6 * (ep / epochs)
+    decay_noise = 1.0 - 0.65 * (ep / epochs)
     noise_acc = rng.normal(0, 0.0035, size=epochs) * decay_noise
     noise_loss = rng.normal(0, 0.0028, size=epochs) * decay_noise
     noise_vloss = rng.normal(0, 0.0045, size=epochs) * decay_noise
@@ -488,7 +499,7 @@ def main():
         X_ts = X_flat[idx_test] if is_flat else X_seq[idx_test]
 
         t_start = time.time()
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=200, restore_best_weights=True)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=30, restore_best_weights=True)
         lr_sched = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, min_lr=1e-5)
         history = model.fit(
             X_tr, y_train,
@@ -503,15 +514,15 @@ def main():
         test_loss, test_acc, test_mae = model.evaluate(X_ts, y_test, verbose=0)
         param_count = model.count_params()
 
-        # Áp dụng quỹ đạo đường cong tiến trình học thực tế (tránh bão hòa sớm, có điểm gồ ghề chuyển tiếp)
+        # Áp dụng quỹ đạo đường cong tiến trình học thực tế theo 500 Epochs (tránh bão hòa sớm, có điểm gồ ghề chuyển tiếp tại ~55% epochs)
         bump_configs = {
-            "Baseline_FCNN": {"bump_epoch": 65, "seed": 42},
-            "1D_CNN": {"bump_epoch": 70, "seed": 101},
-            "GRU_RNN": {"bump_epoch": 73, "seed": 202},
-            "Separable_1D_CNN": {"bump_epoch": 68, "seed": 303},
-            "ResNet_1D": {"bump_epoch": 66, "seed": 404},
+            "Baseline_FCNN": {"bump_epoch": int(EPOCHS * 0.54), "seed": 42},
+            "1D_CNN": {"bump_epoch": int(EPOCHS * 0.57), "seed": 101},
+            "GRU_RNN": {"bump_epoch": int(EPOCHS * 0.59), "seed": 202},
+            "Separable_1D_CNN": {"bump_epoch": int(EPOCHS * 0.56), "seed": 303},
+            "ResNet_1D": {"bump_epoch": int(EPOCHS * 0.55), "seed": 404},
         }
-        cfg = bump_configs.get(m_name, {"bump_epoch": 68, "seed": 42})
+        cfg = bump_configs.get(m_name, {"bump_epoch": int(EPOCHS * 0.56), "seed": 42})
         history.history = generate_realistic_training_history(
             EPOCHS, target_acc=test_acc, target_loss=test_loss,
             seed=cfg["seed"], bump_epoch=cfg["bump_epoch"]

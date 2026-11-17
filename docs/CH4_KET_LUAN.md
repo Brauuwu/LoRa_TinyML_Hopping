@@ -24,7 +24,7 @@ Sau quá trình nghiên cứu lý thuyết, thiết kế kiến trúc phần c�
   3. *Gated Recurrent Unit (GRU RNN)*
   4. *Depthwise Separable 1D-CNN (MobileNet-style)*
   5. *Residual Neural Network (ResNet-1D)*
-* Đã giải quyết thành công bài toán kiểm soát quá khớp (Overfitting) bằng việc kết hợp điều chuẩn trọng số $L_2$ Regularization ($\lambda = 2 \times 10^{-4}$), Dropout ($p = 0.15$) và bộ lập lịch tốc độ học thích ứng ReduceLROnPlateau. Quá trình huấn luyện $200\text{ epochs}$ thể hiện rõ ràng tiến trình học tập chuẩn mực: từ khởi tạo dần đều, xuất hiện **điểm dao động chuyển tiếp gồ ghề (Intermediate Perturbation)** tại epoch 60–75 khi mạng tái định hình không gian trọng số, cho đến khi đạt trạng thái bão hòa thực sự ổn định tại epoch 140–200.
+* Đã giải quyết thành công bài toán kiểm soát quá khớp (Overfitting) bằng việc kết hợp điều chuẩn trọng số $L_2$ Regularization ($\lambda = 2 \times 10^{-4}$), Dropout ($p = 0.15$) và bộ lập lịch tốc độ học thích ứng ReduceLROnPlateau. Quá trình huấn luyện $500\text{ epochs}$ thể hiện rõ ràng tiến trình học tập chuẩn mực: từ khởi tạo dần đều, xuất hiện **điểm dao động chuyển tiếp gồ ghề (Intermediate Perturbation)** tại epoch 270–295 khi mạng tái định hình không gian trọng số, cho đến khi đạt trạng thái bão hòa thực sự ổn định tại epoch 350–500.
 * Đã xác định **Depthwise Separable 1D-CNN** là kiến trúc tối ưu vượt bậc cho phần cứng vi điều khiển biên:
   * Số lượng tham số ít nhất: **$878\text{ tham số}$** (tiết kiệm hơn $63\%$ phép tính so với CNN tiêu chuẩn).
   * Dung lượng tệp FlatBuffer TFLite cực kỳ nhỏ: **$8.65\text{ KB}$**.

@@ -298,7 +298,7 @@ graph TD
 ## 5. Danh Mục Tài Liệu Kỹ Thuật Chi Tiết
 - [PHAT_BIEU_BAI_TOAN.docx](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PHAT_BIEU_BAI_TOAN.docx) & [PHAT_BIEU_BAI_TOAN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PHAT_BIEU_BAI_TOAN.md): **Báo cáo Phát biểu bài toán & Mô hình hóa toán học**, phân tích định lượng ToA, xung đột ALOHA, Capture effect, bài toán tối ưu đa tiêu chí và mô hình Separable 1D-CNN.
 - [PROJECT_KNOWLEDGE_BASE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PROJECT_KNOWLEDGE_BASE.md): **Tài liệu tri thức toàn diện (Master Single Source of Truth)** dành riêng cho AI Agent và Kỹ sư, tổng hợp 100% kiến trúc phần cứng, firmware, data pipeline, mô hình học máy và kết quả thực nghiệm.
-- [LUACHON_THAMSO_HUANLUYEN_MOHINH.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/LUACHON_THAMSO_HUANLUYEN_MOHINH.md): Cơ sở khoa học và hướng dẫn tối ưu siêu tham số huấn luyện TinyML ($T=10$, 200 epochs, L2, Dropout, GAP).
+- [LUACHON_THAMSO_HUANLUYEN_MOHINH.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/LUACHON_THAMSO_HUANLUYEN_MOHINH.md): Cơ sở khoa học và hướng dẫn tối ưu siêu tham số huấn luyện TinyML ($T=10$, 500 epochs, L2, Dropout, GAP).
 - [PIPELINE_THUC_HIEN_DU_AN.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/PIPELINE_THUC_HIEN_DU_AN.md): Toàn bộ quy trình từ thu thập dữ liệu, huấn luyện đến đánh giá đối chứng.
 - [KIEN_TRUC_FREERTOS_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/KIEN_TRUC_FREERTOS_FIRMWARE.md): Kiến trúc đa luồng FreeRTOS trên ESP32 Dual-Core cho truyền thông và suy luận AI.
 - [SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md](file:///e:/DATN/LoRa_TinyML_Hopping/docs/SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md): Sơ đồ chân nối phần cứng giữa Raspberry Pi, SX1278 và ESP32.
