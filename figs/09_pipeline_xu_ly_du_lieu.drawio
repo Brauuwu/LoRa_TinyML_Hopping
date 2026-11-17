@@ -1,65 +1,47 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="09_pipeline_xu_ly_du_lieu">
-    <mxGraphModel dx="1000" dy="420" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="420" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1800" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="980" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" value="QUY TRÌNH XỬ LÝ &amp; CHUẨN HÓA DỮ LIỆU THỰC NGHIỆM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=14;shadow=1;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+        <mxCell id="2" value="QUY TRÌNH XỬ LÝ &amp; CHUẨN HÓA DỮ LIỆU THỰC NGHIỆM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="60" y="20" width="1680" height="60" as="geometry" />
 </mxCell>
-        <mxCell id="3" value="Bước 1: Trích xuất log
-• Thu thập dữ liệu Gateway
-• Tách theo Node (A, B, C)
-• Lọc các bản tin hợp lệ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="60" y="80" width="200" height="80" as="geometry" />
+        <mxCell id="3" value="Bước 1: Trích xuất log&#xa;• Thu thập dữ liệu Gateway&#xa;• Tách theo Node (A, B, C)&#xa;• Lọc các bản tin hợp lệ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="80" y="100" width="380" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="4" value="Bước 2: Xử lý gói mất
-• Quét số thứ tự Packet_ID
-• Bổ sung các gói bị mất
-• Gán nhãn phạt: RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#e9d5ff;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#6b21a8;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="290" y="80" width="200" height="80" as="geometry" />
+        <mxCell id="4" value="Bước 2: Xử lý gói mất&#xa;• Quét số thứ tự Packet_ID&#xa;• Bổ sung các gói bị mất&#xa;• Gán nhãn phạt: RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="500" y="100" width="380" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="5" value="Bước 3: Chuỗi trượt
-• Tensor (10 bước x 9 feat)
-• Gán nhãn kênh mục tiêu
-• Loại bỏ trường rò rỉ nhãn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#92400e;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="520" y="80" width="200" height="80" as="geometry" />
+        <mxCell id="5" value="Bước 3: Chuỗi trượt&#xa;• Tensor (10 bước x 9 feat)&#xa;• Gán nhãn kênh mục tiêu&#xa;• Loại bỏ trường rò rỉ nhãn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fcd34d;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#92400e;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="920" y="100" width="380" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="6" value="Bước 4: Chuẩn hóa &amp; Chia tập
-• StandardScaler: z = (x - μ)/σ
-• Xuất bảng SCALER cho C
-• Chia tập: 60% / 20% / 20%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="750" y="80" width="200" height="80" as="geometry" />
+        <mxCell id="6" value="Bước 4: Chuẩn hóa &amp; Chia&#xa;• StandardScaler: z=(x-μ)/σ&#xa;• Xuất bảng SCALER cho C&#xa;• Chia: 60% / 20% / 20%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="1340" y="100" width="380" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="7" value="Dữ liệu thô" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="3" target="4">
+        <mxCell id="7" value="Dữ liệu thô" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="4">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="8" value="Dữ liệu đầy đủ" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="4" target="5">
+        <mxCell id="8" value="Dữ liệu đầy đủ" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="4" target="5">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="9" value="Chuỗi trượt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="5" target="6">
+        <mxCell id="9" value="Chuỗi trượt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="5" target="6">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="10" value="ĐẦU RA QUY TRÌNH DỮ LIỆU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="60" y="185" width="890" height="150" as="geometry" />
+        <mxCell id="10" value="ĐẦU RA QUY TRÌNH DỮ LIỆU" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="80" y="360" width="1640" height="520" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="dataset_ready.csv
-19,440 mẫu chuỗi thời gian
-90 đặc trưng đầu vào" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="80" y="220" width="260" height="60" as="geometry" />
+        <mxCell id="11" value="dataset_ready.csv&#xa;19,440 mẫu chuỗi thời gian&#xa;90 đặc trưng đầu vào" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="120" y="440" width="480" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="Phân chia tập mẫu
-Train: 11,664 (60%)
-Val: 3,888 (20%) | Test: 3,888 (20%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="370" y="220" width="260" height="60" as="geometry" />
+        <mxCell id="12" value="Phân chia tập mẫu&#xa;Train: 11,664 (60%)&#xa;Val: 3,888 (20%) | Test: 3,888 (20%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="660" y="440" width="480" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="13" value="Mảng tham số nhúng C
-SCALER_MEAN[9] &amp; SCALER_SCALE[9]
-Đồng bộ trong model.h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="660" y="220" width="260" height="60" as="geometry" />
+        <mxCell id="13" value="Mảng tham số nhúng C&#xa;SCALER_MEAN[9] &amp; SCALER_SCALE[9]&#xa;Đồng bộ trong model.h" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="1200" y="440" width="480" height="200" as="geometry" />
 </mxCell>
-        <mxCell id="14" value="Đặc điểm kỹ thuật: Dữ liệu đồng nhất 3 kênh tần số, chuẩn hóa trực tiếp trên thiết bị với độ phức tạp O(1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="80" y="295" width="840" height="30" as="geometry" />
+        <mxCell id="14" value="Đặc điểm kỹ thuật: Dữ liệu đồng nhất 3 kênh tần số, chuẩn hóa trực tiếp trên thiết bị với độ phức tạp O(1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
+  <mxGeometry x="120" y="710" width="1560" height="90" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
