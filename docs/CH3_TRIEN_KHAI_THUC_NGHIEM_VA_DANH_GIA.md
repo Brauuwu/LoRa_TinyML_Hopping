@@ -134,6 +134,18 @@ graph TD
     end
 ```
 
+Hình 3.6 và Hình 3.7 minh họa trực quan phần cứng trạm Gateway và toàn cảnh hệ thống thực nghiệm được lắp ráp thực tế:
+
+<p align="center">
+  <img src="img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="700"/>
+  <br><em>Hình 3.6: Phần cứng thực tế trạm Gateway đa kênh (Raspberry Pi CM4 Baseboard gắn kèm 3 module thu LoRa SX1278 Ra-02 và anten 433 MHz).</em>
+</p>
+
+<p align="center">
+  <img src="img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Toàn bộ phần cứng thực nghiệm hệ thống LoRa TinyML Hopping" width="800"/>
+  <br><em>Hình 3.7: Toàn bộ phần cứng thực nghiệm hệ thống LoRa TinyML Hopping bao gồm trạm Gateway CM4 3 kênh và 3 thiết bị đầu cuối End-Nodes tích hợp màn hình OLED.</em>
+</p>
+
 ---
 
 ### 3.2.2. Nhúng mô hình lên vi điều khiển ESP32
@@ -226,16 +238,16 @@ Bảng 3.2 tổng hợp chi tiết kết quả thực nghiệm đo đạc các c
 | **$250\text{ Bytes}$** | $-102.3\text{ dBm}$ | $-75.6\text{ dBm}$ | $+2.1\text{ dB}$ | $+5.2\text{ dB}$ | $63.7\%$ | **$95.0\%$** | **$+31.3\%$** |
 | **Trung bình toàn dải** | **$-94.4\text{ dBm}$** | **$-71.5\text{ dBm}$** | **$+4.7\text{ dB}$** | **$+6.8\text{ dB}$** | **$79.9\%$** | **$97.8\%$** | **$+17.9\%$** |
 
-Hình 3.7, Hình 3.8 và Hình 3.9 thể hiện trực quan các biểu đồ đối sánh thực nghiệm:
+Hình 3.8, Hình 3.9 và Hình 3.10 thể hiện trực quan các biểu đồ đối sánh thực nghiệm:
 
 ![Biểu đồ đối sánh PDR](figures/PDR_Chart.png)
-*Hình 3.7: Biểu đồ đối sánh Tỷ lệ nhận gói thành công (PDR %) giữa Random Hopping và TinyML Hopping khi kích thước gói tăng từ 30B lên 250B.*
+*Hình 3.8: Biểu đồ đối sánh Tỷ lệ nhận gói thành công (PDR %) giữa Random Hopping và TinyML Hopping khi kích thước gói tăng từ 30B lên 250B.*
 
 ![Biểu đồ đối sánh Average RSSI](figures/Average_RSSI_Chart.png)
-*Hình 3.8: Biểu đồ đối sánh Cường độ tín hiệu thu trung bình (Average RSSI) giữa hai cơ chế nhảy kênh.*
+*Hình 3.9: Biểu đồ đối sánh Cường độ tín hiệu thu trung bình (Average RSSI) giữa hai cơ chế nhảy kênh.*
 
 ![Biểu đồ đối sánh Average SNR](figures/Average_SNR_Chart.png)
-*Hình 3.9: Biểu đồ đối sánh Tỷ số tín hiệu trên tạp âm trung bình (Average SNR) giữa hai cơ chế nhảy kênh.*
+*Hình 3.10: Biểu đồ đối sánh Tỷ số tín hiệu trên tạp âm trung bình (Average SNR) giữa hai cơ chế nhảy kênh.*
 
 #### Đánh giá và nhận xét khoa học từ kết quả thực nghiệm:
 1. **Tính vượt trội về độ tin cậy khi gói tin mở rộng:**

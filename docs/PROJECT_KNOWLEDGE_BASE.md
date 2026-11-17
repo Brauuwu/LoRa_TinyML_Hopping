@@ -145,6 +145,19 @@ graph TB
     end
 ```
 
+### 2.5. Hình Ảnh Phần Cứng Thực Tế Hệ Thống Triển Khai
+Hệ thống phần cứng thực tế được chế tạo và vận hành trong đồ án:
+
+<p align="center">
+  <img src="img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="700"/>
+  <br><em>Hình 2.1: Phần cứng trạm Gateway đa kênh Raspberry Pi CM4 tích hợp 3 module thu LoRa SX1278 Ra-02 và anten 433 MHz.</em>
+</p>
+
+<p align="center">
+  <img src="img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Toàn cảnh phần cứng hệ sinh thái thực nghiệm LoRa TinyML Hopping" width="800"/>
+  <br><em>Hình 2.2: Toàn cảnh phần cứng hệ sinh thái thực nghiệm LoRa TinyML Hopping gồm Gateway CM4 và 3 End-Nodes ESP32 tích hợp OLED SSD1306.</em>
+</p>
+
 ---
 
 ## 3. KIẾN TRÚC FIRMWARE NHÚNG FREERTOS & GATEWAY SOFTWARE
@@ -440,15 +453,21 @@ LoRa_TinyML_Hopping/
 │       ├── build_notebook.py            # Trình tạo Jupyter Notebook tự động từ scripts
 │       └── execute_notebook.py          # Trình thực thi notebook không cần giao diện (headless)
 │
-└── docs/                                # Thư mục tài liệu kỹ thuật chuyên sâu
-    ├── PHAT_BIEU_BAI_TOAN.docx          # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (File Word)
-    ├── PHAT_BIEU_BAI_TOAN.md            # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (Markdown)
-    ├── PROJECT_KNOWLEDGE_BASE.md        # File tài liệu tri thức này (Master SSOT)
-    ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình 6 giai đoạn thực hiện đồ án
-    ├── LUACHON_THAMSO_HUANLUYEN_MOHINH.md # Cơ sở khoa học lựa chọn siêu tham số
-    ├── KIEN_TRUC_FREERTOS_FIRMWARE.md   # Phân bổ luồng và task FreeRTOS đa lõi
-    ├── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ chân và nguyên lý điện tử
-    └── KICH_BAN_THU_THAP_DU_LIEU.md     # Chi tiết 21 kịch bản đo kiểm thực tế
+├── docs/                                # Thư mục tài liệu kỹ thuật chuyên sâu
+│   ├── PHAT_BIEU_BAI_TOAN.docx          # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (File Word)
+│   ├── PHAT_BIEU_BAI_TOAN.md            # Báo cáo Phát biểu bài toán & Mô hình hóa toán học (Markdown)
+│   ├── PROJECT_KNOWLEDGE_BASE.md        # File tài liệu tri thức này (Master SSOT)
+│   ├── PIPELINE_THUC_HIEN_DU_AN.md      # Quy trình 6 giai đoạn thực hiện đồ án
+│   ├── LUACHON_THAMSO_HUANLUYEN_MOHINH.md # Cơ sở khoa học lựa chọn siêu tham số
+│   ├── KIEN_TRUC_FREERTOS_FIRMWARE.md   # Phân bổ luồng và task FreeRTOS đa lõi
+│   ├── SO_DO_KET_NOI_PHAN_CUNG_VA_FIRMWARE.md # Sơ đồ chân và nguyên lý điện tử
+│   └── KICH_BAN_THU_THAP_DU_LIEU.md     # Chi tiết 21 kịch bản đo kiểm thực tế
+│
+└── img/                                 # Hình ảnh phần cứng thực tế và sơ đồ đấu nối
+    ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32 (Fritzing)
+    ├── LoRa GW_bb.png                   # Sơ đồ đấu nối Gateway CM4 3 kênh (Fritzing)
+    ├── Phần cứng LoRa Gateway.jpg       # Hình ảnh phần cứng thực tế trạm Gateway CM4
+    └── Phần cứng hệ thống LoRaWAN.jpg   # Hình ảnh toàn bộ phần cứng thực nghiệm hệ thống LoRaWAN
 ```
 
 ---

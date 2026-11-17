@@ -162,6 +162,11 @@ sequenceDiagram
 
 ### Bước 1: Chuẩn bị Phần cứng & Vị trí
 
+<p align="center">
+  <img src="img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Phần cứng thực nghiệm toàn hệ thống LoRa TinyML Hopping" width="750"/>
+  <br><em>Hình: Chuẩn bị phần cứng thực nghiệm gồm trạm Gateway CM4 và 3 End-Nodes trước khi phân bổ vào các vị trí đo</em>
+</p>
+
 1. Đặt Gateway Raspberry Pi CM4 ở vị trí trung tâm.
 2. Đặt 3 Node (A, B, C) ở các vị trí đo mong muốn (ví dụ: các phòng khác nhau hoặc các khoảng cách khác nhau 5m, 15m, 30m để tạo sự phân hóa về RSSI/SNR).
 3. Cấp nguồn cho 3 Node. Màn hình OLED của từng Node hiển thị:

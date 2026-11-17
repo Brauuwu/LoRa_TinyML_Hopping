@@ -103,6 +103,20 @@ Bộ tài liệu thuyết minh được biên soạn đầy đủ, học thuật
 
 ---
 
+## 📷 HÌNH ẢNH PHẦN CỨNG THỰC TẾ HỆ THỐNG
+
+<p align="center">
+  <img src="img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="700"/>
+  <br><em>Hình 1: Trạm Gateway đa kênh Raspberry Pi CM4 tích hợp 3 module thu LoRa SX1278 Ra-02 và anten 433 MHz.</em>
+</p>
+
+<p align="center">
+  <img src="img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Toàn bộ phần cứng thực nghiệm hệ thống LoRa TinyML Hopping" width="800"/>
+  <br><em>Hình 2: Toàn bộ hệ sinh thái phần cứng thực nghiệm LoRa TinyML Hopping (Trạm thu Gateway CM4 3 kênh và 3 thiết bị đầu cuối End-Nodes ESP32 tích hợp màn hình OLED SSD1306).</em>
+</p>
+
+---
+
 ## 📊 TỔNG HỢP CÁC KẾT QUẢ THỰC NGHIỆM CỐT LÕI
 
 *Bảng đối sánh hiệu năng tổng thể của đề tài:*

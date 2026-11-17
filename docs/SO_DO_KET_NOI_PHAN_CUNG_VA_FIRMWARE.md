@@ -143,6 +143,11 @@ graph LR
   <br><em>Hình: Sơ đồ đấu nối phần cứng thực tế của trạm Gateway 3 kênh (Raspberry Pi CM4 + 3 Module LoRa SX1278 Ra-02 433 MHz)</em>
 </p>
 
+<p align="center">
+  <img src="../img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="750"/>
+  <br><em>Hình: Phần cứng thực tế của trạm Gateway 3 kênh (Raspberry Pi CM4 Baseboard gắn kèm 3 module thu LoRa SX1278 Ra-02 và anten 433 MHz)</em>
+</p>
+
 Trạm Gateway sử dụng Raspberry Pi Compute Module 4 (CM4) kết nối với 3 module Ra-02 thông qua bus `SPI0` dùng chung, phân kênh bằng 3 đường Chip Select độc lập:
 
 ```mermaid
@@ -238,6 +243,15 @@ graph LR
 | **M3 NSS (CS)** | **GPIO 25** | **6** |      **Pin 22**      | Module 3 (`NSS`)            | Chọn chip Kênh 3 (433.575 MHz)   |
 | **M3 RST**      | **GPIO 24** | **5** |      **Pin 18**      | Module 3 (`RST`)            | Reset cứng Module 3               |
 | **M3 DIO0**     | **GPIO 23** | **4** |      **Pin 16**      | Module 3 (`DIO0`)           | Báo ngắt nhận gói tin Kênh 3  |
+
+---
+
+### C. Mô Hình Triển Khai Phần Cứng Toàn Hệ Thống Thực Nghiệm
+
+<p align="center">
+  <img src="../img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Phần cứng thực nghiệm toàn hệ thống LoRa TinyML Hopping" width="850"/>
+  <br><em>Hình: Toàn cảnh phần cứng hệ sinh thái thực nghiệm LoRa TinyML Hopping (Trạm thu Gateway CM4 3 kênh và 3 thiết bị đầu cuối End-Nodes ESP32 tích hợp màn hình OLED SSD1306)</em>
+</p>
 
 ---
 

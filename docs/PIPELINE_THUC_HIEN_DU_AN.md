@@ -60,7 +60,12 @@ flowchart TD
 
 <p align="center">
   <img src="../img/LoRa%20GW_bb.png" alt="Sơ đồ phần cứng trạm Gateway CM4 3 kênh" width="700"/>
-  <br><em>Hình: Sơ đồ kết nối phần cứng thực tế trạm Gateway đa kênh (Raspberry Pi CM4 + 3 Module Ra-02)</em>
+  <br><em>Hình: Sơ đồ kết nối phần cứng trạm Gateway đa kênh (Raspberry Pi CM4 + 3 Module Ra-02)</em>
+</p>
+
+<p align="center">
+  <img src="../img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="720"/>
+  <br><em>Hình: Phần cứng thực tế của trạm Gateway 3 kênh (Raspberry Pi CM4 Baseboard gắn kèm 3 module thu LoRa SX1278 Ra-02 và anten 433 MHz)</em>
 </p>
 
 - **Phần cứng**: Raspberry Pi Compute Module 4 (CM4) gắn 3 module LoRa Ra-02 (SX1278 433 MHz).
@@ -85,6 +90,13 @@ flowchart TD
   - `STATE_WAIT_CMD`: Ở chế độ chờ lệnh từ Gateway, liên tục lắng nghe Downlink hoặc Ping kiểm tra Online/Offline.
   - `STATE_TRANSMITTING`: Nhận lệnh `START`, phát dữ liệu theo hồ sơ lưu lượng chuẩn.
   - `STATE_FINISHED`: Hoàn thành đợt phát, quay lại trạng thái lắng nghe an toàn.
+
+#### 3. Mô hình Phần cứng Thực tế Toàn Hệ thống
+
+<p align="center">
+  <img src="../img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Phần cứng thực nghiệm toàn hệ thống LoRa TinyML Hopping" width="800"/>
+  <br><em>Hình: Toàn cảnh phần cứng hệ sinh thái thực nghiệm LoRa TinyML Hopping (Trạm thu Gateway CM4 3 kênh và 3 thiết bị đầu cuối End-Nodes ESP32 tích hợp OLED SSD1306)</em>
+</p>
 
 ---
 

@@ -10,6 +10,7 @@ Hệ thống nhảy kênh thông minh dựa trên học máy siêu nhẹ (TinyML
 - [2. Sơ đồ đấu nối phần cứng](#sec-2)
   - [2.1. 3 End-Nodes (ESP32 DevKit V1 + Ra-02 433MHz + OLED SSD1306)](#sec-2-1)
   - [2.2. Gateway (Raspberry Pi CM4 / Pi 4 + 3 Module Ra-02 433MHz)](#sec-2-2)
+  - [2.3. Hình ảnh Phần cứng Thực tế Toàn Hệ thống](#sec-2-3)
 - [3. Kiến trúc Đa nhiệm FreeRTOS trên ESP32](#sec-3)
 - [4. Quy trình Thực hiện Đồ án Từng bước](#sec-4)
   - [Bước 1: Thu thập dữ liệu thực tế (Data Collection)](#sec-4-1)
@@ -90,9 +91,11 @@ LoRa_TinyML_Hopping/
 │   ├── KIEN_TRUC_FREERTOS_FIRMWARE.md   # Thiết kế Đa nhiệm FreeRTOS trên ESP32 Dual-Core
 │   ├── LUACHON_THAMSO_HUANLUYEN_MOHINH.md # Cơ sở khoa học và hướng dẫn tối ưu siêu tham số
 │   └── tables/                          # Mã nguồn bảng LaTeX (.tex) tự động sinh sẵn sàng cho Báo cáo
-├── img/                                 # Hình ảnh sơ đồ phần cứng thực tế (Fritzing Breadboard)
-│   ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32
-│   └── LoRa GW_bb.png                   # Sơ đồ đấu nối Gateway CM4 3 kênh
+├── img/                                 # Hình ảnh sơ đồ phần cứng thực tế và mô hình triển khai
+│   ├── LoRa Node_bb.png                 # Sơ đồ đấu nối End-Node ESP32 (Fritzing)
+│   ├── LoRa GW_bb.png                   # Sơ đồ đấu nối Gateway CM4 3 kênh (Fritzing)
+│   ├── Phần cứng LoRa Gateway.jpg       # Hình ảnh phần cứng thực tế trạm Gateway CM4
+│   └── Phần cứng hệ thống LoRaWAN.jpg   # Hình ảnh toàn bộ phần cứng thực nghiệm hệ thống LoRaWAN
 └── README.md
 ```
 
@@ -160,6 +163,19 @@ LoRa_TinyML_Hopping/
 | **Module 3** | **433.575 MHz** | **CS (NSS)** | GPIO 25 | **6** | **Pin 22** |
 | | (Kênh 3) | **RST** | GPIO 24 | **5** | **Pin 18** |
 | | | **DIO0** | GPIO 23 | **4** | **Pin 16** |
+
+<a id="sec-2-3"></a>
+### C. Hình ảnh Phần cứng Thực tế Toàn Hệ thống Thực nghiệm
+
+<p align="center">
+  <img src="img/Phần%20cứng%20LoRa%20Gateway.jpg" alt="Phần cứng thực tế trạm Multi-Channel Gateway CM4" width="750"/>
+  <br><em>Hình 3: Phần cứng thực tế của trạm Gateway 3 kênh (Raspberry Pi CM4 gắn trên Baseboard + 3 Module LoRa SX1278 Ra-02 433 MHz)</em>
+</p>
+
+<p align="center">
+  <img src="img/Phần%20cứng%20hệ%20thống%20LoRaWAN.jpg" alt="Phần cứng thực nghiệm toàn hệ thống LoRa TinyML Hopping" width="850"/>
+  <br><em>Hình 4: Toàn bộ phần cứng hệ sinh thái thực nghiệm LoRa TinyML Hopping (Trạm thu Gateway CM4 3 kênh và 3 thiết bị đầu cuối End-Nodes tích hợp OLED)</em>
+</p>
 
 [🔝 Về mục lục](#muc-luc)
 
