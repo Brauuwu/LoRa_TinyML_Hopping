@@ -1,0 +1,70 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Định Dạng Gói Tin LoRa">
+    <mxGraphModel dx="1000" dy="450" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="450" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="CẤU TRÚC ĐỊNH DẠNG KHUNG TRUYỀN GÓI TIN LORA (PAYLOAD STRUCTURE)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="TIÊU ĐỀ &amp; ĐỊNH DANH (HEADER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="60" y="90" width="350" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="THÔNG SỐ &amp; MỐC THỜI GIAN (METADATA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="430" y="90" width="210" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="TẢI TRỌNG THỰC NGHIỆM (PAYLOAD)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="660" y="90" width="200" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="KIỂM TRA LỖI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="880" y="90" width="80" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="Node_ID
+(1 Byte)
+'A', 'B', 'C'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="140" width="100" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="Packet_ID
+(2 Bytes)
+0 - 65,535" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="170" y="140" width="110" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="Current_CH
+(1 Byte)
+0, 1, 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="290" y="140" width="120" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="Payload_Size
+(1 Byte)
+30 - 250 Bytes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="430" y="140" width="100" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="Timestamp
+(4 Bytes)
+millis()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="540" y="140" width="100" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="12" value="Dummy_Data
+(Biến thiên: 21 đến 241 Bytes)
+Mảng đệm mở rộng kích thước gói" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="660" y="140" width="200" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="13" value="CRC
+(2 Bytes)
+Hardware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="880" y="140" width="80" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="14" value="TỔNG CHIỀU DÀI GÓI TIN THỰC NGHIỆM QUÉT (PAYLOAD SWEEPING): 30B, 74B, 118B, 162B, 206B, 250B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="250" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="15" value="CƠ CHẾ GIẢI MÃ TẠI GATEWAY:
+Khi nhận gói tin toàn vẹn CRC, Gateway giải mã các trường trên và đồng thời đọc thanh ghi phần cứng SX1278 để lấy:
+1. RSSI_pkt (dBm): Cường độ tín hiệu thu
+2. SNR_pkt (dB): Tỷ số tín hiệu trên tạp âm
+Ghi lại bản ghi log chuẩn: &lt;Timestamp, Node_ID, Packet_ID, Frequency, RSSI, SNR, Size, Current_CH, CRC_Status&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="310" width="900" height="100" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

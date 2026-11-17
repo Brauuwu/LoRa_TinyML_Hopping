@@ -1,0 +1,74 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Nguyên Lý Điều Chế LoRa CSS">
+    <mxGraphModel dx="1000" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="500" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="NGUYÊN LÝ ĐIỀU CHẾ TRẢI PHỔ CHIRP (LORA CHIRP SPREAD SPECTRUM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="DỮ LIỆU NHỊ PHÂN
+(Binary Bitstream)
+1 0 1 1 0 ..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="110" width="150" height="75" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="NHÓM SF BIT
+(Mã hóa Symbol)
+Ký hiệu k ∈ [0, 2^SF - 1]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="250" y="110" width="160" height="75" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="BỘ TẠO CHIRP CSS
+(Frequency Sweeping)
+f(t) = f_start + (BW / T_s) * t" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="450" y="110" width="180" height="75" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="KHUẾCH ĐẠI CÔNG SUẤT
+(RF Power Amplifier)
+PA_BOOST = +17 dBm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="670" y="110" width="160" height="75" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="ANTEN PHÁT 433 MHz
+(Sóng điện từ lan truyền
+trong không gian)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="860" y="110" width="140" height="75" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="Nhóm SF bits" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="3" target="4">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="Ký hiệu điều chế" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="4" target="5">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="Tín hiệu Chirp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="5" target="6">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="RF Power" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="6" target="7">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="12" value="ĐẶC TÍNH TẦN SỐ THEO THỜI GIAN CỦA TÍN HIỆU LORA CHIRP (SPECTROGRAM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="230" width="940" height="220" as="geometry" />
+</mxCell>
+        <mxCell id="13" value="Tần số cao (f_0 + BW/2)
+
+
+Tần số tâm (f_0 = 433.x MHz)
+
+
+Tần số thấp (f_0 - BW/2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="80" y="270" width="180" height="150" as="geometry" />
+</mxCell>
+        <mxCell id="14" value="CHIRP CƠ SỞ (UP-CHIRP)
+Quét tần số tuyến tính từ thấp lên cao
+Thời gian Symbol T_s = 2^SF / BW
+(Với SF=7, BW=125kHz: T_s = 1.024 ms)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="290" y="270" width="310" height="150" as="geometry" />
+</mxCell>
+        <mxCell id="15" value="CHIRP DỊCH TẦN (MODULATED CHIRP)
+Điểm bắt đầu nhảy tần số xác định giá trị bit
+Khả năng giải điều chế dưới nhiễu nền
+Ngưỡng SNR giải mã: -7.5 dB đến -20 dB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="630" y="270" width="350" height="150" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

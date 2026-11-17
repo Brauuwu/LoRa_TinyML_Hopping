@@ -118,3 +118,27 @@ Bộ tài liệu thuyết minh được biên soạn đầy đủ, học thuật
 | **Dung lượng bộ nhớ Flash** | — | — | **$8.65\text{ KB}$ TFLite FlatBuffer** |
 | **Dung lượng RAM Tensor Arena**| — | — | **$10\text{ KB}$ SRAM** |
 | **Độ trễ suy luận thời gian thực**| — | — | **$9.3\text{ ms}$ trên ESP32 @ 240 MHz** |
+
+---
+
+## 🎨 THƯ MỤC SƠ ĐỒ ĐỒ HỌA GỐC (.DRAWIO)
+
+Toàn bộ các hình vẽ kiến trúc, lưu đồ và sơ đồ phần cứng trong đồ án đã được xây dựng dưới định dạng **.drawio (Diagrams.net)** trực quan, tinh gọn, ít chú thích rườm rà và lưu trữ tại [docs/figs](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs) cũng như [figs](file:///E:/DATN/LoRa_TinyML_Hopping/figs):
+
+* 📁 **Tệp tích hợp toàn bộ các trang (Master Multi-Page):**
+  * [full_project_diagrams.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/full_project_diagrams.drawio) (Bao gồm đầy đủ 13 tab sơ đồ trong một tệp duy nhất).
+* 📄 **Từng sơ đồ độc lập:**
+  1. [01_kien_truc_iot_4_lop.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/01_kien_truc_iot_4_lop.drawio): Kiến trúc phân tầng hệ thống IoT (4 lớp).
+  2. [02_nguyen_ly_dieu_che_lora_css.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/02_nguyen_ly_dieu_che_lora_css.drawio): Nguyên lý điều chế trải phổ Chirp (LoRa CSS).
+  3. [03_kien_truc_mang_lorawan_star.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/03_kien_truc_mang_lorawan_star.drawio): Kiến trúc mạng LoRaWAN hình sao lồng nhau (Star-of-Stars).
+  4. [04_so_sanh_cloud_ai_vs_edge_tinyml.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/04_so_sanh_cloud_ai_vs_edge_tinyml.drawio): So sánh mô hình Cloud AI truyền thống và Edge TinyML biên.
+  5. [05_bai_toan_lua_chon_kenh_tinyml.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/05_bai_toan_lua_chon_kenh_tinyml.drawio): Cơ chế dự đoán và nhảy kênh thích ứng dựa trên TinyML.
+  6. [06_so_do_khoi_toan_he_thong.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/06_so_do_khoi_toan_he_thong.drawio): Sơ đồ khối toàn hệ thống thực nghiệm (3 End-Nodes, Kênh RF, Multi-Receiver Gateway).
+  7. [07_dinh_dang_khung_truyen_goi_tin.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/07_dinh_dang_khung_truyen_goi_tin.drawio): Cấu trúc định dạng khung truyền gói tin LoRa (Payload Structure).
+  8. [08_5_kien_truc_tinyml.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/08_5_kien_truc_tinyml.drawio): Đối sánh cấu trúc 5 kiến trúc mạng nơ-ron TinyML.
+  9. [09_pipeline_xu_ly_du_lieu.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/09_pipeline_xu_ly_du_lieu.drawio): Quy trình kỹ thuật xử lý & chuẩn hóa dữ liệu thực nghiệm.
+  10. [10_bo_tri_thuc_dia_toa_nha.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/10_bo_tri_thuc_dia_toa_nha.drawio): Sơ đồ bố trí thực địa trong khuôn viên tòa nhà đại học.
+  11. [11_kien_truc_freertos_da_nhiem.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/11_kien_truc_freertos_da_nhiem.drawio): Kiến trúc firmware đa nhiệm thời gian thực FreeRTOS trên ESP32.
+  12. [12_so_do_noi_chan_end_node_esp32.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/12_so_do_noi_chan_end_node_esp32.drawio): Sơ đồ đấu nối chi tiết phần cứng thiết bị đầu cuối End-Node ESP32.
+  13. [13_so_do_noi_chan_gateway_cm4.drawio](file:///E:/DATN/LoRa_TinyML_Hopping/docs/figs/13_so_do_noi_chan_gateway_cm4.drawio): Sơ đồ đấu nối Multi-Receiver Gateway trên Raspberry Pi CM4.
+

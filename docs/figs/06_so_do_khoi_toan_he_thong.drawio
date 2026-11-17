@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Sơ Đồ Khối Toàn Hệ Thống">
+    <mxGraphModel dx="1100" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="650" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="SƠ ĐỒ KHỐI TOÀN HỆ THỐNG THỰC NGHIỆM LORA TINYML CHANNEL HOPPING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="1000" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="PHÂN HỆ TRẠM PHÁT: 03 END-NODES ĐỘC LẬP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="50" y="80" width="310" height="530" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="NODE A (TẦNG 1)
+- ESP32 DevKit V1 (Core 0: Sampler / Core 1: TinyML)
+- Semtech SX1278 Ra-02 (VSPI 10 MHz)
+- Màn hình OLED SSD1306 (I2C 400 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="120" width="270" height="120" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="NODE B (TẦNG 2)
+- ESP32 DevKit V1 (Core 0: Sampler / Core 1: TinyML)
+- Semtech SX1278 Ra-02 (VSPI 10 MHz)
+- Màn hình OLED SSD1306 (I2C 400 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="270" width="270" height="120" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="NODE C (NGOÀI TRỜI)
+- ESP32 DevKit V1 (Core 0: Sampler / Core 1: TinyML)
+- Semtech SX1278 Ra-02 (VSPI 10 MHz)
+- Màn hình OLED SSD1306 (I2C 400 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="420" width="270" height="120" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="MÔI TRƯỜNG VÔ TUYẾN 433 MHz ISM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#92400e;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="400" y="80" width="250" height="530" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="KÊNH 1: 433.175 MHz
+(BW 125 kHz / SF7 / CR 4/5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="420" y="150" width="210" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="KÊNH 2: 433.375 MHz
+(BW 125 kHz / SF7 / CR 4/5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="420" y="270" width="210" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="KÊNH 3: 433.575 MHz
+(BW 125 kHz / SF7 / CR 4/5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="420" y="390" width="210" height="80" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="Khoảng cách bảo vệ: 200 kHz
+(Ngăn chặn can nhiễu lân kênh)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="420" y="500" width="210" height="50" as="geometry" />
+</mxCell>
+        <mxCell id="12" value="PHÂN HỆ TRẠM THU: MULTI-RECEIVER GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="690" y="80" width="360" height="530" as="geometry" />
+</mxCell>
+        <mxCell id="13" value="3 MODULE THU SX1278 TRÊN BUS SPI0
+- Module 1: CS=GPIO 8, DIO0=GPIO 24
+- Module 2: CS=GPIO 7, DIO0=GPIO 23
+- Module 3: CS=GPIO 25, DIO0=GPIO 22" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="710" y="120" width="320" height="95" as="geometry" />
+</mxCell>
+        <mxCell id="14" value="RASPBERRY PI COMPUTE MODULE 4 (CM4)
+- Quad-Core Cortex-A72 @ 1.5 GHz, 2 GB LPDDR4
+- 3 Luồng Python RX Worker độc lập
+- Thu song song 3 kênh (Zero-Blindness)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="710" y="235" width="320" height="105" as="geometry" />
+</mxCell>
+        <mxCell id="15" value="HỆ THỐNG GHI NHẬN &amp; QUẢN TRỊ DỮ LIỆU
+- Tệp lưu trữ CSV: logs/ &amp; csv/
+- Nginx Reverse Proxy (Port 80)
+- Embedded REST API Server (Port 8080)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="710" y="360" width="320" height="95" as="geometry" />
+</mxCell>
+        <mxCell id="16" value="ROUTER-STYLE WEB DASHBOARD
+- Trực quan hóa Telemetry thời gian thực
+- Giám sát RSSI, SNR, PDR, Trạng thái Kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="710" y="475" width="320" height="90" as="geometry" />
+</mxCell>
+        <mxCell id="17" value="Chuyển kênh linh hoạt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="4" target="8">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="18" value="Chuyển kênh linh hoạt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="5" target="9">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="19" value="Chuyển kênh linh hoạt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="6" target="10">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="20" value="Thu đồng thời" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="8" target="13">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="21" value="Thu đồng thời" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="9" target="13">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="22" value="Thu đồng thời" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="10" target="13">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

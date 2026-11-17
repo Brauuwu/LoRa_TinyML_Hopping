@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Bố Trí Thực Địa Tòa Nhà">
+    <mxGraphModel dx="1000" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="600" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="SƠ ĐỒ BỐ TRÍ MÔI TRƯỜNG THỰC NGHIỆM TRONG KHUÔN VIÊN TÒA NHÀ ĐẠI HỌC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="TÒA NHÀ ĐẠI HỌC (KHÔNG GIAN THỰC ĐỊA TRONG NHÀ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="80" width="580" height="480" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="KHÔNG GIAN NGOÀI TRỜI (OUTDOOR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="670" y="80" width="290" height="480" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="TẦNG 2: HÀNH LANG VÀ PHÒNG THÍ NGHIỆM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="80" y="120" width="540" height="190" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="MULTI-CHANNEL GATEWAY
+(Raspberry Pi CM4 + 3x SX1278)
+Vị trí trung tâm trên cao
+Nguồn điện liên tục" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="100" y="160" width="230" height="110" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="NODE B (TẦNG 2)
+Cự ly: 60 mét đến Gateway
+Điều kiện: Che khuất phi đường thẳng (NLOS)
+Xuyên qua 2 lớp sàn &amp; tường bê tông" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="370" y="160" width="230" height="110" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="TẦNG 1: SẢNH VÀ PHÒNG HỌC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="80" y="340" width="540" height="190" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="NODE A (TẦNG 1)
+Cự ly: 25 mét đến Gateway
+Điều kiện: LOS / NLOS nhẹ
+Xuyên qua 1 vách ngăn kính và tường mỏng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="100" y="380" width="250" height="120" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="NODE C (KHU VỰC SÂN TRƯỜNG)
+Cự ly: 110 mét đến Gateway
+Điều kiện: Tán cây rậm rạp, tường bao che khuất
+Suy hao truyền sóng cao nhất" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="690" y="240" width="250" height="150" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="LoRa RF 25m" style="strokeColor=#16a34a;strokeWidth=2;" edge="1" parent="1" source="9" target="6">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="12" value="LoRa RF 60m (NLOS)" style="strokeColor=#d97706;strokeWidth=2;" edge="1" parent="1" source="7" target="6">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="13" value="LoRa RF 110m (Fading)" style="strokeColor=#e11d48;strokeWidth=2;" edge="1" parent="1" source="10" target="6">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

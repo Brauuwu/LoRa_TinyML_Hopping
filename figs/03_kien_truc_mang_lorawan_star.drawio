@@ -1,0 +1,75 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Kiến Trúc Mạng LoRaWAN">
+    <mxGraphModel dx="1000" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="600" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="KIẾN TRÚC MẠNG LORAWAN HÌNH SAO LỒNG NHAU (STAR-OF-STARS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="THIẾT BỊ ĐẦU CUỐI (END-NODES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="50" y="80" width="220" height="480" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="Node A (Tầng 1)
+ESP32 + Ra-02 433 MHz
+OLED SSD1306" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="120" width="180" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="Node B (Tầng 2)
+ESP32 + Ra-02 433 MHz
+OLED SSD1306" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="260" width="180" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="Node C (Ngoài trời)
+ESP32 + Ra-02 433 MHz
+OLED SSD1306" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="70" y="400" width="180" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="TRẠM CỔNG (MULTI-CHANNEL GATEWAY)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="330" y="80" width="310" height="480" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="RASPBERRY PI CM4 GATEWAY
+(Broadcom BCM2711 Quad-Core @ 1.5 GHz)
+
+3x Semtech SX1278 trên bus SPI0:
+- Module #1: CH1 433.175 MHz
+- Module #2: CH2 433.375 MHz
+- Module #3: CH3 433.575 MHz
+
+Kiến trúc Zero-Blindness (Không điểm mù)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="350" y="160" width="270" height="290" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="MÁY CHỦ QUẢN TRỊ &amp; ỨNG DỤNG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#e9d5ff;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#6b21a8;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="700" y="80" width="250" height="480" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="NETWORK SERVER (NS)
+- Khử bản tin trùng lặp
+- Kiểm tra tính toàn vẹn MIC
+- Quản lý cửa sổ nhận RX1/RX2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="720" y="150" width="210" height="120" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="APPLICATION SERVER &amp; WEB
+- Giải mã AppSKey Payload
+- Cơ sở dữ liệu CSV / Logs
+- Router-style Web Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="720" y="340" width="210" height="130" as="geometry" />
+</mxCell>
+        <mxCell id="12" value="LoRa RF 433.x MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="4" target="8">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="13" value="LoRa RF 433.x MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="5" target="8">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="14" value="LoRa RF 433.x MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="6" target="8">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="15" value="TCP/IP / MQTT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="8" target="10">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="16" value="JSON Data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="10" target="11">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

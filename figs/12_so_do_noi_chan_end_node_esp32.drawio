@@ -1,0 +1,62 @@
+<mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="diagram_page" name="Sơ Đồ Đấu Nối End-Node">
+    <mxGraphModel dx="1000" dy="580" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="580" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="SƠ ĐỒ ĐẤU NỐI CHI TIẾT PHẦN CỨNG THIẾT BỊ ĐẦU CUỐI END-NODE ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=15;shadow=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
+</mxCell>
+        <mxCell id="3" value="VI ĐIỀU KHIỂN ESP32 DEVKIT V1
+(Xtensa Dual-Core 32-bit LX6 @ 240 MHz)
+SRAM: 520 KB | Flash: 4 MB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="360" y="90" width="280" height="390" as="geometry" />
+</mxCell>
+        <mxCell id="4" value="MODULE SEMTECH SX1278 (RA-02)
+Băng tần: 433 MHz ISM
+Công suất: +17 dBm (PA_BOOST)
+Giao tiếp: VSPI Hardware Bus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="120" width="250" height="220" as="geometry" />
+</mxCell>
+        <mxCell id="5" value="Chân kết nối SX1278:
+- MOSI ──&gt; GPIO 27
+- MISO &lt;── GPIO 19
+- SCK  ──&gt; GPIO 18 (10 MHz)
+- NSS  ──&gt; GPIO 5 (CS)
+- RST  ──&gt; GPIO 14
+- DIO0 &lt;── GPIO 26 (Ngắt TxDone)
+- VCC  ──&gt; 3.3V (Kèm tụ lọc)
+- GND  ──&gt; GND chung" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="75" y="185" width="220" height="140" as="geometry" />
+</mxCell>
+        <mxCell id="6" value="MÀN HÌNH OLED SSD1306
+Kích thước: 0.96 inch (128x64)
+Giao tiếp: I2C Fast Mode (400 kHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#e9d5ff;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#6b21a8;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="690" y="120" width="250" height="180" as="geometry" />
+</mxCell>
+        <mxCell id="7" value="Chân kết nối OLED:
+- SDA &lt;==&gt; GPIO 21
+- SCL ───&gt; GPIO 22
+- VCC ───&gt; 3.3V
+- GND ───&gt; GND chung" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="705" y="185" width="220" height="100" as="geometry" />
+</mxCell>
+        <mxCell id="8" value="MẠCH NGUỒN VÀ BỘ TỤ BÙ CHỐNG SỤT ÁP ĐỈNH
+- Cấp nguồn 3.3V DC ổn định
+- Tụ hóa 100 µF song song tụ gốm 100 nF đặt sát chân VCC của module Ra-02
+- Triệt tiêu dòng đỉnh 130 mA khi phát sóng, chống Brownout Reset ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="200" y="480" width="600" height="70" as="geometry" />
+</mxCell>
+        <mxCell id="9" value="Bus VSPI &amp; Ngắt DIO0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="4" target="3">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="10" value="Bus I2C" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="3" target="6">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+        <mxCell id="11" value="3.3V / GND" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=11;" edge="1" parent="1" source="8" target="3">
+  <mxGeometry relative="1" as="geometry" />
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
