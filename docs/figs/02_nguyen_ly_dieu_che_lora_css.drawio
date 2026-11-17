@@ -1,26 +1,26 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="02_nguyen_ly_dieu_che_lora_css">
-    <mxGraphModel dx="1800" dy="1050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1050" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2150" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2150" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="NGUYÊN LÝ ĐIỀU CHẾ TRẢI PHỔ LORA CSS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="20" width="1680" height="60" as="geometry" />
+  <mxGeometry x="60" y="25" width="2030" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="Dữ liệu nhị phân&#xa;(Bitstream)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="100" width="290" height="120" as="geometry" />
+  <mxGeometry x="80" y="120" width="310" height="130" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Mã hóa Symbol&#xa;(k = 0 .. 2^SF - 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="430" y="100" width="290" height="120" as="geometry" />
+  <mxGeometry x="480" y="120" width="310" height="130" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Bộ tạo Chirp CSS&#xa;(Quét tần số tuyến tính)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="780" y="100" width="310" height="120" as="geometry" />
+  <mxGeometry x="880" y="120" width="330" height="130" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Khuếch đại PA&#xa;(+17 dBm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1150" y="100" width="290" height="120" as="geometry" />
+  <mxGeometry x="1300" y="120" width="310" height="130" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Anten phát&#xa;(433 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1500" y="100" width="220" height="120" as="geometry" />
+  <mxGeometry x="1700" y="120" width="290" height="130" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Nhóm SF bits" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;" edge="1" parent="1" source="3" target="4">
   <mxGeometry relative="1" as="geometry" />
@@ -35,16 +35,16 @@
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
         <mxCell id="12" value="ĐẶC TÍNH DẠNG SÓNG CHIRP TRÊN MIỀN TẦN SỐ - THỜI GIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="280" width="1640" height="720" as="geometry" />
+  <mxGeometry x="80" y="350" width="1990" height="780" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Trục tần số (f)&#xa;&#xa;f0 + BW/2&#xa;&#xa;f0 (433.x MHz)&#xa;&#xa;f0 - BW/2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="110" y="350" width="280" height="620" as="geometry" />
+  <mxGeometry x="130" y="430" width="310" height="660" as="geometry" />
 </mxCell>
         <mxCell id="14" value="UP-CHIRP CƠ SỞ (PREAMBLE)&#xa;&#xa;• Quét tần số tuyến tính f_min -&gt; f_max&#xa;• Chu kỳ ký hiệu: Ts = 2^SF / BW&#xa;• Dùng cho đồng bộ khung truyền" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="430" y="350" width="610" height="620" as="geometry" />
+  <mxGeometry x="530" y="430" width="700" height="660" as="geometry" />
 </mxCell>
         <mxCell id="15" value="CHIRP ĐIỀU CHẾ MANG TIN&#xa;&#xa;• Bước nhảy tần số mang giá trị Symbol k&#xa;• Băng thông kênh: BW = 125 kHz&#xa;• Hệ số trải phổ: SF = 7 .. 12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1080" y="350" width="610" height="620" as="geometry" />
+  <mxGeometry x="1320" y="430" width="700" height="660" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>
