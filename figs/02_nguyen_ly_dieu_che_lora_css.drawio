@@ -1,31 +1,31 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="02_nguyen_ly_dieu_che_lora_css">
-    <mxGraphModel dx="1000" dy="460" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="460" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1000" dy="440" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="440" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="NGUYÊN LÝ ĐIỀU CHẾ TRẢI PHỔ LORA CSS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=14;shadow=1;arcSize=10;" vertex="1" parent="1">
   <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="3" value="Dữ liệu Nhị phân
-(Bitstream 1 0 1 1 0...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="85" width="150" height="65" as="geometry" />
+        <mxCell id="3" value="Dữ liệu nhị phân
+(Bitstream đầu vào)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="85" width="150" height="60" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Mã hóa Symbol
-(k ∈ [0, 2^SF - 1])" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="240" y="85" width="150" height="65" as="geometry" />
+(k = 0 .. 2^SF - 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="240" y="85" width="150" height="60" as="geometry" />
 </mxCell>
-        <mxCell id="5" value="Bộ tạo Chirp CSS
+        <mxCell id="5" value="Bộ tạo tín hiệu Chirp
 (Quét tần số tuyến tính)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="420" y="85" width="180" height="65" as="geometry" />
+  <mxGeometry x="420" y="85" width="180" height="60" as="geometry" />
 </mxCell>
-        <mxCell id="6" value="Khuếch đại PA_BOOST
+        <mxCell id="6" value="Khuếch đại công suất PA
 (+17 dBm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="630" y="85" width="160" height="65" as="geometry" />
+  <mxGeometry x="630" y="85" width="160" height="60" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Anten 433 MHz
 (Sóng điện từ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="820" y="85" width="120" height="65" as="geometry" />
+  <mxGeometry x="820" y="85" width="120" height="60" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Nhóm SF bits" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="3" target="4">
   <mxGeometry relative="1" as="geometry" />
@@ -39,31 +39,31 @@
         <mxCell id="11" value="RF Power" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="6" target="7">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="ĐẶC TÍNH DẠNG SÓNG CHIRP THEO THỜI GIAN (SPECTROGRAM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="60" y="185" width="880" height="230" as="geometry" />
+        <mxCell id="12" value="ĐẶC TÍNH DẠNG SÓNG CHIRP TRÊN MIỀN TẦN SỐ - THỜI GIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="175" width="880" height="230" as="geometry" />
 </mxCell>
         <mxCell id="13" value="Tần số (f)
 
 f_0 + BW/2
 
-f_0 (433.x MHz)
+f_0
 
 f_0 - BW/2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="80" y="225" width="140" height="175" as="geometry" />
+  <mxGeometry x="80" y="215" width="140" height="170" as="geometry" />
 </mxCell>
-        <mxCell id="14" value="CHIRP CƠ SỞ (UP-CHIRP)
+        <mxCell id="14" value="UP-CHIRP CƠ SỞ
 
 • Quét tần số tuyến tính từ f_min đến f_max
-• Chu kỳ: Ts = 2^SF / BW (1.024 ms với SF7)
-• Đồng bộ khung &amp; Báo hiệu đường truyền" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="240" y="225" width="330" height="175" as="geometry" />
+• Chu kỳ ký hiệu: Ts = 2^SF / BW
+• Dùng cho đồng bộ khung truyền (Preamble)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="240" y="215" width="330" height="170" as="geometry" />
 </mxCell>
-        <mxCell id="15" value="CHIRP ĐIỀU CHẾ (MODULATED CHIRP)
+        <mxCell id="15" value="CHIRP ĐIỀU CHẾ MANG TIN
 
-• Bước nhảy tần tức thời mang giá trị bit
-• Khả năng giải điều chế dưới nhiễu nền
-• Ngưỡng SNR giải mã: -7.5 dB đến -20 dB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="590" y="225" width="330" height="175" as="geometry" />
+• Bước nhảy tần số mang giá trị bit
+• Băng thông kênh: BW = 125 kHz
+• Hệ số trải phổ: SF = 7 .. 12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="590" y="215" width="330" height="170" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>

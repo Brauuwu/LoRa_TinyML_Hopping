@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="07_dinh_dang_khung_truyen_goi_tin">
-    <mxGraphModel dx="1000" dy="340" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="340" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1000" dy="320" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="320" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -8,57 +8,57 @@
   <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
 </mxCell>
         <mxCell id="3" value="HEADER (4 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="60" y="80" width="340" height="35" as="geometry" />
+  <mxGeometry x="60" y="80" width="340" height="32" as="geometry" />
 </mxCell>
         <mxCell id="4" value="METADATA (5 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="420" y="80" width="210" height="35" as="geometry" />
+  <mxGeometry x="420" y="80" width="210" height="32" as="geometry" />
 </mxCell>
         <mxCell id="5" value="PAYLOAD (Biến thiên)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="650" y="80" width="200" height="35" as="geometry" />
+  <mxGeometry x="650" y="80" width="200" height="32" as="geometry" />
 </mxCell>
         <mxCell id="6" value="CRC (2 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=10;" vertex="1" parent="1">
-  <mxGeometry x="870" y="80" width="90" height="35" as="geometry" />
+  <mxGeometry x="870" y="80" width="90" height="32" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Node_ID
 (1 Byte)
 'A', 'B', 'C'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="125" width="100" height="75" as="geometry" />
+  <mxGeometry x="60" y="120" width="100" height="70" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Packet_ID
 (2 Bytes)
 0 - 65,535" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="170" y="125" width="110" height="75" as="geometry" />
+  <mxGeometry x="170" y="120" width="110" height="70" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Current_CH
 (1 Byte)
 0, 1, 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="290" y="125" width="110" height="75" as="geometry" />
+  <mxGeometry x="290" y="120" width="110" height="70" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Payload_Size
 (1 Byte)
 30 - 250 B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="420" y="125" width="100" height="75" as="geometry" />
+  <mxGeometry x="420" y="120" width="100" height="70" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Timestamp
 (4 Bytes)
 millis()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="530" y="125" width="100" height="75" as="geometry" />
+  <mxGeometry x="530" y="120" width="100" height="70" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Payload Data
 (21 - 241 Bytes)
-Buffer mở rộng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="650" y="125" width="200" height="75" as="geometry" />
+Bộ đệm dữ liệu" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="650" y="120" width="200" height="70" as="geometry" />
 </mxCell>
         <mxCell id="13" value="CRC
 (2 Bytes)
 Hardware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="870" y="125" width="90" height="75" as="geometry" />
+  <mxGeometry x="870" y="120" width="90" height="70" as="geometry" />
 </mxCell>
-        <mxCell id="14" value="Dải Tải Trọng Quét Thực Nghiệm: 30B, 74B, 118B, 162B, 206B, 250B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="60" y="220" width="900" height="35" as="geometry" />
+        <mxCell id="14" value="Các mức kích thước gói tin: 30B, 74B, 118B, 162B, 206B, 250B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="210" width="900" height="30" as="geometry" />
 </mxCell>
-        <mxCell id="15" value="Gateway Logger: Bóc tách gói tin + Đọc thanh ghi phần cứng SX1278 (RSSI, SNR) -&gt; Ghi log CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="265" width="900" height="35" as="geometry" />
+        <mxCell id="15" value="Trích xuất tại trạm thu: Bóc tách gói tin và đọc thanh ghi phần cứng SX1278 (RSSI, SNR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="255" width="900" height="30" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>

@@ -1,49 +1,49 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="10_bo_tri_thuc_dia_toa_nha">
-    <mxGraphModel dx="1000" dy="480" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="480" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1000" dy="460" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="460" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" value="SƠ ĐỒ BỐ TRÍ THỰC NGHIỆM TRONG TÒA NHÀ ĐẠI HỌC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=14;shadow=1;arcSize=10;" vertex="1" parent="1">
+        <mxCell id="2" value="SƠ ĐỒ BỐ TRÍ THỰC NGHIỆM KHÔNG GIAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=14;shadow=1;arcSize=10;" vertex="1" parent="1">
   <mxGeometry x="50" y="20" width="900" height="40" as="geometry" />
 </mxCell>
-        <mxCell id="3" value="KHÔNG GIAN TRONG NHÀ (INDOOR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="60" y="80" width="580" height="370" as="geometry" />
+        <mxCell id="3" value="KHÔNG GIAN TRONG NHÀ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="80" width="580" height="350" as="geometry" />
 </mxCell>
-        <mxCell id="4" value="TẦNG 2: PHÒNG THÍ NGHIỆM &amp; HÀNH LANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="80" y="115" width="540" height="140" as="geometry" />
+        <mxCell id="4" value="TẦNG 2: PHÒNG THÍ NGHIỆM VÀ HÀNH LANG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="80" y="115" width="540" height="130" as="geometry" />
 </mxCell>
-        <mxCell id="5" value="MULTI-CHANNEL GATEWAY
+        <mxCell id="5" value="GATEWAY CM4
 Raspberry Pi CM4 + 3x SX1278
-Vị trí trung tâm trên cao" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="100" y="145" width="230" height="90" as="geometry" />
+Vị trí trung tâm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="100" y="145" width="230" height="80" as="geometry" />
 </mxCell>
         <mxCell id="6" value="NODE B (TẦNG 2)
-60m | NLOS (Xuyên 2 sàn bê tông)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="370" y="145" width="230" height="90" as="geometry" />
+Cự ly 60m (Xuyên sàn bê tông)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="370" y="145" width="230" height="80" as="geometry" />
 </mxCell>
         <mxCell id="7" value="TẦNG 1: SẢNH VÀ PHÒNG HỌC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="80" y="275" width="540" height="155" as="geometry" />
+  <mxGeometry x="80" y="260" width="540" height="150" as="geometry" />
 </mxCell>
         <mxCell id="8" value="NODE A (TẦNG 1)
-25m | LOS / NLOS nhẹ (Xuyên vách kính)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="100" y="310" width="250" height="95" as="geometry" />
+Cự ly 25m (Xuyên vách ngăn)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="100" y="295" width="250" height="85" as="geometry" />
 </mxCell>
-        <mxCell id="9" value="NGOÀI TRỜI (OUTDOOR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="670" y="80" width="270" height="370" as="geometry" />
+        <mxCell id="9" value="KHÔNG GIAN NGOÀI TRỜI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#15803d;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="670" y="80" width="270" height="350" as="geometry" />
 </mxCell>
         <mxCell id="10" value="NODE C (SÂN TRƯỜNG)
-110m | Tán cây &amp; Tường bao
-Suy hao truyền sóng cao nhất" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="690" y="190" width="230" height="120" as="geometry" />
+Cự ly 110m
+Môi trường ngoài trời" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#e11d48;strokeWidth=1.5;fontColor=#be123c;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="690" y="180" width="230" height="110" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="25m (LOS/NLOS nhẹ)" style="strokeColor=#16a34a;strokeWidth=2;" edge="1" parent="1" source="8" target="5">
+        <mxCell id="11" value="25m (Trong nhà)" style="strokeColor=#16a34a;strokeWidth=2;" edge="1" parent="1" source="8" target="5">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="12" value="60m (NLOS)" style="strokeColor=#d97706;strokeWidth=2;" edge="1" parent="1" source="6" target="5">
+        <mxCell id="12" value="60m (Xuyên tầng)" style="strokeColor=#d97706;strokeWidth=2;" edge="1" parent="1" source="6" target="5">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
-        <mxCell id="13" value="110m (Fading)" style="strokeColor=#e11d48;strokeWidth=2;" edge="1" parent="1" source="10" target="5">
+        <mxCell id="13" value="110m (Ngoài trời)" style="strokeColor=#e11d48;strokeWidth=2;" edge="1" parent="1" source="10" target="5">
   <mxGeometry relative="1" as="geometry" />
 </mxCell>
       </root>

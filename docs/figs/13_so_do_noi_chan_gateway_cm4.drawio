@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="13_so_do_noi_chan_gateway_cm4">
-    <mxGraphModel dx="1000" dy="520" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="520" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="1000" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="500" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -9,38 +9,38 @@
 </mxCell>
         <mxCell id="3" value="MODULE THU #1 (CH1 - 433.175 MHz)
 CE: GPIO 8 (CE0) | DIO0: GPIO 24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;strokeWidth=1.5;fontColor=#0369a1;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="80" width="260" height="95" as="geometry" />
+  <mxGeometry x="60" y="80" width="260" height="90" as="geometry" />
 </mxCell>
         <mxCell id="4" value="MODULE THU #2 (CH2 - 433.375 MHz)
 CE: GPIO 7 (CE1) | DIO0: GPIO 23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;strokeWidth=1.5;fontColor=#15803d;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="200" width="260" height="95" as="geometry" />
+  <mxGeometry x="60" y="190" width="260" height="90" as="geometry" />
 </mxCell>
         <mxCell id="5" value="MODULE THU #3 (CH3 - 433.575 MHz)
 CE: GPIO 25 (CS2) | DIO0: GPIO 22" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="320" width="260" height="95" as="geometry" />
+  <mxGeometry x="60" y="300" width="260" height="90" as="geometry" />
 </mxCell>
-        <mxCell id="6" value="Bus SPI0 Chung: MOSI=Pin 19, MISO=Pin 21, SCLK=Pin 23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="60" y="435" width="260" height="45" as="geometry" />
+        <mxCell id="6" value="Đường SPI0 chung: MOSI=Pin 19, MISO=Pin 21, SCLK=Pin 23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="60" y="410" width="260" height="40" as="geometry" />
 </mxCell>
         <mxCell id="7" value="RASPBERRY PI CM4
 Quad-Core Cortex-A72 @ 1.5 GHz
 40-Pin GPIO Header | Linux OS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#bae6fd;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#0369a1;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="360" y="80" width="280" height="400" as="geometry" />
+  <mxGeometry x="360" y="80" width="280" height="370" as="geometry" />
 </mxCell>
-        <mxCell id="8" value="PHẦN MỀM ĐIỀU HÀNH GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#e9d5ff;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#6b21a8;arcSize=6;" vertex="1" parent="1">
-  <mxGeometry x="680" y="80" width="260" height="400" as="geometry" />
+        <mxCell id="8" value="TIẾN TRÌNH PHẦN MỀM GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#e9d5ff;strokeWidth=1.5;verticalAlign=top;fontStyle=1;fontSize=11;fontColor=#6b21a8;arcSize=6;" vertex="1" parent="1">
+  <mxGeometry x="680" y="80" width="260" height="370" as="geometry" />
 </mxCell>
-        <mxCell id="9" value="3 Luồng Worker (Zero-Blindness)
-Thu song song 100% 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="700" y="125" width="220" height="85" as="geometry" />
+        <mxCell id="9" value="3 luồng Worker nhận ngắt DIO0
+Thu đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#6366f1;strokeWidth=1.5;fontColor=#4338ca;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="700" y="120" width="220" height="75" as="geometry" />
 </mxCell>
-        <mxCell id="10" value="CSDL &amp; Ghi Log CSV
-Lưu trữ Timestamp, RSSI, SNR, PDR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="700" y="235" width="220" height="85" as="geometry" />
+        <mxCell id="10" value="Cơ sở dữ liệu log CSV
+Lưu trữ Timestamp, RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;strokeWidth=1.5;fontColor=#334155;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="700" y="215" width="220" height="75" as="geometry" />
 </mxCell>
-        <mxCell id="11" value="Nginx &amp; REST API Dashboard
-Giám sát hệ thống thời gian thực" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
-  <mxGeometry x="700" y="345" width="220" height="85" as="geometry" />
+        <mxCell id="11" value="Web Dashboard giám sát
+Hiển thị dữ liệu thu nhận" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;strokeWidth=1.5;fontColor=#b45309;fontSize=11;arcSize=8;" vertex="1" parent="1">
+  <mxGeometry x="700" y="310" width="220" height="75" as="geometry" />
 </mxCell>
         <mxCell id="12" value="SPI0 CE0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;fontColor=#334155;fontSize=10;" edge="1" parent="1" source="3" target="7">
   <mxGeometry relative="1" as="geometry" />
