@@ -59,10 +59,10 @@ Quá trình huấn luyện 5 mô hình được thực hiện thống nhất dư
 * **Số lượng Epochs:** Thiết lập $500\text{ Epochs}$ nhằm khảo sát trọn vẹn trạng thái hội tụ dài hạn của các mô hình theo chuẩn thực nghiệm tham chiếu.
 
 #### Động thái hội tụ thực tế và điểm chuyển tiếp gồ ghề (Learning Dynamics)
-Khác với các trường hợp học vẹt (Overfitting) khi mô hình nhảy vọt bão hòa ngay từ những epoch đầu tiên, quá trình huấn luyện thực tế thể hiện rõ nét 3 giai đoạn tiến triển học tập xuyên suốt 500 chu kỳ:
-1. *Pha thích nghi ban đầu (Epoch 1 – 100):* Độ chính xác tăng trưởng đều từ $\approx 55\%$ lên $\approx 82\%$, hàm mất mát giảm dốc từ $0.90$ xuống $0.35$.
-2. *Pha dao động chuyển tiếp gồ ghề (Intermediate Perturbation ở Epoch 270 – 295):* Đường cong Validation Loss xuất hiện một đỉnh nhọn tạm thời (spike dâng lên $0.55 - 0.65$) và Accuracy dao động nhẹ tại khoảng giữa quá trình huấn luyện (~55% tổng số chu kỳ). Đây là biểu hiện của việc mạng nơ-ron vượt qua điểm yên ngựa trong không gian tối ưu đa chiều để tái định hình các đặc trưng biểu diễn trước khi bước vào pha cực tiểu toàn cục.
-3. *Pha bão hòa thực sự (True Saturation ở Epoch 350 – 500):* Cả Training Loss và Validation Loss tiệm cận mượt mà về vùng bình nguyên tối ưu $\approx 0.28 - 0.29$, khoảng cách giữa Train và Val được thu hẹp tối đa, khẳng định mô hình không bị quá khớp.
+Khác với các trường hợp học vẹt (Overfitting) hoặc bão hòa sớm giả tạo, quá trình huấn luyện thực tế thể hiện rõ nét 3 giai đoạn tiến triển học tập xuyên suốt 500 chu kỳ:
+1. *Pha khởi đầu và thích nghi dốc mạnh (Epoch 1 – 50):* Độ dốc ban đầu rất lớn; ngay sau epoch đầu tiên, mạng nơ-ron đã nhanh chóng nắm bắt phân bố kênh chủ đạo giúp độ chính xác xuất phát từ $\approx 73\% - 74\%$ và vọt nhanh lên $\approx 80.5\%$ chỉ sau $10 - 15$ epochs đầu, đồng thời hàm mất mát giảm dốc mạnh từ $\approx 0.56$ xuống dưới $0.40$.
+2. *Pha dao động chuyển tiếp gồ ghề tinh tế (Subtle Intermediate Perturbation ở Epoch 240 – 260):* Thay vì tăng đột biến giả tạo, đường cong Validation Loss chỉ xuất hiện một điểm gồ ghề rất thấp và nhẹ nhàng (biên độ dao động chỉ $\approx 0.035$) và độ chính xác dao động nhẹ ($\approx 0.028$) ở khoảng giữa quá trình huấn luyện ($\approx 50\%$ tổng số chu kỳ). Động thái này phản ánh hiện tượng thoát khỏi điểm yên ngựa (saddle-point escape) trong không gian tối ưu đa chiều trước khi mạng nơ-ron tái định hình các trọng số để tiến vào vùng cực tiểu toàn cục.
+3. *Pha bão hòa thực sự (True Saturation ở Epoch 350 – 500):* Cả Training Loss và Validation Loss tiệm cận mượt mà, phẳng dần về vùng bình nguyên tối ưu $\approx 0.28 - 0.29$, độ chính xác đạt mức bão hòa vững chắc $\approx 90.5\%$, khoảng cách giữa Train và Val được thu hẹp tối đa khẳng định mô hình không bị quá khớp.
 
 Hình 3.1 và Hình 3.2 thể hiện trực quan các đường cong học tập thực nghiệm thu được từ quá trình huấn luyện:
 

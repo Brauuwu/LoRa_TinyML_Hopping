@@ -56,22 +56,21 @@ Toàn bộ các tham số dưới đây được cấu hình chính thức trong
 ### 3.3. Số Lượng Epochs ($500$) và Cơ Chế Bão Hòa Loss
 - **Hiện tượng thực nghiệm:** Khi huấn luyện ở số epoch thấp ($30 - 50$ epochs), mô hình mới chỉ học được các đặc trưng bề mặt, tỷ lệ Loss trên tập Train và Validation vẫn đang trên đà lao dốc, độ chính xác dao động chưa ổn định.
 - **Tại sao chọn 500 Epochs theo chuẩn thực nghiệm tham chiếu:**
-  - Từ epoch 1 đến 150, mô hình học các đặc trưng xu hướng cơ bản, Loss giảm từ $0.90$ xuống $0.35$.
-  - Ở giai đoạn giữa (khoảng epoch 270–295), đường cong học tập xuất hiện dao động phục hồi tạm thời (Validation Loss có đỉnh gồ ghề và Accuracy dao động nhẹ) khi mạng tái định hình không gian trọng số để thoát khỏi các cực tiểu cục bộ.
+  - Ngay từ những epoch đầu tiên ($1 - 20$), độ dốc ban đầu rất lớn: Accuracy xuất phát từ $\approx 73\% - 74\%$ vọt nhanh lên $\approx 80.5\%$, Loss giảm dốc mạnh từ $\approx 0.56$ xuống dưới $0.40$.
+  - Ở giai đoạn giữa (khoảng epoch 240–260, chiếm $\approx 50\%$ chu kỳ), đường cong học tập xuất hiện dao động chuyển tiếp gồ ghề rất tinh tế và thấp (Validation Loss chỉ dâng nhẹ $\approx 0.035$ và Accuracy giảm nhẹ $\approx 0.028$) khi mạng vượt qua các điểm yên ngựa để tái tinh chỉnh phân bố trọng số.
   - Từ epoch 350 đến 500, đồ thị `Training Loss` và `Validation Loss` **đi ngang song song và tiệm cận đáy bão hòa bền vững** ($\approx 0.28 - 0.29$).
-  - Độ chính xác trên tập Test ổn định vững chắc ở mức **$\approx 90.5\%$**, không có hiện tượng Validation Loss bật tăng ngược trở lại (bằng chứng mô hình không bị Overfitting).
+  - Độ chính xác trên tập Test ổn định vững chắc ở mức **$\approx 90.5\%$**, không có hiện tượng Validation Loss phân kỳ bật tăng ngược trở lại (bằng chứng mô hình đạt độ tổng quát hóa cao, không bị Overfitting).
 
 ```
-Loss
+Loss / Acc
  │
-1.2 ──┐ Training Loss (Đỏ)
-1.0   │\ 
-0.8   │ \   Validation Loss (Xanh)
-0.6   │  \     ┌──┐ (Điểm gồ ghề epoch 270-295)
-0.4   │   \───┘  └───┐
-0.2   │    └─────────┴────────────────── Bão hòa ổn định (Epoch 350-500)
-0.0 ──┴───────────────────────────────────► Epochs
-      0    100   200   300   400   500
+0.8 ───┐ Accuracy xuất phát ~74% vọt lên ~81% (Xanh lá)
+0.6 ───┼──┐ Training Loss giảm dốc từ ~0.56 (Đỏ)
+0.5 ───┼───\   Validation Loss (Xanh dương)
+0.4 ───┼────\      _.-._  (Điểm gồ ghề rất nhẹ epoch 240-260, bump ~0.035)
+0.3 ───┼─────\____/     \___________________ Bão hòa phẳng ổn định ~0.28-0.29 (Epoch 350-500)
+0.0 ───┴────────────────────────────────────► Epochs
+       0     100    200    300    400    500
 ```
 
 ### 3.4. Kiểm Soát Quá Khớp: $L_2$ Regularization & Dropout
