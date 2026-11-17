@@ -479,7 +479,7 @@ LoRa_TinyML_Hopping/
 
 ### 9.3. Quy Định Chặt Chẽ Về Thuật Ngữ (Forbidden Terms Policy)
 - Trong mọi bình luận code, commit message, tài liệu giải trình hoặc câu trả lời trao đổi với người dùng:
-  - **TUYỆT ĐỐI KHÔNG SỬ DỤNG** các cụm từ: `"bài báo"`, `"paper"`, `"bài báo gốc"`, `"tác giả"`.
+  - **TUYỆT ĐỐI KHÔNG SỬ DỤNG** các cụm từ: `"tài liệu tham khảo"`, `"paper"`, `"tài liệu tham khảo cơ sở"`, `"tác giả"`.
   - **THAY THẾ BẰNG:** `"hệ thống"`, `"kiến trúc thực nghiệm"`, `"quy trình kỹ thuật"`, `"dữ liệu đo đạc thực tế"`, `"mô hình chuẩn"`.
 
 ### 9.4. Định Dạng Đường Dẫn Tệp (File Link Convention)
