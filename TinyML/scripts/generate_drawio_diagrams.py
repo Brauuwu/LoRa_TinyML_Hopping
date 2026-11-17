@@ -267,30 +267,71 @@ def build_fig04():
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# SƠ ĐỒ 5: BÀI TOÁN LỰA CHỌN KÊNH TINYML
+# SƠ ĐỒ 5: BÀI TOÁN LỰA CHỌN KÊNH TINYML (KIẾN TRÚC PHÂN TẦNG 3 LỚP)
 # ══════════════════════════════════════════════════════════════════════════
 def build_fig05():
-    d = DrawioBuilder("05_bai_toan_lua_chon_kenh_tinyml", 1000, 440)
-    d.add_title("QUY TRÌNH CHỌN KÊNH TRUYỀN DỰA TRÊN TINYML", x=50, y=20, w=900, h=40)
+    d = DrawioBuilder("05_bai_toan_lua_chon_kenh_tinyml", 1040, 710)
+    d.add_title("KHUNG KIẾN TRÚC BÀI TOÁN LỰA CHỌN KÊNH TINYML CHO LORAWAN", x=40, y=15, w=960, h=40)
 
-    # Top pipeline
-    b1 = d.add_box("Bộ đệm trượt CSI (10x9)\n10 bước x 9 đặc trưng\n(RSSI, SNR, Payload, Freq)", 60, 80, 200, 90, C_CONTAINER_BLUE)
-    b2 = d.add_box("Chuẩn hóa Z-Score\nz = (x - μ) / σ\nBảng SCALER tĩnh O(1)", 290, 80, 180, 90, C_SKY)
-    b3 = d.add_box("Mạng nơ-ron TinyML\nĐầu vào: Vector (90)\nĐầu ra: 3 giá trị Logits", 500, 80, 220, 90, C_CONTAINER_GREEN)
-    b4 = d.add_box("Hàm kích hoạt Softmax\nPhân phối xác suất\n[P(CH0), P(CH1), P(CH2)]", 750, 80, 190, 90, C_PURP)
+    # Kiểu đường kết nối chuyên dụng
+    style_data_edge = (
+        "edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;"
+        "html=1;strokeColor=#1e293b;strokeWidth=2;endArrow=block;endFill=1;"
+        "fontColor=#0f172a;fontSize=9.5;fontStyle=1;"
+    )
+    style_model_edge = (
+        "edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;"
+        "html=1;strokeColor=#dc2626;strokeWidth=2;endArrow=block;endFill=1;"
+        "fontColor=#b91c1c;fontSize=9.5;fontStyle=1;"
+    )
+    style_local_edge = (
+        "edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;"
+        "html=1;strokeColor=#16a34a;strokeWidth=2;endArrow=block;endFill=1;"
+        "fontColor=#15803d;fontSize=9.5;fontStyle=1;"
+    )
 
-    d.add_edge(b1, b2, "Ma trận (10, 9)")
-    d.add_edge(b2, b3, "Vector (90)")
-    d.add_edge(b3, b4, "Logits")
+    # ── KHUNG CHÚ GIẢI (LEGEND) Ở GÓC TRÊN TRÁI ────────────────────────────
+    d.add_box("CHÚ GIẢI LUỒNG TƯƠNG TÁC", 40, 70, 220, 165, C_CONTAINER_AMBER)
+    d.add_box("Luồng dữ liệu vô tuyến & CSI\n(End-Node -> Gateway -> Server)", 55, 100, 190, 36, C_SLATE)
+    d.add_box("Luồng nạp mô hình TinyML\n(Server -> Biên dịch -> Flash)", 55, 142, 190, 36, C_ROSE)
+    d.add_box("Vòng lặp suy luận tự chủ\n(Thực thi hoàn toàn nội bộ)", 55, 184, 190, 36, C_GREEN)
 
-    # Bottom execution
-    b5 = d.add_box("Tìm kênh xác suất lớn nhất (ArgMax)\nk = argmax(P0, P1, P2)", 450, 210, 280, 45, C_AMBER)
-    b6 = d.add_box("Cài đặt tần số SX1278\nradio.setFrequency(f_k)", 450, 280, 280, 45, C_ROSE)
-    b7 = d.add_box("Phát gói tin LoRa tại kênh k\nCông suất phát: +17 dBm", 450, 350, 280, 45, C_GREEN)
+    # ── TẦNG 1: MÁY CHỦ HUẤN LUYỆN (SERVER / WORKSTATION) ───────────────────
+    d.add_box("TẦNG 1: MÁY CHỦ HUẤN LUYỆN NGOẠI TUYẾN (SERVER / WORKSTATION)", 280, 70, 720, 165, C_CONTAINER_PURP)
+    s_data = d.add_box("Nhật ký kênh (CSV Logs)\n• Chuỗi thời gian CSI (10x9)\n• Lịch sử RSSI, SNR, mất gói", 300, 105, 190, 75, C_PURP)
+    s_train = d.add_box("TensorFlow / Keras Training\n• Tiền xử lý & StandardScaler\n• Huấn luyện 5 kiến trúc nơ-ron\n• 500 Epochs (Hội tụ chuẩn)", 510, 105, 220, 75, C_PURP)
+    s_tflite = d.add_box("TFLite Converter & Exporter\n• Lượng tử hóa mô hình FlatBuffer\n• Sinh mã C Header model.h\n• Định dạng bộ nhớ alignas(16)", 750, 105, 230, 75, C_ROSE)
 
-    d.add_edge(b4, b5, "Phân phối xác suất", "edgeStyle=orthogonalEdgeStyle;rounded=1;")
-    d.add_edge(b5, b6, "Chỉ số kênh k")
-    d.add_edge(b6, b7, "Kích hoạt phát")
+    d.add_edge(s_data, s_train, "Tập dữ liệu", style_data_edge)
+    d.add_edge(s_train, s_tflite, "Trọng số tối ưu", style_model_edge)
+    d.add_box("Quy trình ngoại tuyến: Phân tích dữ liệu thực nghiệm, tối ưu hóa trọng số và xuất mã nguồn C nhúng", 300, 192, 680, 30, C_SLATE)
+
+    # ── TẦNG 2: TRẠM THU BIÊN ĐA KÊNH (MULTI-CHANNEL GATEWAY) ──────────────
+    d.add_box("TẦNG 2: TRẠM THU BIÊN ĐA KÊNH (MULTI-CHANNEL LORA GATEWAY - CM4)", 40, 255, 960, 155, C_CONTAINER_BLUE)
+    gw_rf = d.add_box("3x Module SX1278 (SPI0)\n• CH1: 433.175 MHz\n• CH2: 433.375 MHz\n• CH3: 433.575 MHz\nThu đồng thời 3 kênh", 60, 290, 220, 75, C_SKY)
+    gw_mgr = d.add_box("Gateway Manager Daemon\n• Nhận ngắt DIO0 đa luồng\n• Bóc tách Header/Payload\n• Đọc thanh ghi đo RSSI, SNR", 310, 290, 330, 75, C_SKY)
+    gw_db = d.add_box("CSDL Log & Data Dispatcher\n• Ghi nhật ký đo đạc CSV\n• Web Dashboard theo dõi\n• Stream dữ liệu sang Server", 670, 290, 310, 75, C_PURP)
+
+    d.add_edge(gw_rf, gw_mgr, "Tín hiệu RF thô", style_data_edge)
+    d.add_edge(gw_mgr, gw_db, "Metadata & CSI", style_data_edge)
+    d.add_edge(gw_db, s_data, "CSV Stream qua TCP/IP", style_data_edge)
+    d.add_box("Vai trò trạm thu: Tiếp nhận gói tin từ mọi kênh, bóc tách chỉ số truyền thông và truyền về máy chủ phân tích", 60, 372, 920, 28, C_SLATE)
+
+    # ── TẦNG 3: THIẾT BỊ ĐẦU CUỐI IOT BIÊN (EDGE TINYML END-NODE) ──────────
+    d.add_box("TẦNG 3: THIẾT BỊ ĐẦU CUỐI IOT BIÊN (EDGE TINYML END-NODE - ESP32)", 40, 430, 960, 255, C_CONTAINER_GREEN)
+    node_mgr = d.add_box("Khối Quản Lý Dữ Liệu (Manager)\n• Cảm biến môi trường (Telemetry)\n• Bộ đệm trượt FIFO (10 bước x 9 đặc trưng)\n• Chuẩn hóa Z-Score O(1) theo SCALER tĩnh\n• Khóa Mutex đồng bộ FreeRTOS", 60, 465, 275, 140, C_GREEN)
+    node_ml = d.add_box("Nhân Suy Luận Biên (TFLM Engine)\n• Mảng FlatBuffer model.h trong Flash\n• Vùng đệm Tensor Arena (10 KB RAM tĩnh)\n• Bộ tính toán mạng nơ-ron (Forward Pass)\n• Quyết định kênh tối ưu: k = ArgMax(P0, P1, P2)", 365, 465, 330, 140, C_GREEN)
+    node_rf = d.add_box("Khối Truyền Thông Vô Tuyến\n• Module LoRa SX1278 (Ra-02)\n• Tự động chỉnh tần số sang kênh k\n• Khuếch đại công suất (+17 dBm)\n• Kích hoạt phát gói tin Uplink", 725, 465, 255, 140, C_SKY)
+
+    # Kết nối nội bộ End-Node
+    d.add_edge(node_mgr, node_ml, "Vector đặc trưng (90)", style_local_edge)
+    d.add_edge(node_ml, node_rf, "Chỉ số kênh k", style_local_edge)
+
+    # Kết nối liên tầng
+    d.add_edge(s_tflite, node_ml, "Nạp mã nguồn C header model.h vào Flash", style_model_edge)
+    d.add_edge(node_rf, gw_rf, "Gói tin LoRa Uplink (RF 433.x MHz)", style_data_edge)
+
+    d.add_box("Đặc tính tự chủ: End-Node tự động dự đoán và chuyển kênh cục bộ trong < 15 ms, hoàn toàn không cần gói tin Downlink từ Gateway", 60, 645, 920, 30, C_SLATE)
 
     d.save("05_bai_toan_lua_chon_kenh_tinyml.drawio")
     return d
