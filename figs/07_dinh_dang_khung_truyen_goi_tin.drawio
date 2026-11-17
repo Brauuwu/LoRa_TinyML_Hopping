@@ -1,50 +1,50 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="07_dinh_dang_khung_truyen_goi_tin">
-    <mxGraphModel dx="2200" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="880" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2700" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2700" pageHeight="880" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="CẤU TRÚC ĐỊNH DẠNG KHUNG TRUYỀN GÓI TIN LORA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2080" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2580" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="HEADER (4 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="680" height="70" as="geometry" />
+  <mxGeometry x="100" y="110" width="870" height="70" as="geometry" />
 </mxCell>
         <mxCell id="4" value="METADATA (5 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="820" y="110" width="460" height="70" as="geometry" />
+  <mxGeometry x="1040" y="110" width="590" height="70" as="geometry" />
 </mxCell>
         <mxCell id="5" value="PAYLOAD (Biến thiên)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d97706;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1340" y="110" width="540" height="70" as="geometry" />
+  <mxGeometry x="1700" y="110" width="680" height="70" as="geometry" />
 </mxCell>
         <mxCell id="6" value="CRC (2 Bytes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e11d48;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=28;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1940" y="110" width="180" height="70" as="geometry" />
+  <mxGeometry x="2450" y="110" width="220" height="70" as="geometry" />
 </mxCell>
         <mxCell id="7" value="Node_ID&#xa;(1 Byte)&#xa;'A', 'B', 'C'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="240" width="190" height="180" as="geometry" />
+  <mxGeometry x="100" y="240" width="230" height="180" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Packet_ID&#xa;(2 Bytes)&#xa;0 - 65,535" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="310" y="240" width="220" height="180" as="geometry" />
+  <mxGeometry x="400" y="240" width="270" height="180" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Current_CH&#xa;(1 Byte)&#xa;0, 1, 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="570" y="240" width="190" height="180" as="geometry" />
+  <mxGeometry x="740" y="240" width="230" height="180" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Payload_Size&#xa;(1 Byte)&#xa;30 - 250 B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="820" y="240" width="200" height="180" as="geometry" />
+  <mxGeometry x="1040" y="240" width="250" height="180" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Timestamp&#xa;(4 Bytes)&#xa;millis()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1060" y="240" width="220" height="180" as="geometry" />
+  <mxGeometry x="1360" y="240" width="270" height="180" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Payload Data&#xa;(21 - 241 Bytes)&#xa;Bộ đệm dữ liệu" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1340" y="240" width="540" height="180" as="geometry" />
+  <mxGeometry x="1700" y="240" width="680" height="180" as="geometry" />
 </mxCell>
         <mxCell id="13" value="CRC&#xa;(2 Bytes)&#xa;Hardware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff1f2;strokeColor=#e11d48;strokeWidth=2;fontColor=#9f1239;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1940" y="240" width="180" height="180" as="geometry" />
+  <mxGeometry x="2450" y="240" width="220" height="180" as="geometry" />
 </mxCell>
         <mxCell id="14" value="Các mức kích thước gói tin khảo sát: 30B, 74B, 118B, 162B, 206B, 250B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="500" width="2040" height="95" as="geometry" />
+  <mxGeometry x="100" y="500" width="2570" height="95" as="geometry" />
 </mxCell>
         <mxCell id="15" value="Trích xuất tại trạm thu: Bóc tách gói tin và đọc thanh ghi phần cứng SX1278 (RSSI, SNR)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontColor=#1e293b;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="635" width="2040" height="95" as="geometry" />
+  <mxGeometry x="100" y="635" width="2570" height="95" as="geometry" />
 </mxCell>
       </root>
     </mxGraphModel>

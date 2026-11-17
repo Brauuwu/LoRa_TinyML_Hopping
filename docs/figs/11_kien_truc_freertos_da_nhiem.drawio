@@ -1,35 +1,35 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="11_kien_truc_freertos_da_nhiem">
-    <mxGraphModel dx="2300" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1250" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2750" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2750" pageHeight="1250" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KIẾN TRÚC FIRMWARE ĐA NHIỆM FREERTOS TRÊN ESP32" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2630" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="CORE 0: THU THẬP &amp; HIỂN THỊ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="960" height="1050" as="geometry" />
+  <mxGeometry x="80" y="110" width="1150" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Task_Sampler (Ưu tiên 1)&#xa;Đọc cảm biến -&gt; Cập nhật bộ đệm trượt 10x9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="140" y="210" width="840" height="210" as="geometry" />
+  <mxGeometry x="140" y="210" width="1010" height="210" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Task_OLED (Ưu tiên 1)&#xa;Quét bus I2C -&gt; Hiển thị trạng thái kênh, RSSI, SNR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="140" y="510" width="840" height="210" as="geometry" />
+  <mxGeometry x="140" y="510" width="1010" height="210" as="geometry" />
 </mxCell>
         <mxCell id="6" value="historyMutex&#xa;Khóa bảo vệ truy cập bộ đệm trượt 10x9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="140" y="810" width="840" height="210" as="geometry" />
+  <mxGeometry x="140" y="810" width="1010" height="210" as="geometry" />
 </mxCell>
         <mxCell id="7" value="CORE 1: SUY LUẬN AI &amp; TRUYỀN SÓNG RF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1260" y="110" width="960" height="1050" as="geometry" />
+  <mxGeometry x="1570" y="110" width="1100" height="1050" as="geometry" />
 </mxCell>
         <mxCell id="8" value="Task_TinyML (Ưu tiên 2)&#xa;Z-Score -&gt; Suy luận TFLM -&gt; ArgMax chọn kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1320" y="210" width="840" height="210" as="geometry" />
+  <mxGeometry x="1630" y="210" width="960" height="210" as="geometry" />
 </mxCell>
         <mxCell id="9" value="Task_LoRaTX (Ưu tiên 3)&#xa;Cấu hình tần số -&gt; Phát sóng RF (+17 dBm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1320" y="510" width="840" height="210" as="geometry" />
+  <mxGeometry x="1630" y="510" width="960" height="210" as="geometry" />
 </mxCell>
         <mxCell id="10" value="channelQueue (Độ dài 1)&#xa;Hàng đợi truyền mã kênh sang Task TX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1320" y="810" width="840" height="210" as="geometry" />
+  <mxGeometry x="1630" y="810" width="960" height="210" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Ghi dữ liệu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="6">
   <mxGeometry relative="1" as="geometry">
@@ -43,8 +43,8 @@
         <mxCell id="12" value="Đọc bộ đệm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="6" target="8">
   <mxGeometry relative="1" as="geometry">
         <Array as="points">
-          <mxPoint x="1110" y="915" />
-          <mxPoint x="1110" y="315" />
+          <mxPoint x="1380" y="915" />
+          <mxPoint x="1380" y="315" />
         </Array>
         <mxPoint as="offset" x="0" y="-18" />
   </mxGeometry>
@@ -52,8 +52,8 @@
         <mxCell id="13" value="Gửi mã kênh" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#15803d;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="8" target="10">
   <mxGeometry relative="1" as="geometry">
         <Array as="points">
-          <mxPoint x="2190" y="315" />
-          <mxPoint x="2190" y="915" />
+          <mxPoint x="2630" y="315" />
+          <mxPoint x="2630" y="915" />
         </Array>
         <mxPoint as="offset" x="18" y="0" />
   </mxGeometry>

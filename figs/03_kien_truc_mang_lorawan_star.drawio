@@ -1,38 +1,38 @@
 <mxfile host="app.diagrams.net" agent="Antigravity" version="21.0.0" type="device">
   <diagram id="diagram_page" name="03_kien_truc_mang_lorawan_star">
-    <mxGraphModel dx="2300" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="1200" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="2750" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2750" pageHeight="1200" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" value="KIẾN TRÚC MẠNG LORAWAN HÌNH SAO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=32;shadow=1;arcSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="60" y="25" width="2180" height="65" as="geometry" />
+  <mxGeometry x="60" y="25" width="2630" height="65" as="geometry" />
 </mxCell>
         <mxCell id="3" value="THIẾT BỊ ĐẦU CUỐI (END-NODES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#4ade80;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#15803d;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="80" y="110" width="520" height="1020" as="geometry" />
+  <mxGeometry x="80" y="110" width="560" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="4" value="Node A (Tầng 1)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="200" width="420" height="220" as="geometry" />
+  <mxGeometry x="130" y="200" width="460" height="220" as="geometry" />
 </mxCell>
         <mxCell id="5" value="Node B (Tầng 2)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="500" width="420" height="220" as="geometry" />
+  <mxGeometry x="130" y="500" width="460" height="220" as="geometry" />
 </mxCell>
         <mxCell id="6" value="Node C (Ngoài trời)&#xa;ESP32 + Ra-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;strokeWidth=2;fontColor=#15803d;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="130" y="800" width="420" height="220" as="geometry" />
+  <mxGeometry x="130" y="800" width="460" height="220" as="geometry" />
 </mxCell>
         <mxCell id="7" value="MULTI-CHANNEL GATEWAY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#38bdf8;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#0369a1;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="760" y="110" width="720" height="1020" as="geometry" />
+  <mxGeometry x="900" y="110" width="840" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="8" value="RASPBERRY PI CM4 GATEWAY&#xa;Broadcom BCM2711 @ 1.5 GHz&#xa;&#xa;3x Module SX1278 (SPI0 Bus):&#xa;• Kênh 1: 433.175 MHz&#xa;• Kênh 2: 433.375 MHz&#xa;• Kênh 3: 433.575 MHz&#xa;&#xa;Thu song song đồng thời 3 kênh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0284c7;strokeWidth=2;fontColor=#0369a1;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="810" y="200" width="620" height="820" as="geometry" />
+  <mxGeometry x="960" y="200" width="720" height="820" as="geometry" />
 </mxCell>
         <mxCell id="9" value="MÁY CHỦ &amp; GIAO DIỆN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#c084fc;strokeWidth=2;verticalAlign=top;fontStyle=1;fontSize=26;fontColor=#6b21a8;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1640" y="110" width="580" height="1020" as="geometry" />
+  <mxGeometry x="2000" y="110" width="670" height="1020" as="geometry" />
 </mxCell>
         <mxCell id="10" value="Network Server&#xa;• Điều phối khung truyền&#xa;• Lọc gói tin trùng lặp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf5ff;strokeColor=#7c3aed;strokeWidth=2;fontColor=#5b21b6;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1690" y="250" width="480" height="300" as="geometry" />
+  <mxGeometry x="2060" y="250" width="550" height="300" as="geometry" />
 </mxCell>
         <mxCell id="11" value="Application Server&#xa;• Giải mã Payload gói tin&#xa;• CSDL và Web Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;strokeWidth=2;fontColor=#92400e;fontSize=24;arcSize=8;fontFamily=Helvetica;" vertex="1" parent="1">
-  <mxGeometry x="1690" y="680" width="480" height="300" as="geometry" />
+  <mxGeometry x="2060" y="680" width="550" height="300" as="geometry" />
 </mxCell>
         <mxCell id="12" value="Kênh 1: 433.175 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0f172a;strokeWidth=2.5;endArrow=block;endFill=1;fontColor=#0f172a;fontSize=22;fontStyle=1;fontFamily=Helvetica;labelBackgroundColor=#ffffff;labelBorderColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="8">
   <mxGeometry relative="1" as="geometry">
