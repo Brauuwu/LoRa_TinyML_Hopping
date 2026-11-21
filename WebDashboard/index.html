@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LoRa 433 MHz Multi-Channel & TTS Cloud Gateway Operations Console - TinyML Channel Hopping Ready." />
+  <title>LoRa 433 MHz Gateway — Telemetry & Operations Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <header id="app-header">
+    <div class="header-left">
+      <div class="logo-icon">
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" stroke="url(#logo-grad)" stroke-width="2.5" />
+          <path d="M9 20c2.5-6.5 4.5-10 7-10s4.5 3.5 7 10" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" />
+          <circle cx="16" cy="11" r="2.5" fill="#34d399" />
+          <defs>
+            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
+              <stop stop-color="#34d399" />
+              <stop offset="0.5" stop-color="#22d3ee" />
+              <stop offset="1" stop-color="#6366f1" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <div class="title-with-pill">
+          <h1>LoRa 433 MHz Gateway Console</h1>
+          <span class="badge-tinyml">TinyML Ready</span>
+        </div>
+        <p class="subtitle">Multi-Channel Gateway · The Things Stack · ESP32 / CM4 · SX1278 Ra-02</p>
+      </div>
+    </div>
+
+    <!-- Active 3-Channel Spectrum Quick Bar -->
+    <div class="spectrum-bar" title="3 Kênh tần số thử nghiệm LoRa 433 MHz">
+      <div class="channel-pill active" id="pill-ch1" data-freq="433.175">
+        <span class="ch-id">CH1</span>
+        <span class="ch-freq">433.175 MHz</span>
+      </div>
+      <div class="channel-pill" id="pill-ch2" data-freq="433.375">
+        <span class="ch-id">CH2</span>
+        <span class="ch-freq">433.375 MHz</span>
+      </div>
+      <div class="channel-pill" id="pill-ch3" data-freq="433.575">
+        <span class="ch-id">CH3</span>
+        <span class="ch-freq">433.575 MHz</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div id="gw-eui-pill" class="pill" title="Gateway EUI for The Things Stack">
+        <span class="pill-label">GW EUI:</span>
+        <span id="val-header-eui">--</span>
+      </div>
+      <span id="wifi-badge" class="badge disconnected">
+        <span class="badge-dot"></span> WiFi: Off
+      </span>
+      <span id="status-badge" class="badge disconnected">
+        <span class="badge-dot"></span> Serial: Disconnected
+      </span>
+      <button id="btn-connect" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+        Connect Serial
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ MAIN ═══════════════════ -->
+  <main id="app-main">
+    <!-- ── Stats Cards Grid ── -->
+    <section id="stats-row">
+      <!-- 1. Packets RX -->
+      <div class="card stat-card" id="stat-packets">
+        <div class="stat-icon packets-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <path d="M9 3v18M3 9h18"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value" id="val-packets">0</span>
+          <span class="stat-label">Packets RX</span>
+        </div>
+      </div>
+
+      <!-- 2. TTS Forwarded -->
+      <div class="card stat-card" id="stat-fwd">
+        <div class="stat-icon fwd-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value highlight-green" id="val-fwd">0</span>
+          <span class="stat-label">TTS Forwarded</span>
+        </div>
+      </div>
+
+      <!-- 3. RSSI with Signal Meter -->
+      <div class="card stat-card" id="stat-rssi">
+        <div class="stat-icon rssi-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 20h2v-4h2v4h2v-8h2v8h2v-12h2v12h2v-16h2v16h2"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-val-row">
+            <span class="stat-value" id="val-rssi">—</span>
+            <div class="signal-meter" id="signal-meter" title="Signal Strength Bar">
+              <span class="bar bar-1"></span>
+              <span class="bar bar-2"></span>
+              <span class="bar bar-3"></span>
+              <span class="bar bar-4"></span>
+            </div>
+          </div>
+          <span class="stat-label">RSSI (dBm)</span>
+        </div>
+      </div>
+
+      <!-- 4. SNR -->
+      <div class="card stat-card" id="stat-snr">
+        <div class="stat-icon snr-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value" id="val-snr">—</span>
+          <span class="stat-label">SNR (dB)</span>
+        </div>
+      </div>
+
+      <!-- 5. Frequency Error -->
+      <div class="card stat-card" id="stat-ferr">
+        <div class="stat-icon ferr-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value" id="val-ferr">—</span>
+          <span class="stat-label">Freq Err (Hz)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Content Row ── -->
+    <section id="content-row">
+      <!-- Left: Message Log Panel -->
+      <div class="card log-card" id="log-panel">
+        <div class="card-header">
+          <div class="header-title-group">
+            <h2>Live LoRa Packets & TTS Forwarding</h2>
+            <span id="log-count" class="badge-count">0 msgs</span>
+          </div>
+
+          <!-- Quick Search Filter & Actions -->
+          <div class="card-actions">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="text" id="log-search-input" placeholder="Lọc Node, ID, Payload..." />
+            </div>
+            <label class="toggle-label">
+              <input type="checkbox" id="chk-autoscroll" checked />
+              <span>Auto-scroll</span>
+            </label>
+            <button id="btn-export-log" class="btn btn-sm btn-ghost" title="Xuất dữ liệu log sang file CSV">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              Export CSV
+            </button>
+            <button id="btn-clear-log" class="btn btn-sm btn-ghost">Clear</button>
+          </div>
+        </div>
+
+        <div id="log-container">
+          <table id="log-table">
+            <thead>
+              <tr>
+                <th class="col-pkt">#</th>
+                <th class="col-time">Time</th>
+                <th class="col-payload">Payload (ASCII / Hex)</th>
+                <th class="col-len">Len</th>
+                <th class="col-rssi">RSSI</th>
+                <th class="col-snr">SNR</th>
+                <th class="col-fwd">TTS Cloud</th>
+              </tr>
+            </thead>
+            <tbody id="log-body"></tbody>
+          </table>
+          <div id="log-empty">
+            <div class="empty-state">
+              <div class="radar-pulse"></div>
+              <p>Chưa có gói tin nào. Kết nối Serial để bắt đầu thu nhận dữ liệu vô tuyến.</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-scroll-bottom" class="scroll-bottom-btn hidden" title="Cuộn xuống tin mới nhất">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          </svg>
+          Tin mới nhất
+        </button>
+      </div>
+
+      <!-- Right Panels Column -->
+      <div id="sidebar-panels">
+        <!-- ── TTS & WiFi Gateway Panel ── -->
+        <div class="card config-card" id="gateway-panel">
+          <div class="card-header">
+            <h2>The Things Stack & Network</h2>
+            <button id="btn-read-gw" class="btn btn-sm btn-outline" title="Làm mới thông tin Gateway" disabled>
+              Refresh
+            </button>
+          </div>
+          <div class="card-body-padded">
+            <!-- Gateway EUI Banner -->
+            <div class="eui-banner">
+              <div>
+                <div class="eui-caption">GATEWAY EUI (ĐĂNG KÝ TTS)</div>
+                <div class="eui-text" id="val-gw-eui">----------------</div>
+              </div>
+              <button type="button" id="btn-copy-eui" class="btn btn-sm btn-copy" title="Copy Gateway EUI">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+
+            <!-- Gateway info status summary -->
+            <div class="gw-status-box">
+              <div class="gw-status-row"><span>WiFi Status:</span> <strong id="lbl-gw-status">Disconnected</strong></div>
+              <div class="gw-status-row"><span>Gateway IP:</span> <strong id="lbl-gw-ip">—</strong></div>
+              <div class="gw-status-row"><span>TTS Server:</span> <strong id="lbl-tts-status">eu1.cloud.thethings.network</strong></div>
+              <div class="gw-status-row"><span>Gói chuyển tiếp:</span> <strong id="lbl-gw-fwd" class="highlight-green">0</strong></div>
+            </div>
+
+            <!-- BOOT Button AP Guide Card -->
+            <div class="ap-guide-card">
+              <div class="ap-guide-title">
+                <span class="ap-icon">🔘</span>
+                <span>Cấu hình WiFi qua nút BOOT (AP Mode)</span>
+              </div>
+              <ol class="ap-steps">
+                <li>Nhấn giữ nút <strong>BOOT (GPIO 0)</strong> trên ESP32 khoảng <strong>1 giây</strong>.</li>
+                <li>Kết nối điện thoại/máy tính vào WiFi: <code>LoRa-Gateway-AP</code> <em>(Pass: <code>12345678</code>)</em>.</li>
+                <li>Vào <a href="http://192.168.4.1" target="_blank" rel="noopener">http://192.168.4.1</a> để quét và lưu mật khẩu WiFi.</li>
+              </ol>
+            </div>
+
+            <!-- TTS Cloud Config Form -->
+            <form id="tts-form" autocomplete="off">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="tts-server">TTS Server Address</label>
+                  <input type="text" id="tts-server" value="eu1.cloud.thethings.network" />
+                </div>
+                <div class="form-group" style="max-width:90px;">
+                  <label for="tts-port">Port</label>
+                  <input type="number" id="tts-port" value="1700" />
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="submit" id="btn-save-tts" class="btn btn-accent" disabled>
+                  💾 Lưu TTS Cloud
+                </button>
+                <button type="button" id="btn-trigger-ap" class="btn btn-outline" disabled title="Kích hoạt AP Mode từ xa">
+                  📡 Bật AP Mode
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ── LoRa Hardware Configuration Panel ── -->
+        <div class="card config-card" id="config-panel">
+          <div class="card-header">
+            <h2>LoRa Physical Parameters</h2>
+            <button id="btn-read-cfg" class="btn btn-sm btn-outline" title="Đọc cấu hình hiện tại từ thiết bị" disabled>
+              Refresh
+            </button>
+          </div>
+          <div class="card-body-padded">
+            <!-- Channel Presets Quick Bar -->
+            <div class="preset-group">
+              <span class="preset-label">Kênh mẫu 433 MHz:</span>
+              <div class="preset-buttons">
+                <button type="button" class="btn btn-xs btn-preset" data-freq="433.175">CH1 (433.175)</button>
+                <button type="button" class="btn btn-xs btn-preset" data-freq="433.375">CH2 (433.375)</button>
+                <button type="button" class="btn btn-xs btn-preset" data-freq="433.575">CH3 (433.575)</button>
+              </div>
+            </div>
+
+            <form id="config-form" autocomplete="off">
+              <div class="form-group">
+                <label for="cfg-freq">Frequency (MHz) <small class="hint">(Chuẩn 433 MHz thực nghiệm)</small></label>
+                <input type="number" id="cfg-freq" step="0.001" min="410" max="525" value="433.175" />
+              </div>
+              <div class="form-group">
+                <label for="cfg-bw">Bandwidth (kHz)</label>
+                <select id="cfg-bw">
+                  <option value="7.8">7.8</option>
+                  <option value="10.4">10.4</option>
+                  <option value="15.6">15.6</option>
+                  <option value="20.8">20.8</option>
+                  <option value="31.25">31.25</option>
+                  <option value="41.7">41.7</option>
+                  <option value="62.5">62.5</option>
+                  <option value="125" selected>125 (LoRaWAN standard)</option>
+                  <option value="250">250</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cfg-sf">Spreading Factor</label>
+                  <select id="cfg-sf">
+                    <option value="6">SF6</option>
+                    <option value="7" selected>SF7 (LoRaWAN)</option>
+                    <option value="8">SF8</option>
+                    <option value="9">SF9</option>
+                    <option value="10">SF10</option>
+                    <option value="11">SF11</option>
+                    <option value="12">SF12</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="cfg-cr">Coding Rate</label>
+                  <select id="cfg-cr">
+                    <option value="5" selected>4/5 (LoRaWAN)</option>
+                    <option value="6">4/6</option>
+                    <option value="7">4/7</option>
+                    <option value="8">4/8</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cfg-sw">Sync Word</label>
+                  <input type="number" id="cfg-sw" min="0" max="255" value="18" />
+                  <small class="hint">18 = 0x12 (Private), 52 = 0x34 (Public)</small>
+                </div>
+                <div class="form-group">
+                  <label for="cfg-pwr">TX Power (dBm)</label>
+                  <input type="number" id="cfg-pwr" min="2" max="20" value="17" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="cfg-pre">Preamble Length</label>
+                <input type="number" id="cfg-pre" min="6" max="65535" value="8" />
+              </div>
+              <button type="submit" id="btn-apply-cfg" class="btn btn-accent" disabled>
+                Apply LoRa Configuration
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RSSI / SNR Chart ── -->
+    <section id="chart-section" class="card">
+      <div class="card-header">
+        <div class="chart-header-left">
+          <h2>Radio Signal Quality Trends (RSSI / SNR)</h2>
+          <span class="chart-window-hint">Rolling Window: 60 Samples</span>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot rssi-dot"></span> RSSI (dBm)</span>
+          <span class="legend-item"><span class="legend-dot snr-dot"></span> SNR (dB)</span>
+        </div>
+      </div>
+      <div class="chart-container-box">
+        <canvas id="chart-canvas" height="190"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══════════════════ TOAST ═══════════════════ -->
+  <div id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

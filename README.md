@@ -56,6 +56,10 @@ LoRa_TinyML_Hopping/
 │       ├── sx1278_wiringpi.cpp          # Driver điều khiển SX1278 qua SPI
 │       ├── test_comm.cpp                # Chương trình kiểm tra đường truyền RF & phản hồi ACK
 │       └── main_gw.cpp                  # Luồng lắng nghe đồng thời 3 module Ra-02 & bộ lọc Control
+├── WebDashboard/                        # Giao diện Web Serial & Cloud Gateway Dashboard (UI/UX Pro Max)
+│   ├── index.html                       # Bảng điều khiển giám sát Real-time, lọc gói tin và đo mức sóng
+│   ├── style.css                        # Hệ thống giao diện Cyber-Industrial Dark Glassmorphism
+│   └── app.js                           # Logic Web Serial API, xử lý phổ tần số và xuất báo cáo CSV
 ├── TinyML/                              # Pipeline AI và phân tích dữ liệu (Python)
 │   ├── LoRa_TinyML_Pipeline.ipynb       # Jupyter Notebook hoàn chỉnh, tách riêng từng cặp plaintext+code
 │   ├── requirements.txt                 # Thư viện: TensorFlow, Scikit-learn, Pandas, Matplotlib, Seaborn
